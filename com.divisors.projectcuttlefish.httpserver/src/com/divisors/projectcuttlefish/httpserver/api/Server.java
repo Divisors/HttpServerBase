@@ -1,44 +1,32 @@
 package com.divisors.projectcuttlefish.httpserver.api;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.time.Duration;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.function.BiConsumer;
 
-public abstract class Server implements Runnable {
-	protected final InetSocketAddress address;
+public interface Server extends Runnable {
+	void init() throws IOException;
 	
-	public Server(int port) {
-		address = new InetSocketAddress(port);
-	}
+	void destroy() throws IOException;
 	
-	public int getPort() {
-		return address.getPort();
-	}
+	void start() throws IOException;
+	void start(ExecutorService executor) throws IOException;
 	
-	public void init() {
-		
-	}
-	
-	public void destroy() {
-		
-	}
-	
-	public void start() {
-		
-	}
-	
-	public void start(Executor executor) {
-		
-	}
-	
-	public void stop() {
-		
-	}
-	public void stop(Duration timeout) {
-		
-	}
+	void stop() throws IOException, InterruptedException;
+	void stop(Duration timeout)  throws IOException, InterruptedException;
 	@Override
-	public void run() {
-		
-	}
+	void run();
+	
+	InetSocketAddress getAddress();
+	
+	boolean isRunning();
+	
+	void registerConnectionListener(BiConsumer<Socket, Server> handler);
+	void deregisterConnectionListener(BiConsumer<Socket, Server> handler);
+	
+	boolean isSSL();
+
 }

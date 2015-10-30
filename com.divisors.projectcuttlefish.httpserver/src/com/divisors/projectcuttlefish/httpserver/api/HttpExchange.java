@@ -16,4 +16,5 @@ public interface HttpExchange {
 	HttpServer getHttpServer();
 	Optional<Socket> getSocket();
 	boolean isOpen();
+	HttpContext getContext();
 }

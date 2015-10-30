@@ -1,69 +1,33 @@
 package com.divisors.projectcuttlefish.httpserver.impl;
 
-import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.net.Socket;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 import com.divisors.projectcuttlefish.httpserver.api.HttpServer;
+import com.divisors.projectcuttlefish.httpserver.api.Server;
+import com.divisors.projectcuttlefish.httpserver.api.error.HttpErrorHandler;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequestHandler;
 
-public class HttpServerImpl implements HttpServer {
-	protected final int port;
-	protected ServerSocketChannel serverSocketChannel;
+public class HttpServerImpl extends ServerImpl implements HttpServer {
 
 	public HttpServerImpl(int port) {
-		this.port = port;
+		super(port);
 	}
-
-	@Override
-	public void init() throws IOException {
-		serverSocketChannel = ServerSocketChannel.open();
-		serverSocketChannel.socket().bind(new InetSocketAddress(port));
-		serverSocketChannel.configureBlocking(false);
-	}
-
-	@Override
-	public void run() {
-		if (serverSocketChannel == null)
-			throw new IllegalStateException("serverSocketChannel not initialized");
-		while (true) {
-			try {
-				SocketChannel socketChannel = serverSocketChannel.accept();
-				if (socketChannel != null) {
-					
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-	}
-
-	@Override
-	public void shutdown() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void destroy() throws IOException {
-		serverSocketChannel.close();
+	public HttpServerImpl(InetSocketAddress addr) {
+		super(addr);
 	}
 
 	@Override
 	public void registerHandler(Predicate<HttpRequest> requestFilter, HttpRequestHandler handler) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void deregisterHandler(HttpRequestHandler handler) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -71,22 +35,23 @@ public class HttpServerImpl implements HttpServer {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
 	@Override
-	public int getPort() {
-		return port;
+	public void registerConnectionListener(BiConsumer<Socket, Server> handler) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
-	public InetAddress getAddress() {
+	public void deregisterConnectionListener(BiConsumer<Socket, Server> handler) {
 		// TODO Auto-generated method stub
-		return null;
+		
 	}
 
 	@Override
-	public boolean isSSL() {
+	public void registerErrorHandler(HttpErrorHandler handler) {
 		// TODO Auto-generated method stub
-		return false;
+		
 	}
 
 }

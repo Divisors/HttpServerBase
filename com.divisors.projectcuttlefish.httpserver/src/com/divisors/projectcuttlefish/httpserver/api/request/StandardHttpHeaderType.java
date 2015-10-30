@@ -6,8 +6,6 @@ import org.eclipse.jetty.util.ArrayTrie;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.Trie;
 
-import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
-
 public enum StandardHttpHeaderType {
 	/* ------------------------------------------------------------ */
     /** General Fields.
