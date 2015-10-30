@@ -3,8 +3,8 @@ package com.divisors.projectcuttlefish.contentmanager.api;
 import java.time.Duration;
 import java.time.Instant;
 
-import com.divisors.projectcuttlefish.uac.NotPermittedException;
-import com.divisors.projectcuttlefish.uac.User;
+import com.divisors.projectcuttlefish.uac.api.NotPermittedException;
+import com.divisors.projectcuttlefish.uac.api.User;
 
 public interface CachableView extends View {
 	/**

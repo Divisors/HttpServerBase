@@ -1,4 +1,4 @@
-package com.divisors.projectcuttlefish.uac;
+package com.divisors.projectcuttlefish.uac.api;
 
 public abstract class User {
 	abstract long getId();

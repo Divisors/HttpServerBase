@@ -1,4 +1,4 @@
-package com.divisors.projectcuttlefish.uac;
+package com.divisors.projectcuttlefish.uac.api;
 
 public class NotPermittedException extends RuntimeException {
 	private static final long serialVersionUID = -5092517600291707813L;

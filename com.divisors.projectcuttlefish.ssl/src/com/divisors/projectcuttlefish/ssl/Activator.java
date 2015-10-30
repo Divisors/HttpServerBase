@@ -1,8 +1,7 @@
-package com.divisors.projectcuttlefish.uac.impl;
+package com.divisors.projectcuttlefish.ssl;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
 public class Activator implements BundleActivator {
 
@@ -12,15 +11,12 @@ public class Activator implements BundleActivator {
 		return context;
 	}
 
-	
-	ServiceRegistration<?> userAccountControlService, sessionManagerService;
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		Activator.context = context;
-		
 	}
 
 	/*

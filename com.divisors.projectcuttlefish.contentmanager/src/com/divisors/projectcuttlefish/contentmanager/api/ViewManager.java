@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.divisors.projectcuttlefish.uac.InvalidSessionException;
-import com.divisors.projectcuttlefish.uac.NotPermittedException;
-import com.divisors.projectcuttlefish.uac.Session;
-import com.divisors.projectcuttlefish.uac.User;
+import com.divisors.projectcuttlefish.uac.api.InvalidSessionException;
+import com.divisors.projectcuttlefish.uac.api.NotPermittedException;
+import com.divisors.projectcuttlefish.uac.api.Session;
+import com.divisors.projectcuttlefish.uac.api.User;
 
 public class ViewManager {
 	protected static ViewManager instance = new ViewManager();

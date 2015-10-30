@@ -1,4 +1,4 @@
-package com.divisors.projectcuttlefish.uac;
+package com.divisors.projectcuttlefish.uac.api;
 
 import java.util.UUID;
 

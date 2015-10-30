@@ -4,20 +4,23 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import com.divisors.projectcuttlefish.httpserver.api.HttpServerFactory;
+import com.divisors.projectcuttlefish.httpserver.impl.HttpServerFactoryImpl;
+
 public class Activator implements BundleActivator {
 
-	ServiceRegistration<?> httpServiceRegistration;
+	ServiceRegistration<?> httpServerFactoryServiceRegistration;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
 		System.out.println("Initializing: ProjectCuttlefish|HttpServer");
-		HttpServerService httpService = new HttpServerServiceImpl();
-		httpServiceRegistration = context.registerService(HttpServerService.class.getName(), httpService, null);
+		HttpServerFactory httpService = new HttpServerFactoryImpl();
+		httpServerFactoryServiceRegistration = context.registerService(HttpServerFactory.class.getName(), httpService, null);
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		httpServiceRegistration.unregister();
+		httpServerFactoryServiceRegistration.unregister();
 	}
 
 }

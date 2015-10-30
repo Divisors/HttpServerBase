@@ -1,4 +1,4 @@
-package com.divisors.projectcuttlefish.ssl;
+package com.divisors.projectcuttlefish.ssl.api;
 
 import java.io.IOException;
 import java.net.InetAddress;
