@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Project Cuttlefish Content Manager
+Bundle-SymbolicName: com.divisors.projectcuttlefish.contentmanager
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.divisors.projectcuttlefish.contentmanager.Activator
+Bundle-Vendor: DIVISORS
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.divisors.projectcuttlefish.uac,
+ org.osgi.framework;version="1.3.0"
+Bundle-ActivationPolicy: lazy
+Export-Package: com.divisors.projectcuttlefish.contentmanager.api
