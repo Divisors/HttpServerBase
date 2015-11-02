@@ -4,8 +4,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Optional;
 
-import org.eclipse.jetty.client.HttpResponse;
-
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 
 public interface HttpExchange {

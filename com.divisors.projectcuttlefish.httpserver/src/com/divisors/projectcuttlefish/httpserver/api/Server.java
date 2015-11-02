@@ -7,16 +7,17 @@ import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
 
-public interface Server extends Runnable {
+public interface Server extends RunnableService {
 	void init() throws IOException;
 	
 	void destroy() throws IOException;
 	
-	void start() throws IOException;
-	void start(ExecutorService executor) throws IOException;
+	boolean start() throws IOException;
+	boolean start(ExecutorService executor) throws IOException;
 	
-	void stop() throws IOException, InterruptedException;
-	void stop(Duration timeout)  throws IOException, InterruptedException;
+	boolean stop() throws IOException, InterruptedException;
+	boolean stop(Duration timeout)  throws IOException, InterruptedException;
+	
 	@Override
 	void run();
 	
