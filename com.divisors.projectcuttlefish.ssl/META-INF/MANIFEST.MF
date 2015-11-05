@@ -11,3 +11,4 @@ Import-Package: com.divisors.projectcuttlefish.httpserver.api,
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.divisors.projectcuttlefish.ssl.api
+Require-Bundle: com.divisors.projectcuttlefish.httpserver

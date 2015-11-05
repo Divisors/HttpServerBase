@@ -1,8 +1,9 @@
-package com.divisors.projectcuttlefish.httpserver.api;
+package com.divisors.projectcuttlefish.httpserver.api.response;
 
 import java.nio.channels.SeekableByteChannel;
 
-import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponseLine;
+import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
+import com.divisors.projectcuttlefish.httpserver.api.HttpHeaderValue;
 
 public interface HttpResponse {
 	HttpResponseLine getResponseLine();

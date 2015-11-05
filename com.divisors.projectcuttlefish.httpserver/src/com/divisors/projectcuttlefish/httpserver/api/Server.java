@@ -2,18 +2,22 @@ package com.divisors.projectcuttlefish.httpserver.api;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
 
+/**
+ * Generic server interface.
+ * @author mailmindlin
+ *
+ */
 public interface Server extends RunnableService {
 	void init() throws IOException;
 	
 	void destroy() throws IOException;
 	
-	boolean start() throws IOException;
-	boolean start(ExecutorService executor) throws IOException;
+	void start() throws IOException, IllegalStateException;
+	void start(ExecutorService executor) throws IOException, IllegalStateException;
 	
 	boolean stop() throws IOException, InterruptedException;
 	boolean stop(Duration timeout)  throws IOException, InterruptedException;
@@ -25,8 +29,8 @@ public interface Server extends RunnableService {
 	
 	boolean isRunning();
 	
-	void registerConnectionListener(BiConsumer<Socket, Server> handler);
-	void deregisterConnectionListener(BiConsumer<Socket, Server> handler);
+	void registerConnectionListener(BiConsumer<Connection, Server> handler);
+	void deregisterConnectionListener(BiConsumer<Connection, Server> handler);
 	
 	boolean isSSL();
 

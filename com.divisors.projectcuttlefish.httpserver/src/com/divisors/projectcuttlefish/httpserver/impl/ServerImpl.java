@@ -4,62 +4,71 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
+import com.divisors.projectcuttlefish.httpserver.api.Connection;
 import com.divisors.projectcuttlefish.httpserver.api.Server;
-import com.divisors.projectcuttlefish.httpserver.impl.ServerImpl.ServerDataEvent;
+
+import reactor.Environment;
+import reactor.core.Dispatcher;
 
 public class ServerImpl implements Server {
-	public class ServerDataEvent extends Socket {
-
-		public ServerDataEvent(ServerImpl serverImpl, SocketChannel socketChannel, byte[] data) {
-			// TODO Auto-generated constructor stub
-			
-		}
-
-	}
-
+	
 	public static final int BUFFER_SIZE = 8192;
+	/**
+	 * Address that the server is bound to
+	 */
 	protected final InetSocketAddress address;
+	/**
+	 * Channel that all the requests come through
+	 */
 	protected ServerSocketChannel serverSocketChannel;
-	protected final ArrayList<BiConsumer<Socket, ? super Server>> handlers = new ArrayList<>();
+	/**
+	 * Selector to find stuff
+	 */
 	protected Selector selector;
-	protected ConcurrentHashMap<SocketChannel, List<byte[]>> dataMap = new ConcurrentHashMap<>();
-	protected WeakReference<Thread> self;
-	protected ByteBuffer readBuffer;
-	protected BlockingDeque<Socket> queue;
+	/**
+	 * Map of connections currently open
+	 */
+	protected ConcurrentHashMap<Long, Connection> dataQueue = new ConcurrentHashMap<>();
+	/**
+	 * 
+	 */
+	protected volatile WeakReference<Thread> self = new WeakReference<>(null);
+	protected ByteBuffer readBuffer, writeBuffer;
+	protected AtomicLong nextID = new AtomicLong(16 * 1024);
+	
 	public ServerImpl(int port) {
 		this(new InetSocketAddress(port));
 	}
-
+	
 	public ServerImpl(InetSocketAddress addr) {
 		address = addr;
 	}
-
+	
 	public InetSocketAddress getAddress() {
 		return address;
 	}
-
+	
 	@Override
 	public void init() throws IOException {
-		queue = new LinkedBlockingDeque<>();
-		readBuffer = ByteBuffer.allocate(BUFFER_SIZE);//TODO maybe allocateDirect?
+		System.out.println("Initializing");
+		// TODO maybe allocateDirect?
+		readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+		writeBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 		
 		this.selector = Selector.open();
 		
@@ -67,59 +76,65 @@ public class ServerImpl implements Server {
 		serverSocketChannel.configureBlocking(false);
 		serverSocketChannel.socket().bind(address);
 		serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+		
+		System.out.println("Initialized");
 	}
-
+	
 	@Override
 	public void destroy() throws IOException {
-		readBuffer = null;//dereference bytebuffer
+		readBuffer = null;// dereference bytebuffer
 		serverSocketChannel.socket().close();
 		serverSocketChannel.close();
+		for (Connection connection : dataQueue.values())
+			connection.close();
+		System.out.println("Destroyed");
 	}
-
+	
 	@Override
-	public boolean start() throws IOException {
-		if (serverSocketChannel == null)
-			init();
+	public void start() throws IOException {
 		run();
-		return true;
 	}
-
+	
 	@Override
-	public boolean start(ExecutorService executor) throws IOException {
-		if (serverSocketChannel == null)
-			init();
+	public void start(ExecutorService executor) throws IOException {
 		executor.submit(this);
-		return true;
 	}
-
+	
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean stop() {
-		self.get().interrupt();
-		self.get().stop();
-		return true;
+		synchronized (self) {
+			if (self.get() == null)
+				return false;
+			self.get().interrupt();
+			self.get().stop();
+			return true;
+		}
 	}
-
+	
 	@Override
 	public boolean stop(Duration timeout) {
 		return stop();
 	}
-
+	
 	@Override
 	public void run() {
+		System.out.println("Running on " + this.getAddress().toString());
 		self = new WeakReference<>(Thread.currentThread());
+		if (selector == null || serverSocketChannel == null || !serverSocketChannel.isOpen())
+			throw new IllegalStateException("init() must be called before run()");
 		while (!Thread.interrupted()) {
 			try {
 				selector.select();
 				Iterator<SelectionKey> keyIterator = this.selector.selectedKeys().iterator();
 				while (keyIterator.hasNext() && !Thread.currentThread().isInterrupted()) {
-
 					SelectionKey key = keyIterator.next();
-
+					
 					keyIterator.remove();
-
+					
 					if (!key.isValid())
 						continue;
-
+						
 					if (key.isAcceptable())
 						accept(key);
 					else if (key.isReadable())
@@ -130,104 +145,111 @@ public class ServerImpl implements Server {
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				System.out.println("Interrupted");
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw e;
 			}
 		}
 	}
-
-	protected void write(SelectionKey key) throws IOException {
-		SocketChannel channel = (SocketChannel) key.channel();
-		List<byte[]> pendingData = this.dataMap.get(channel);
-		Iterator<byte[]> items = pendingData.iterator();
-		while (items.hasNext()) {
-			byte[] item = items.next();
-			items.remove();
-			channel.write(ByteBuffer.wrap(item));
-		}
-		key.interestOps(SelectionKey.OP_READ);
-	}
-
-	protected void read(SelectionKey key) throws IOException, InterruptedException {
-		SocketChannel socketChannel = (SocketChannel) key.channel();
-		
-		this.readBuffer.clear();
-		int numRead = -1;
-		try {
-			numRead = socketChannel.read(readBuffer);
-		} catch (IOException e) {
-			key.cancel();
-			socketChannel.close();
-			e.printStackTrace();
-			return;
-		}
-
-		if (numRead == -1) {
-			this.dataMap.remove(socketChannel);
-			Socket socket = socketChannel.socket();
-			SocketAddress remoteAddr = socket.getRemoteSocketAddress();
-			System.out.println("Connection closed by client: " + remoteAddr);
-			socketChannel.close();
-			key.cancel();
-			return;
-		}
-
-		byte[] data = new byte[numRead];
-		System.arraycopy(readBuffer.array(), 0, data, 0, numRead);
-		System.out.println("Got: " + new String(data, "US-ASCII"));
-		// write back to client
-		synchronized (queue) {
-			queue.put(new ServerDataEvent(this, socketChannel, data));
-		}
-		doEcho(key, data);
-	}
-
+	
 	protected void accept(SelectionKey key) throws UnsupportedEncodingException, IOException {
+		System.out.println("Connecting to client");
 		ServerSocketChannel sChannel = (ServerSocketChannel) key.channel();
 		SocketChannel channel = sChannel.accept();
 		channel.configureBlocking(false);
-
+		
 		// write welcome message
-		channel.write(ByteBuffer.wrap("Welcome, this is the echo server\r\n".getBytes("US-ASCII")));
-
-		Socket socket = channel.socket();
-		SocketAddress remoteAddr = socket.getRemoteSocketAddress();
+//		channel.write(ByteBuffer.wrap("Welcome, this is the echo server\r\n".getBytes("US-ASCII")));
+		
+		SocketAddress remoteAddr = channel.socket().getRemoteSocketAddress();
 		System.out.println("Connected to: " + remoteAddr);
-
-		// register channel with selector for further IO
-		dataMap.put(channel, new ArrayList<byte[]>());
-		channel.register(this.selector, SelectionKey.OP_READ);
+		
+		this.registerChannel(key, channel);
 	}
-
+	
+	protected void registerChannel(SelectionKey key, SocketChannel channel) throws ClosedChannelException {
+		// register channel with selector for further IO
+		long id = this.nextID.incrementAndGet();
+		Connection connection = new ConnectionImpl(channel);
+		connection.setConnectionID(id);
+		this.dataQueue.put(id, connection);
+		SelectionKey readKey = channel.register(this.selector, SelectionKey.OP_READ);
+		readKey.attach(id);
+	}
+	
+	protected void write(SelectionKey key) throws IOException {
+		Connection connection = this.dataQueue.get((Long) key.attachment());
+		
+		connection.writeNext(this.writeBuffer);
+		
+		key.interestOps(key.interestOps() | SelectionKey.OP_READ);
+	}
+	
+	protected void read(SelectionKey key) throws IOException, InterruptedException {
+		Connection connection = this.dataQueue.get((Long) key.attachment());
+		
+		long read;
+		try {
+			read = connection.readNext(this.readBuffer);
+		} catch (IOException e) {
+			key.cancel();
+			this.dataQueue.remove(connection.getConnectionID());
+			e.printStackTrace();
+			connection.close();
+			return;
+		}
+		if (read == -1) {
+			this.dataQueue.remove(connection.getConnectionID());
+			SocketAddress remoteAddr = ((SocketChannel) key.channel()).socket().getRemoteSocketAddress();
+			System.out.println("Connection closed by client: " + remoteAddr);
+			key.cancel();
+			connection.close();
+			return;
+		}
+		
+		byte[] data = connection.peek();
+		if (data != null)
+			System.out.println("Got: " + Arrays.toString((new String(data, "US-ASCII").split("\n"))));
+		// write back to client
+		key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+	}
+	
 	@Override
 	public boolean isRunning() {
-		return this.self.get()!=null;
+		return this.self.get() != null;
 	}
-
+	
 	@Override
-	public void registerConnectionListener(BiConsumer<Socket, Server> handler) {
+	public void registerConnectionListener(BiConsumer<Connection, Server> handler) {
 		// TODO Auto-generated method stub
 	}
-
+	
 	@Override
-	public void deregisterConnectionListener(BiConsumer<Socket, Server> handler) {
+	public void deregisterConnectionListener(BiConsumer<Connection, Server> handler) {
 		// TODO Auto-generated method stub
 	}
-
+	
 	@Override
 	public boolean isSSL() {
 		return false;
 	}
-
-	private void doEcho(SelectionKey key, byte[] data) {
-		SocketChannel channel = (SocketChannel) key.channel();
-		List<byte[]> pendingData = this.dataMap.get(channel);
-		pendingData.add(data);
-		key.interestOps(SelectionKey.OP_WRITE);
-	}
-
+	
 	@Override
-	public boolean stopNow() throws Exception {
+	public boolean shutdown() throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	@Override
+	public boolean shutdown(Duration timeout) throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	@Override
+	public boolean shutdownNow() throws Exception {
 		// TODO Auto-generated method stub
 		return false;
 	}

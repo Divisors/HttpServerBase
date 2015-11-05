@@ -3,7 +3,6 @@ package com.divisors.projectcuttlefish.httpserver.impl;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.LinkedList;
@@ -15,6 +14,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import com.divisors.projectcuttlefish.httpserver.api.Connection;
 import com.divisors.projectcuttlefish.httpserver.api.HttpExchange;
 import com.divisors.projectcuttlefish.httpserver.api.HttpServer;
 import com.divisors.projectcuttlefish.httpserver.api.Server;
@@ -26,8 +26,7 @@ import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequestHandler;
 public class HttpServerImpl implements HttpServer {
 	protected final boolean isServerOrphan;
 	final Server server;
-	protected final AtomicReference<WeakReference<Thread>> currentThread = new AtomicReference<>(null);
-	protected final LinkedList<HttpErrorHandler> errorHandlers = new LinkedList<>();
+	protected final AtomicReference<WeakReference<Thread>> currentThread = new AtomicReference<>(new WeakReference<>(null));
 	protected final List<Entry<Predicate<HttpRequest>, HttpRequestHandler>> handlers = new LinkedList<>();
 	
 	public HttpServerImpl(Server server) {
@@ -61,18 +60,18 @@ public class HttpServerImpl implements HttpServer {
 	}
 	
 	@Override
-	public void registerConnectionListener(BiConsumer<Socket, Server> handler) {
+	public void registerConnectionListener(BiConsumer<Connection, Server> handler) {
 		server.registerConnectionListener(handler);
 	}
 
 	@Override
-	public void deregisterConnectionListener(BiConsumer<Socket, Server> handler) {
+	public void deregisterConnectionListener(BiConsumer<Connection, Server> handler) {
 		server.deregisterConnectionListener(handler);
 	}
 
 	@Override
 	public void registerErrorHandler(HttpErrorHandler handler) {
-		this.errorHandlers.add(handler);
+		//TODO fin
 	}
 	@Override
 	public void init() throws IOException {
@@ -84,27 +83,20 @@ public class HttpServerImpl implements HttpServer {
 		server.deregisterConnectionListener(this);
 	}
 	@Override
-	public boolean start() throws IOException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public boolean start(ExecutorService executor) throws IOException {
-		if (isRunning())
-			return false;
-		executor.submit(this);
-		return true; 
-	}
-	@Override
 	public boolean stop() throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean stop(Duration timeout) throws IOException, InterruptedException {
 		synchronized(this.currentThread) {
-
-			WeakReference<Thread> thread = this.currentThread.get();
+			Thread thread = this.currentThread.get().get();
+			if (thread == null)
+				return false;
+			thread.interrupt();
+			thread.join(timeout.toMillis());
+			thread.stop();
 		}
 		return false;
 	}
@@ -121,13 +113,9 @@ public class HttpServerImpl implements HttpServer {
 	public boolean isSSL() {
 		return false;
 	}
+	
 	@Override
-	public boolean stopNow() throws Exception {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public void accept(Socket socket, Server server) {
+	public void accept(Connection connection, Server server) {
 		
 	}
 	protected void onRequest(HttpRequest request, HttpExchange exchange) {
@@ -136,8 +124,31 @@ public class HttpServerImpl implements HttpServer {
 			.forEach((Consumer<Entry<Predicate<HttpRequest>,HttpRequestHandler>>)(entry)->(entry.getValue().accept(request, exchange)));
 	}
 	public void onError(HttpError error, HttpExchange exchange) {
-		this.errorHandlers.forEach((handler)->{
-			//TODO finish
-		});
+		//TODO fin
+	}
+	@Override
+	public void start() throws IOException, IllegalStateException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void start(ExecutorService executor) throws IOException, IllegalStateException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public boolean shutdown() throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public boolean shutdown(Duration timeout) throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public boolean shutdownNow() throws Exception {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

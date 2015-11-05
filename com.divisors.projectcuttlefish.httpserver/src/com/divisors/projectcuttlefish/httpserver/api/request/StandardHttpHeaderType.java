@@ -1,11 +1,5 @@
 package com.divisors.projectcuttlefish.httpserver.api.request;
 
-import java.nio.ByteBuffer;
-
-import org.eclipse.jetty.util.ArrayTrie;
-import org.eclipse.jetty.util.StringUtil;
-import org.eclipse.jetty.util.Trie;
-
 public enum StandardHttpHeaderType {
 	/* ------------------------------------------------------------ */
     /** General Fields.
@@ -106,7 +100,7 @@ public enum StandardHttpHeaderType {
 
 
     /* ------------------------------------------------------------ */
-    public final static Trie<StandardHttpHeaderType> CACHE= new ArrayTrie<>(535);
+/*    public final static Trie<StandardHttpHeaderType> CACHE= new ArrayTrie<>(535);
     static
     {
         for (StandardHttpHeaderType header : StandardHttpHeaderType.values())
@@ -120,50 +114,43 @@ public enum StandardHttpHeaderType {
     private final byte[] _bytesColonSpace;
     private final ByteBuffer _buffer;
 
-    /* ------------------------------------------------------------ */
-    StandardHttpHeaderType(String s)
-    {
-        _string=s;
+   */ StandardHttpHeaderType(String s)
+    {}
+        /*_string=s;
         _bytes=StringUtil.getBytes(s);
         _bytesColonSpace=StringUtil.getBytes(s+": ");
         _buffer=ByteBuffer.wrap(_bytes);
     }
 
-    /* ------------------------------------------------------------ */
     public ByteBuffer toBuffer()
     {
         return _buffer.asReadOnlyBuffer();
     }
 
-    /* ------------------------------------------------------------ */
     public byte[] getBytes()
     {
         return _bytes;
     }
 
-    /* ------------------------------------------------------------ */
     public byte[] getBytesColonSpace()
     {
         return _bytesColonSpace;
     }
 
-    /* ------------------------------------------------------------ */
     public boolean is(String s)
     {
         return _string.equalsIgnoreCase(s);    
     }
 
-    /* ------------------------------------------------------------ */
     public String asString()
     {
         return _string;
     }
     
-    /* ------------------------------------------------------------ */
     @Override
     public String toString()
     {
         return _string;
-    }
+    }*/
 	
 }

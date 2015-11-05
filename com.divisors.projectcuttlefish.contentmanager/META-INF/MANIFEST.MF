@@ -7,6 +7,7 @@ Bundle-Activator: com.divisors.projectcuttlefish.contentmanager.Activator
 Bundle-Vendor: DIVISORS
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.divisors.projectcuttlefish.uac.api,
+ javax.servlet.annotation;version="3.1.0",
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.divisors.projectcuttlefish.contentmanager.api

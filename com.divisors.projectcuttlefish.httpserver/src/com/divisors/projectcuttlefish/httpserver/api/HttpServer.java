@@ -1,6 +1,5 @@
 package com.divisors.projectcuttlefish.httpserver.api;
 
-import java.net.Socket;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -8,7 +7,7 @@ import com.divisors.projectcuttlefish.httpserver.api.error.HttpErrorHandler;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequestHandler;
 
-public interface HttpServer extends Server, RunnableService, BiConsumer<Socket, Server> {
+public interface HttpServer extends Server, RunnableService, BiConsumer<Connection, Server> {
 	
 	default void registerHandler(HttpRequestHandler handler) {
 		registerHandler((a)->(true),handler);
