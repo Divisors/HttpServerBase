@@ -11,8 +11,8 @@ import com.divisors.projectcuttlefish.httpserver.api.HttpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.api.Server;
 import com.divisors.projectcuttlefish.httpserver.api.ServerFactory;
 import com.divisors.projectcuttlefish.httpserver.impl.HttpServerFactoryImpl;
+import com.divisors.projectcuttlefish.httpserver.impl.ServerFactoryImpl;
 import com.divisors.projectcuttlefish.httpserver.impl.ServerImpl;
-import com.sun.security.sasl.ServerFactoryImpl;
 
 import reactor.Environment;
 
@@ -27,11 +27,12 @@ public class Activator implements BundleActivator {
 		try {
 			System.out.println("Initializing: ProjectCuttlefish|HttpServer");
 			Environment.initialize();
-			serverFactoryServiceRegistration = context.registerService(ServerFactory.class.getName(),new ServerFactoryImpl(), null);
+			serverFactoryServiceRegistration = context.registerService(ServerFactory.class.getName(), new ServerFactoryImpl(), null);
 			httpServerFactoryServiceRegistration = context.registerService(HttpServerFactory.class.getName(), new HttpServerFactoryImpl(), null);
 			server = new ServerImpl(new InetSocketAddress("localhost", 8082));
 			server.init();
 			server.start(Executors.newSingleThreadExecutor());
+			
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;

@@ -1,9 +1,10 @@
-package com.divisors.projectcuttlefish.httpserver.impl;
+package com.divisors.projectcuttlefish.httpserver.impl.websocket;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
+import com.divisors.projectcuttlefish.httpserver.api.Connection;
 import com.divisors.projectcuttlefish.httpserver.api.websocket.WebSocket;
 
 public class WebSocketImpl implements WebSocket {
@@ -11,13 +12,19 @@ public class WebSocketImpl implements WebSocket {
 	 * List of handlers that will be called when this recieves a message from the client.
 	 */
 	protected ArrayList<BiConsumer<WebSocket, String>> handlers;
+	protected final Connection connection;
 	
+	public WebSocketImpl(Connection c) {
+		this.connection = c;
+	}
 	
 	@Override
 	public void send(String message) {
 		
 	}
-	
+	protected void open() {
+		
+	}
 	@Override
 	public void onMessage(BiConsumer<WebSocket, String> handler) {
 		(handlers==null?handlers=new ArrayList<>():handlers).add(handler);

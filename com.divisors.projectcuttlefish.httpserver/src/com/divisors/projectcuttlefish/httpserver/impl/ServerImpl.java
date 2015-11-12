@@ -22,8 +22,8 @@ import java.util.function.BiConsumer;
 import com.divisors.projectcuttlefish.httpserver.api.Connection;
 import com.divisors.projectcuttlefish.httpserver.api.Server;
 
-import reactor.Environment;
-import reactor.core.Dispatcher;
+import reactor.rx.Stream;
+import reactor.rx.Streams;
 
 public class ServerImpl implements Server {
 	
@@ -50,6 +50,7 @@ public class ServerImpl implements Server {
 	protected volatile WeakReference<Thread> self = new WeakReference<>(null);
 	protected ByteBuffer readBuffer, writeBuffer;
 	protected AtomicLong nextID = new AtomicLong(16 * 1024);
+	private Stream<Connection> connectionStream;
 	
 	public ServerImpl(int port) {
 		this(new InetSocketAddress(port));
@@ -76,7 +77,14 @@ public class ServerImpl implements Server {
 		serverSocketChannel.configureBlocking(false);
 		serverSocketChannel.socket().bind(address);
 		serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-		
+				
+		this.connectionStream = Streams.<Connection, Void>createWith(
+				(demand, sub) -> {
+					sub.context();
+					System.out.println("Demanding "+demand);
+				},
+				sub->null,
+				sub->System.out.println("Cancelled"));
 		System.out.println("Initialized");
 	}
 	
@@ -154,6 +162,12 @@ public class ServerImpl implements Server {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param key
+	 * @throws UnsupportedEncodingException
+	 * @throws IOException
+	 */
 	protected void accept(SelectionKey key) throws UnsupportedEncodingException, IOException {
 		System.out.println("Connecting to client");
 		ServerSocketChannel sChannel = (ServerSocketChannel) key.channel();
@@ -169,6 +183,9 @@ public class ServerImpl implements Server {
 		this.registerChannel(key, channel);
 	}
 	
+	/**
+	 * Register channel with 
+	 */
 	protected void registerChannel(SelectionKey key, SocketChannel channel) throws ClosedChannelException {
 		// register channel with selector for further IO
 		long id = this.nextID.incrementAndGet();
@@ -177,14 +194,29 @@ public class ServerImpl implements Server {
 		this.dataQueue.put(id, connection);
 		SelectionKey readKey = channel.register(this.selector, SelectionKey.OP_READ);
 		readKey.attach(id);
+		
+		connection.add(("HTTP/1.1 200 OK\r\n"
+				+ "Content-Type: text/html; charset=iso-8859-1\r\n"
+				+ "Server: x-projectcuttlefish\r\n"
+				+ "\r\n"
+				+ "Hello, World!\r\n").getBytes());
 	}
 	
 	protected void write(SelectionKey key) throws IOException {
 		Connection connection = this.dataQueue.get((Long) key.attachment());
 		
+		if (!connection.isOpen()) {
+			key.cancel();
+			this.dataQueue.remove(connection.getConnectionID());
+			SocketAddress remoteAddr = ((SocketChannel) key.channel()).socket().getRemoteSocketAddress();
+			System.out.println("Connection closed by client: " + remoteAddr);
+			connection.close();
+		}
 		connection.writeNext(this.writeBuffer);
 		
-		key.interestOps(key.interestOps() | SelectionKey.OP_READ);
+		connection.close();
+		
+//		key.interestOps(key.interestOps() | SelectionKey.OP_READ);
 	}
 	
 	protected void read(SelectionKey key) throws IOException, InterruptedException {
@@ -252,5 +284,8 @@ public class ServerImpl implements Server {
 	public boolean shutdownNow() throws Exception {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	public Stream<Connection> connectionStream() {
+		return this.connectionStream;
 	}
 }

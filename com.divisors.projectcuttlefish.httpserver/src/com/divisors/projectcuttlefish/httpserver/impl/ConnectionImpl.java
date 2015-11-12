@@ -232,6 +232,7 @@ public class ConnectionImpl implements Connection {
 		byte[] peek;
 		while ((peek = outputBuffer.peek()) != null && peek.length < buffer.remaining())
 			buffer.put(outputBuffer.poll());
+		System.out.println("Writing " + buffer.position() + " bytes");
 		return write(buffer);
 	}
 }
