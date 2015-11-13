@@ -39,3 +39,7 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
+
+**/*-javadoc.jar
+**/*-sources.jar
+RemoteSystemsTempFiles/*

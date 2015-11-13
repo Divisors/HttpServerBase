@@ -24,4 +24,3 @@ Bundle-ClassPath: lib/javatuples-1.2.jar,
  lib/reactor-net-2.0.6.RELEASE.jar,
  lib/reactor-stream-2.0.6.RELEASE.jar,
  .
-Require-Bundle: io.projectreactor.reactor-stream;bundle-version="2.0.6"

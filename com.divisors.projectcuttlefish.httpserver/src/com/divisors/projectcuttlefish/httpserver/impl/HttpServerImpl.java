@@ -10,14 +10,13 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import com.divisors.projectcuttlefish.httpserver.api.Connection;
 import com.divisors.projectcuttlefish.httpserver.api.HttpExchange;
 import com.divisors.projectcuttlefish.httpserver.api.HttpServer;
-import com.divisors.projectcuttlefish.httpserver.api.Server;
+import com.divisors.projectcuttlefish.httpserver.api.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.error.HttpError;
 import com.divisors.projectcuttlefish.httpserver.api.error.HttpErrorHandler;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
@@ -25,16 +24,16 @@ import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequestHandler;
 
 public class HttpServerImpl implements HttpServer {
 	protected final boolean isServerOrphan;
-	final Server server;
+	final TcpServer server;
 	protected final AtomicReference<WeakReference<Thread>> currentThread = new AtomicReference<>(new WeakReference<>(null));
 	protected final List<Entry<Predicate<HttpRequest>, HttpRequestHandler>> handlers = new LinkedList<>();
 	
-	public HttpServerImpl(Server server) {
+	public HttpServerImpl(TcpServer server) {
 		this.server = server;
 		isServerOrphan=false;
 	}
 	public HttpServerImpl(InetSocketAddress addr) {
-		this.server = new ServerImpl(addr);
+		this.server = new TcpServerImpl(addr);
 		isServerOrphan = true;
 	}
 
@@ -57,16 +56,6 @@ public class HttpServerImpl implements HttpServer {
 			Thread t = this.currentThread.get().get();
 			return t!=null && t.isAlive();
 		}
-	}
-	
-	@Override
-	public void registerConnectionListener(BiConsumer<Connection, Server> handler) {
-		server.registerConnectionListener(handler);
-	}
-
-	@Override
-	public void deregisterConnectionListener(BiConsumer<Connection, Server> handler) {
-		server.deregisterConnectionListener(handler);
 	}
 
 	@Override
@@ -115,7 +104,7 @@ public class HttpServerImpl implements HttpServer {
 	}
 	
 	@Override
-	public void accept(Connection connection, Server server) {
+	public void accept(Connection connection, TcpServer server) {
 		
 	}
 	protected void onRequest(HttpRequest request, HttpExchange exchange) {

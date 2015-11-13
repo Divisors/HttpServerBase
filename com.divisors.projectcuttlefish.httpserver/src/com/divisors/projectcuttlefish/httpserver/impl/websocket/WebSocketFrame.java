@@ -8,6 +8,7 @@ import java.io.OutputStream;
 public class WebSocketFrame {
 	public static WebSocketFrame readFrom(InputStream is) throws IOException {
 		WebSocketFrame result = new WebSocketFrame();
+		@SuppressWarnings("unused")
 		long read = 0;
 		byte[] buffer;
 		

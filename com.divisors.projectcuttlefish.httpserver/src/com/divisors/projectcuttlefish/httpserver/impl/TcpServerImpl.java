@@ -20,12 +20,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
 import com.divisors.projectcuttlefish.httpserver.api.Connection;
-import com.divisors.projectcuttlefish.httpserver.api.Server;
+import com.divisors.projectcuttlefish.httpserver.api.TcpServer;
 
 import reactor.rx.Stream;
-import reactor.rx.Streams;
 
-public class ServerImpl implements Server {
+public class TcpServerImpl implements TcpServer {
 	
 	public static final int BUFFER_SIZE = 8192;
 	/**
@@ -52,11 +51,11 @@ public class ServerImpl implements Server {
 	protected AtomicLong nextID = new AtomicLong(16 * 1024);
 	private Stream<Connection> connectionStream;
 	
-	public ServerImpl(int port) {
+	public TcpServerImpl(int port) {
 		this(new InetSocketAddress(port));
 	}
 	
-	public ServerImpl(InetSocketAddress addr) {
+	public TcpServerImpl(InetSocketAddress addr) {
 		address = addr;
 	}
 	
@@ -78,13 +77,13 @@ public class ServerImpl implements Server {
 		serverSocketChannel.socket().bind(address);
 		serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 				
-		this.connectionStream = Streams.<Connection, Void>createWith(
+		/*this.connectionStream = Streams.<Connection, Void>createWith(
 				(demand, sub) -> {
 					sub.context();
 					System.out.println("Demanding "+demand);
 				},
 				sub->null,
-				sub->System.out.println("Cancelled"));
+				sub->System.out.println("Cancelled"));*/
 		System.out.println("Initialized");
 	}
 	
@@ -254,12 +253,12 @@ public class ServerImpl implements Server {
 	}
 	
 	@Override
-	public void registerConnectionListener(BiConsumer<Connection, Server> handler) {
+	public void registerConnectionListener(BiConsumer<Connection, TcpServer> handler) {
 		// TODO Auto-generated method stub
 	}
 	
 	@Override
-	public void deregisterConnectionListener(BiConsumer<Connection, Server> handler) {
+	public void deregisterConnectionListener(BiConsumer<Connection, TcpServer> handler) {
 		// TODO Auto-generated method stub
 	}
 	

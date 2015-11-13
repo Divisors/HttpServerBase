@@ -3,12 +3,12 @@ package com.divisors.projectcuttlefish.httpserver.api;
 import java.net.InetSocketAddress;
 
 @FunctionalInterface
-public interface ServerFactory {
-	default Server createServer(int port) {
+public interface TcpServerFactory {
+	default TcpServer createServer(int port) {
 		return createServer(new InetSocketAddress(port));
 	}
-	default Server createServer(String host, int port) {
+	default TcpServer createServer(String host, int port) {
 		return createServer(new InetSocketAddress(host, port));
 	}
-	Server createServer(InetSocketAddress addr);
+	TcpServer createServer(InetSocketAddress addr);
 }

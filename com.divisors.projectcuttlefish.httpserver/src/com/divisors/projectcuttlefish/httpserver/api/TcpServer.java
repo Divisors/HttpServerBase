@@ -11,26 +11,30 @@ import java.util.function.BiConsumer;
  * @author mailmindlin
  *
  */
-public interface Server extends RunnableService {
+public interface TcpServer extends RunnableService {
+	@Override
 	void init() throws IOException;
 	
+	@Override
 	void destroy() throws IOException;
 	
+	@Override
 	void start() throws IOException, IllegalStateException;
+	@Override
 	void start(ExecutorService executor) throws IOException, IllegalStateException;
-	
-	boolean stop() throws IOException, InterruptedException;
-	boolean stop(Duration timeout)  throws IOException, InterruptedException;
 	
 	@Override
 	void run();
+	
+	public boolean stop() throws IOException, InterruptedException;
+	public boolean stop(Duration timeout) throws IOException, InterruptedException;
 	
 	InetSocketAddress getAddress();
 	
 	boolean isRunning();
 	
-	void registerConnectionListener(BiConsumer<Connection, Server> handler);
-	void deregisterConnectionListener(BiConsumer<Connection, Server> handler);
+	void registerConnectionListener(BiConsumer<Connection, TcpServer> handler);
+	void deregisterConnectionListener(BiConsumer<Connection, TcpServer> handler);
 	
 	boolean isSSL();
 
