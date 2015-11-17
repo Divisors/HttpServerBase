@@ -1,10 +1,12 @@
-package com.divisors.projectcuttlefish.httpserver.api;
+package com.divisors.projectcuttlefish.httpserver.api.tcp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
+
+import com.divisors.projectcuttlefish.httpserver.api.RunnableService;
 
 /**
  * Generic server interface.

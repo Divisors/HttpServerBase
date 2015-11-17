@@ -19,8 +19,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
-import com.divisors.projectcuttlefish.httpserver.api.Connection;
-import com.divisors.projectcuttlefish.httpserver.api.TcpServer;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.Connection;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 
 import reactor.rx.Stream;
 

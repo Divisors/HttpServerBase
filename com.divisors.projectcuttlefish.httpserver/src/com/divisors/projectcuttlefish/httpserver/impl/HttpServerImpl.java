@@ -13,14 +13,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.divisors.projectcuttlefish.httpserver.api.Connection;
 import com.divisors.projectcuttlefish.httpserver.api.HttpExchange;
 import com.divisors.projectcuttlefish.httpserver.api.HttpServer;
-import com.divisors.projectcuttlefish.httpserver.api.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.error.HttpError;
 import com.divisors.projectcuttlefish.httpserver.api.error.HttpErrorHandler;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequestHandler;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.Connection;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 
 public class HttpServerImpl implements HttpServer {
 	protected final boolean isServerOrphan;

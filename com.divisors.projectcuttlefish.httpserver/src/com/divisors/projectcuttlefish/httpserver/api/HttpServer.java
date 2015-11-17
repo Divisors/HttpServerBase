@@ -9,6 +9,8 @@ import java.util.function.Predicate;
 import com.divisors.projectcuttlefish.httpserver.api.error.HttpErrorHandler;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequestHandler;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.Connection;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 
 public interface HttpServer extends RunnableService, BiConsumer<Connection, TcpServer> {
 	

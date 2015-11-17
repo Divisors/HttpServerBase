@@ -1,4 +1,4 @@
-package com.divisors.projectcuttlefish.httpserver.api;
+package com.divisors.projectcuttlefish.httpserver.api.tcp;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

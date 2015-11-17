@@ -12,10 +12,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.divisors.projectcuttlefish.httpserver.api.Connection;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.Connection;
 
 /**
- * Implementation of {@linkplain com.divisors.projectcuttlefish.httpserver.api.Connection}
+ * Implementation of {@linkplain com.divisors.projectcuttlefish.httpserver.api.tcp.Connection}
  * @author mailmindlin
  */
 public class ConnectionImpl implements Connection {

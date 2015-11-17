@@ -1,6 +1,9 @@
 package com.divisors.projectcuttlefish.httpserver.api.request;
 
+import java.util.List;
+
 import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
+import com.divisors.projectcuttlefish.httpserver.api.Mutable;
 
 /**
  * Wrapper for HTTP request
@@ -8,7 +11,7 @@ import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
  * @author mailmindlin
  *
  */
-public interface HttpRequest {
+public interface HttpRequest extends Mutable<HttpRequest> {
 	public static final String METHOD_GET = "GET";
 	public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_POST = "POST";
@@ -34,11 +37,16 @@ public interface HttpRequest {
 	}
 
 	HttpRequestLine getRequestLine();
-
-	HttpHeader[] getHeaders();
-	HttpHeader getHeader(String key);
 	
-	default boolean isUpgradeRequest() {
-		return false;
+	List<HttpHeader> getHeaders();
+	default HttpHeader getHeader(String key) {
+		for (HttpHeader header : getHeaders())
+			if (header.getKey().equalsIgnoreCase(key))
+				return header;
+		return null;
+	}
+	
+	default ImmutableHttpRequest immutable() {
+		return new ImmutableHttpRequest(this);
 	}
 }

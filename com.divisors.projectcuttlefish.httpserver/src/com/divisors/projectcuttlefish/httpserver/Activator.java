@@ -5,8 +5,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.divisors.projectcuttlefish.httpserver.api.HttpServerFactory;
-import com.divisors.projectcuttlefish.httpserver.api.TcpServer;
-import com.divisors.projectcuttlefish.httpserver.api.TcpServerFactory;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.impl.HttpServerFactoryImpl;
 import com.divisors.projectcuttlefish.httpserver.impl.TcpServerFactoryImpl;
 

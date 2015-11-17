@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
-import com.divisors.projectcuttlefish.httpserver.api.Connection;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.Connection;
 import com.divisors.projectcuttlefish.httpserver.api.websocket.WebSocket;
 
 public class WebSocketImpl implements WebSocket {

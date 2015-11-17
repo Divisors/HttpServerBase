@@ -27,12 +27,27 @@ public interface RunnableService extends Runnable {
 	void start() throws Exception;
 	void start(ExecutorService executor) throws Exception;
 	/**
-	 * Stop all threads of this service. 
-	 * @return
+	 * Cease operation of this service. If this service accepts any input (e.g., a webserver)
+	 * it SHOULD reject any input after this method is called. The service SHOULD attempt a
+	 * soft shutdown, where any running tasks will be completed before closing, but no tasks
+	 * will be started.
+	 * @return if the service was shutdown. Returns FALSE if the service was not running
+	 * at the time of this call, or if the service was being shutdown by another call.
 	 * @throws Exception
 	 */
 	boolean shutdown() throws Exception;
+	/**
+	 * 
+	 * @param timeout
+	 * @return
+	 * @throws Exception
+	 */
 	boolean shutdown(Duration timeout) throws Exception;
+	/**
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	boolean shutdownNow() throws Exception;
 	
 	void init() throws Exception;
