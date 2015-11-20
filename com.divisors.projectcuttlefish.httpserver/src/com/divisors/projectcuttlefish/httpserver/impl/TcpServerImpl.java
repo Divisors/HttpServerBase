@@ -49,7 +49,6 @@ public class TcpServerImpl implements TcpServer {
 	protected volatile WeakReference<Thread> self = new WeakReference<>(null);
 	protected ByteBuffer readBuffer, writeBuffer;
 	protected AtomicLong nextID = new AtomicLong(16 * 1024);
-	private Stream<TcpConnection> connectionStream;
 	
 	public TcpServerImpl(int port) {
 		this(new InetSocketAddress(port));
@@ -285,6 +284,6 @@ public class TcpServerImpl implements TcpServer {
 		return false;
 	}
 	public Stream<TcpConnection> connectionStream() {
-		return this.connectionStream;
+		return null;//this.connectionStream;
 	}
 }

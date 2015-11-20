@@ -22,4 +22,7 @@ Export-Package: com.divisors.projectcuttlefish.httpserver.api;uses:="com.divisor
  com.divisors.projectcuttlefish.httpserver.impl;x-friends:="com.divisors.projectcuttlefish.ssl"
 Bundle-ClassPath: lib/javatuples-1.2.jar,
  .
-Require-Bundle: io.projectreactor.reactor-stream
+Require-Bundle: io.projectreactor.reactor-stream,
+ io.projectreactor.reactor-bus;bundle-version="2.1.0",
+ io.projectreactor.reactor-core;bundle-version="2.1.0",
+ io.projectreactor.reactor-net;bundle-version="2.1.0"
