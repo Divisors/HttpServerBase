@@ -7,9 +7,9 @@ import java.net.Socket;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.divisors.projectcuttlefish.httpserver.impl.ServerImpl;
+import com.divisors.projectcuttlefish.httpserver.impl.TcpServerImpl;
 
-public class SSLServerImpl extends ServerImpl{
+public class SSLServerImpl extends TcpServerImpl{
 
 	public SSLServerImpl(int port) {
 		super(port);

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
-import com.divisors.projectcuttlefish.httpserver.api.tcp.Connection;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpConnection;
 import com.divisors.projectcuttlefish.httpserver.api.websocket.WebSocket;
 
 public class WebSocketImpl implements WebSocket {
@@ -12,9 +12,9 @@ public class WebSocketImpl implements WebSocket {
 	 * List of handlers that will be called when this recieves a message from the client.
 	 */
 	protected ArrayList<BiConsumer<WebSocket, String>> handlers;
-	protected final Connection connection;
+	protected final TcpConnection connection;
 	
-	public WebSocketImpl(Connection c) {
+	public WebSocketImpl(TcpConnection c) {
 		this.connection = c;
 	}
 	

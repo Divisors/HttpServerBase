@@ -35,8 +35,8 @@ public interface TcpServer extends RunnableService {
 	
 	boolean isRunning();
 	
-	void registerConnectionListener(BiConsumer<Connection, TcpServer> handler);
-	void deregisterConnectionListener(BiConsumer<Connection, TcpServer> handler);
+	void registerConnectionListener(BiConsumer<TcpConnection, TcpServer> handler);
+	void deregisterConnectionListener(BiConsumer<TcpConnection, TcpServer> handler);
 	
 	boolean isSSL();
 

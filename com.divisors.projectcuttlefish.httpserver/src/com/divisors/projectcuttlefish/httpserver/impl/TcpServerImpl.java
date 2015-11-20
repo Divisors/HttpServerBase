@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 
-import com.divisors.projectcuttlefish.httpserver.api.tcp.Connection;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpConnection;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 
 import reactor.rx.Stream;
@@ -42,14 +42,14 @@ public class TcpServerImpl implements TcpServer {
 	/**
 	 * Map of connections currently open
 	 */
-	protected ConcurrentHashMap<Long, Connection> dataQueue = new ConcurrentHashMap<>();
+	protected ConcurrentHashMap<Long, TcpConnection> dataQueue = new ConcurrentHashMap<>();
 	/**
 	 * 
 	 */
 	protected volatile WeakReference<Thread> self = new WeakReference<>(null);
 	protected ByteBuffer readBuffer, writeBuffer;
 	protected AtomicLong nextID = new AtomicLong(16 * 1024);
-	private Stream<Connection> connectionStream;
+	private Stream<TcpConnection> connectionStream;
 	
 	public TcpServerImpl(int port) {
 		this(new InetSocketAddress(port));
@@ -92,7 +92,7 @@ public class TcpServerImpl implements TcpServer {
 		readBuffer = null;// dereference bytebuffer
 		serverSocketChannel.socket().close();
 		serverSocketChannel.close();
-		for (Connection connection : dataQueue.values())
+		for (TcpConnection connection : dataQueue.values())
 			connection.close();
 		System.out.println("Destroyed");
 	}
@@ -188,7 +188,7 @@ public class TcpServerImpl implements TcpServer {
 	protected void registerChannel(SelectionKey key, SocketChannel channel) throws ClosedChannelException {
 		// register channel with selector for further IO
 		long id = this.nextID.incrementAndGet();
-		Connection connection = new ConnectionImpl(channel);
+		TcpConnection connection = new TcpConnectionImpl(channel);
 		connection.setConnectionID(id);
 		this.dataQueue.put(id, connection);
 		SelectionKey readKey = channel.register(this.selector, SelectionKey.OP_READ);
@@ -202,7 +202,7 @@ public class TcpServerImpl implements TcpServer {
 	}
 	
 	protected void write(SelectionKey key) throws IOException {
-		Connection connection = this.dataQueue.get((Long) key.attachment());
+		TcpConnection connection = this.dataQueue.get((Long) key.attachment());
 		
 		if (!connection.isOpen()) {
 			key.cancel();
@@ -219,7 +219,7 @@ public class TcpServerImpl implements TcpServer {
 	}
 	
 	protected void read(SelectionKey key) throws IOException, InterruptedException {
-		Connection connection = this.dataQueue.get((Long) key.attachment());
+		TcpConnection connection = this.dataQueue.get((Long) key.attachment());
 		
 		long read;
 		try {
@@ -253,12 +253,12 @@ public class TcpServerImpl implements TcpServer {
 	}
 	
 	@Override
-	public void registerConnectionListener(BiConsumer<Connection, TcpServer> handler) {
+	public void registerConnectionListener(BiConsumer<TcpConnection, TcpServer> handler) {
 		// TODO Auto-generated method stub
 	}
 	
 	@Override
-	public void deregisterConnectionListener(BiConsumer<Connection, TcpServer> handler) {
+	public void deregisterConnectionListener(BiConsumer<TcpConnection, TcpServer> handler) {
 		// TODO Auto-generated method stub
 	}
 	
@@ -284,7 +284,7 @@ public class TcpServerImpl implements TcpServer {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	public Stream<Connection> connectionStream() {
+	public Stream<TcpConnection> connectionStream() {
 		return this.connectionStream;
 	}
 }

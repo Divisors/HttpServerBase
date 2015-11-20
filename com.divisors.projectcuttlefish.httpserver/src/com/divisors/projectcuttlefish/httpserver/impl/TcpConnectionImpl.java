@@ -12,23 +12,23 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.divisors.projectcuttlefish.httpserver.api.tcp.Connection;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpConnection;
 
 /**
- * Implementation of {@linkplain com.divisors.projectcuttlefish.httpserver.api.tcp.Connection}
+ * Implementation of {@linkplain com.divisors.projectcuttlefish.httpserver.api.tcp.TcpConnection}
  * @author mailmindlin
  */
-public class ConnectionImpl implements Connection {
+public class TcpConnectionImpl implements TcpConnection {
 	protected BlockingQueue<byte[]> inputBuffer, outputBuffer;
 	protected final SocketChannel channel;
 	protected AtomicLong id = new AtomicLong(-1);
 	protected boolean isEOS = false;
-	public ConnectionImpl(SocketChannel channel) {
+	public TcpConnectionImpl(SocketChannel channel) {
 		this.channel = channel;
 		this.inputBuffer = new LinkedBlockingQueue<>();
 		this.outputBuffer = new LinkedBlockingQueue<>();
 	}
-	public ConnectionImpl(SocketChannel channel, BlockingQueue<byte[]> inputQueue, BlockingQueue<byte[]> outputQueue) {
+	public TcpConnectionImpl(SocketChannel channel, BlockingQueue<byte[]> inputQueue, BlockingQueue<byte[]> outputQueue) {
 		this.channel = channel;
 		this.inputBuffer = inputQueue;
 		this.outputBuffer = outputQueue;
@@ -179,7 +179,7 @@ public class ConnectionImpl implements Connection {
     	return new InputStream() {
     		@Override
     		public int read(byte[] array, int off, int len) throws IOException {
-    			return ConnectionImpl.this.read(ByteBuffer.wrap(array, off, len));
+    			return TcpConnectionImpl.this.read(ByteBuffer.wrap(array, off, len));
     		}
 			@Override
 			public int read() throws IOException {
@@ -194,11 +194,11 @@ public class ConnectionImpl implements Connection {
     	return new OutputStream() {
     		@Override
     		public void write(byte[] array, int off, int len) throws IOException {
-    			ConnectionImpl.this.write(ByteBuffer.wrap(array, off, len));
+    			TcpConnectionImpl.this.write(ByteBuffer.wrap(array, off, len));
     		}
 			@Override
 			public void write(int b) throws IOException {
-				ConnectionImpl.this.write(ByteBuffer.wrap(new byte[]{(byte)b}));
+				TcpConnectionImpl.this.write(ByteBuffer.wrap(new byte[]{(byte)b}));
 			}
     	};
     }
