@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * @see com.projectcuttlefish.httpserver.impl.ConnectionImpl
  *
  */
-public interface Connection extends BlockingQueue<byte[]>, AutoCloseable {
+public interface TcpConnection extends BlockingQueue<byte[]>, AutoCloseable {
 	/**
 	 * Add byte[] to output buffer
 	 * @param data message to add

@@ -8,7 +8,9 @@ Bundle-Vendor: DIVISORS
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.servlet.annotation;version="3.1.0",
  org.osgi.framework;version="1.3.0",
- org.slf4j;version="1.7.2"
+ org.reactivestreams;version="1.0.0",
+ org.slf4j;version="1.7.2",
+ reactor.core.processor
 Bundle-ActivationPolicy: lazy
 Export-Package: com.divisors.projectcuttlefish.httpserver.api;uses:="com.divisors.projectcuttlefish.httpserver.api.error,com.divisors.projectcuttlefish.httpserver.api.request,com.divisors.projectcuttlefish.httpserver.api.response",
  com.divisors.projectcuttlefish.httpserver.api.error,
@@ -17,10 +19,5 @@ Export-Package: com.divisors.projectcuttlefish.httpserver.api;uses:="com.divisor
  com.divisors.projectcuttlefish.httpserver.api.websocket,
  com.divisors.projectcuttlefish.httpserver.impl;x-friends:="com.divisors.projectcuttlefish.ssl"
 Bundle-ClassPath: lib/javatuples-1.2.jar,
- lib/reactive-streams-1.0.0.jar,
- lib/reactor-alloc-2.0.6.RELEASE.jar,
- lib/reactor-bus-2.0.6.RELEASE.jar,
- lib/reactor-core-2.0.6.RELEASE.jar,
- lib/reactor-net-2.0.6.RELEASE.jar,
- lib/reactor-stream-2.0.6.RELEASE.jar,
  .
+Require-Bundle: io.projectreactor.reactor-stream

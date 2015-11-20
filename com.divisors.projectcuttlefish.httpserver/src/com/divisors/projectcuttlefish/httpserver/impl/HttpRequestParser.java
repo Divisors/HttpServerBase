@@ -28,10 +28,7 @@ public class HttpRequestParser {
 				.put(previous)
 				.put(bytes);
 		buf.rewind();
-		int eol = findCRLF(bytes);
-		if (eol > -1) {
-			
-		}
+		
 		return false;
 	}
 	HttpRequest getRequest() {

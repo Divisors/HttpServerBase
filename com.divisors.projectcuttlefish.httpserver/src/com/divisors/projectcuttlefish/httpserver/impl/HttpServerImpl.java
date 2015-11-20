@@ -4,30 +4,40 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.time.Duration;
-import java.util.AbstractMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import org.reactivestreams.Processor;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import com.divisors.projectcuttlefish.httpserver.api.HttpExchange;
 import com.divisors.projectcuttlefish.httpserver.api.HttpServer;
 import com.divisors.projectcuttlefish.httpserver.api.error.HttpError;
-import com.divisors.projectcuttlefish.httpserver.api.error.HttpErrorHandler;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequestHandler;
-import com.divisors.projectcuttlefish.httpserver.api.tcp.Connection;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpConnection;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
+
+import reactor.core.processor.RingBufferWorkProcessor;
+import reactor.rx.Stream;
+import reactor.rx.Streams;
+import reactor.rx.broadcast.Broadcaster;
 
 public class HttpServerImpl implements HttpServer {
 	protected final boolean isServerOrphan;
 	final TcpServer server;
 	protected final AtomicReference<WeakReference<Thread>> currentThread = new AtomicReference<>(new WeakReference<>(null));
 	protected final List<Entry<Predicate<HttpRequest>, HttpRequestHandler>> handlers = new LinkedList<>();
-	
+	Broadcaster<HttpExchange> onAccept;
+	Broadcaster<HttpRequest> onRequest;
+	AtomicBoolean running = new AtomicBoolean(false);
 	public HttpServerImpl(TcpServer server) {
 		this.server = server;
 		isServerOrphan=false;
@@ -36,20 +46,7 @@ public class HttpServerImpl implements HttpServer {
 		this.server = new TcpServerImpl(addr);
 		isServerOrphan = true;
 	}
-
-	/**
-	 * Register a handler
-	 */
-	@Override
-	public void registerHandler(Predicate<HttpRequest> requestFilter, HttpRequestHandler handler) {
-		handlers.add(new AbstractMap.SimpleImmutableEntry<>(requestFilter, handler));
-	}
-
-	@Override
-	public void deregisterHandler(HttpRequestHandler handler) {
-		handlers.removeIf((entry)->(entry.getValue().equals(handler)));
-	}
-
+	
 	@Override
 	public boolean isRunning() {
 		synchronized (this.currentThread) {
@@ -57,19 +54,17 @@ public class HttpServerImpl implements HttpServer {
 			return t!=null && t.isAlive();
 		}
 	}
-
-	@Override
-	public void registerErrorHandler(HttpErrorHandler handler) {
-		//TODO fin
-	}
+	
 	@Override
 	public void init() throws IOException {
 		server.init();
-		server.registerConnectionListener(this);
+		Processor<TcpConnection, TcpConnection> p=RingBufferWorkProcessor.create("Acceptor",32);
+		Stream<TcpConnection> s = Streams.wrap(p);
+		
 	}
 	@Override
 	public void destroy() throws IOException {
-		server.deregisterConnectionListener(this);
+		
 	}
 	@Override
 	public boolean stop() throws IOException, InterruptedException {
@@ -92,7 +87,6 @@ public class HttpServerImpl implements HttpServer {
 	@Override
 	public void run() {
 		server.run();
-		
 	}
 	@Override
 	public InetSocketAddress getAddress() {
@@ -103,10 +97,6 @@ public class HttpServerImpl implements HttpServer {
 		return false;
 	}
 	
-	@Override
-	public void accept(Connection connection, TcpServer server) {
-		
-	}
 	protected void onRequest(HttpRequest request, HttpExchange exchange) {
 		this.handlers.stream()
 			.filter((entry)->(entry.getKey().test(request)))
@@ -139,5 +129,30 @@ public class HttpServerImpl implements HttpServer {
 	public boolean shutdownNow() throws Exception {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	@Override
+	public void onSubscribe(Subscription s) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void onNext(TcpConnection t) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void onError(Throwable t) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void onComplete() {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void subscribe(Subscriber<? super HttpExchange> s) {
+		// TODO Auto-generated method stub
+		
 	}
 }

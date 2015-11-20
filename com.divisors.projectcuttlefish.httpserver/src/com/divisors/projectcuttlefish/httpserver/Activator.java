@@ -10,25 +10,24 @@ import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.impl.HttpServerFactoryImpl;
 import com.divisors.projectcuttlefish.httpserver.impl.TcpServerFactoryImpl;
 
-import reactor.Environment;
+import reactor.core.processor.ProcessorGroup;
+
 
 public class Activator implements BundleActivator {
 
 	ServiceRegistration<?> httpServerFactoryServiceRegistration;
 	ServiceRegistration<?> serverFactoryServiceRegistration;
 	TcpServer server;
-
+	public static ProcessorGroup<?> processor;
 	@Override
 	public void start(BundleContext context) throws Exception {
 		try {
 			System.out.println("Initializing: ProjectCuttlefish|HttpServer");
-			Environment.initialize();
 			serverFactoryServiceRegistration = context.registerService(TcpServerFactory.class.getName(), new TcpServerFactoryImpl(), null);
 			httpServerFactoryServiceRegistration = context.registerService(HttpServerFactory.class.getName(), new HttpServerFactoryImpl(), null);
 //			server = new ServerImpl(new InetSocketAddress("localhost", 8082));
 //			server.init();
 //			server.start(Executors.newSingleThreadExecutor());
-			
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -42,7 +41,6 @@ public class Activator implements BundleActivator {
 		serverFactoryServiceRegistration.unregister();
 		
 		try {
-			Environment.terminate();
 //			server.stop();
 //			server.destroy();
 		}catch (Exception e) {

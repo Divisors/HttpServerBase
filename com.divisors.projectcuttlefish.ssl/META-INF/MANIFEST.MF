@@ -11,4 +11,6 @@ Import-Package: com.divisors.projectcuttlefish.httpserver.api,
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.divisors.projectcuttlefish.ssl.api
-Require-Bundle: com.divisors.projectcuttlefish.httpserver
+Require-Bundle: com.divisors.projectcuttlefish.httpserver,
+ io.projectreactor.reactor-core;bundle-version="2.1.0",
+ org.reactivestreams.reactive-streams;bundle-version="1.0.0"

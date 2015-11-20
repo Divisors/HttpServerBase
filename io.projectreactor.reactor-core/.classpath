@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry exported="true" kind="lib" path="reactor-core-2.1.0.BUILD-SNAPSHOT.jar" sourcepath="/com.divisors.projectcuttlefish.httpserver/lib/src/reactor-core-2.1.0.BUILD-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/com.divisors.projectcuttlefish.httpserver/lib/doc/reactor-core-2.1.0.BUILD-SNAPSHOT-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
