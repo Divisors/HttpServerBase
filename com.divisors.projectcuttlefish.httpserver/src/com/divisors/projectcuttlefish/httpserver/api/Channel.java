@@ -2,7 +2,7 @@ package com.divisors.projectcuttlefish.httpserver.api;
 
 import reactor.fn.Consumer;
 
-public interface Channel<IN,OUT> {
+public interface Channel<IN,OUT> extends AutoCloseable {
 	/**
 	 * 
 	 * @param data
@@ -21,4 +21,7 @@ public interface Channel<IN,OUT> {
 	 * @return new channel
 	 */
 	<X,Y> Channel<X,Y> map(Codec<IN,X,OUT,Y> codec);
+	
+	boolean isOpen();
+	
 }

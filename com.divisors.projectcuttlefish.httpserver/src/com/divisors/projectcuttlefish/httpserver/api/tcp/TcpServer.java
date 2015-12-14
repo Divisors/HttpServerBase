@@ -1,7 +1,7 @@
 package com.divisors.projectcuttlefish.httpserver.api.tcp;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.time.Duration;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -18,7 +18,7 @@ public interface TcpServer {
 		return this.start((x)->{});
 	}
 	
-	InetSocketAddress getAddress();
+	SocketAddress getAddress();
 	
 	boolean isRunning();
 	

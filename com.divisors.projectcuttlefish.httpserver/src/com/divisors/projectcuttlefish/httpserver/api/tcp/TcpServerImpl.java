@@ -4,6 +4,8 @@ import static reactor.bus.selector.Selectors.$;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -11,18 +13,22 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import org.omg.CORBA.portable.InputStream;
 import org.reactivestreams.Processor;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+import reactor.io.buffer.Buffer;
 
 public class TcpServerImpl implements TcpServer, Runnable {
 	protected EventBus bus;
+	protected final ConcurrentHashMap<SocketChannel, TcpChannelImpl> channelMap = new ConcurrentHashMap<>();
 	protected final Selector selector;
 	/**
 	 * Server socket
@@ -31,13 +37,18 @@ public class TcpServerImpl implements TcpServer, Runnable {
 	/**
 	 * Address to connect to
 	 */
-	protected final InetSocketAddress addr;
+	protected final SocketAddress addr;
 	/**
 	 * E
 	 */
 	protected ExecutorService executor;
 	protected final AtomicBoolean running = new AtomicBoolean(false);
-	public TcpServerImpl(InetSocketAddress addr) throws IOException {
+	
+	
+	public TcpServerImpl(int port) throws IOException {
+		this(new InetSocketAddress(port));
+	}
+	public TcpServerImpl(SocketAddress addr) throws IOException {
 		this.addr = addr;
 		selector = Selector.open();
 		server = ServerSocketChannel.open();
@@ -50,6 +61,13 @@ public class TcpServerImpl implements TcpServer, Runnable {
 		initializer.accept(this);
 		return this.start();
 	}
+	public TcpServerImpl start() {
+		if (executor == null)
+			run();
+		else
+			executor.submit(this);
+		return this;
+	}
 	public TcpServerImpl dispatchOn(Processor<Event<?>, Event<?>> p) {
 		this.bus = EventBus.create(p);
 		return this;
@@ -59,16 +77,9 @@ public class TcpServerImpl implements TcpServer, Runnable {
 			this.executor = executor;
 		return this;
 	}
-	public TcpServerImpl start() {
-		if (executor == null)
-			run();
-		else
-			executor.submit(this);
-		return this;
-	}
 	
 	@Override
-	public InetSocketAddress getAddress() {
+	public SocketAddress getAddress() {
 		return addr;
 	}
 
@@ -103,45 +114,65 @@ public class TcpServerImpl implements TcpServer, Runnable {
 	public void run() {
 		if (!running.weakCompareAndSet(false, true))
 			throw new IllegalStateException("Was already running!");
-		while (true) {
-			try {
-				int nKeys = selector.select();
-				if (nKeys > 0) {
-					Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
-					while (keyIterator.hasNext()) {
-						SelectionKey key = keyIterator.next();
-						keyIterator.remove();
-						if (!key.isValid())
-							continue;
-						
-						if (key.isAcceptable()) {
-							this.accept(key);
-						} else {
-							if (key.isReadable())
-								this.read(key);
-							if (key.isWritable())
-								this.write(key);
+		try {
+			while (true) {
+				try {
+					int nKeys = selector.select();
+					if (nKeys > 0) {
+						Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
+						while (keyIterator.hasNext()) {
+							SelectionKey key = keyIterator.next();
+							keyIterator.remove();
+							if (!key.isValid())
+								continue;
+							
+							if (key.isAcceptable()) {
+								this.accept(key);
+							} else {
+								if (key.isReadable())
+									this.read(key);
+								if (key.isWritable())
+									this.write(key);
+							}
 						}
 					}
+				} catch (IOException e) {
+					e.printStackTrace();
+					return;
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				return;
 			}
+		} finally {
+			if (!running.weakCompareAndSet(true, false))
+				throw new IllegalStateException("...I'm not even sure what caused this...");
 		}
 	}
+	/**
+	 * Connect to a socket
+	 * @param key
+	 * @throws IOException
+	 */
 	protected void accept(SelectionKey key) throws IOException {
-		SocketChannel channel = server.accept();
-		channel.configureBlocking(false);
-		channel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
-		channel.setOption(StandardSocketOptions.TCP_NODELAY, true);
-		channel.register(selector, SelectionKey.OP_READ, null);
-		bus.notify("connect",Event.wrap(null));
+		SocketChannel socket = server.accept();
+		socket.configureBlocking(false);
+		socket.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
+		socket.setOption(StandardSocketOptions.TCP_NODELAY, true);
+		socket.register(selector, SelectionKey.OP_READ, null);
+		TcpChannelImpl channel = new TcpChannelImpl(this, socket);
+		channelMap.put(socket, channel);
+		bus.notify("connect",Event.<TcpChannel>wrap(channel));
 		System.out.println("Connected to "+channel.getRemoteAddress().toString());
 	}
-	protected void read(SelectionKey key) {
+	protected void read(SelectionKey key) throws IOException {
 		System.out.println("Reading...");
-		bus.notify("read",Event.wrap(key));
+		SocketChannel socket = (SocketChannel) key.channel();
+		Buffer buffer = readSocket(socket);
+		TcpChannelImpl channel = channelMap.get(socket);
+		bus.notify("read.chan"+channel.getConnectionID(), Event.wrap(key));
+	}
+	protected Buffer readSocket(SocketChannel socket) throws IOException {
+		
+		socket.read(buf.byteBuffer());
+		return buf;
 	}
 	protected void write(SelectionKey key) {
 		bus.notify("write",Event.wrap(key));

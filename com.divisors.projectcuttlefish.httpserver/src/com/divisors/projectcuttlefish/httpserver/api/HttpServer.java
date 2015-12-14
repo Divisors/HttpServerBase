@@ -6,9 +6,10 @@ import java.time.Duration;
 
 import org.reactivestreams.Processor;
 
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpChannel;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpConnection;
 
-public interface HttpServer extends RunnableService, Processor<TcpConnection, HttpExchange> {
+public interface HttpServer extends RunnableService, Processor<TcpChannel, HttpExchange> {
 	
 	public boolean stop() throws IOException, InterruptedException;
 	public boolean stop(Duration timeout) throws IOException, InterruptedException;
