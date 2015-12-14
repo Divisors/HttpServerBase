@@ -1,14 +1,16 @@
 package com.divisors.projectcuttlefish.httpserver.api.tcp;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
-@FunctionalInterface
-public interface TcpServerFactory {
-	default TcpServer createServer(int port) {
+public final class TcpServerFactory {
+	public static TcpServer createServer(int port) throws IOException {
 		return createServer(new InetSocketAddress(port));
 	}
-	default TcpServer createServer(String host, int port) {
+	public static  TcpServer createServer(String host, int port) throws IOException {
 		return createServer(new InetSocketAddress(host, port));
 	}
-	TcpServer createServer(InetSocketAddress addr);
+	public static TcpServer createServer(InetSocketAddress addr) throws IOException {
+		return new TcpServerImpl(addr);
+	}
 }

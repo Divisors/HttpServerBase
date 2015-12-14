@@ -12,7 +12,7 @@ Export-Package: reactor;version="2.1.0.BUILD-SNAPSHOT";
    reactor.fn,
    reactor.fn.timer",
  reactor.core.error;version="2.1.0.BUILD-SNAPSHOT";uses:="org.reactivestreams",
- reactor.core.processor,
+ reactor.core.processor;version="2.1.0.BUILD-SNAPSHOT",
  reactor.core.processor.rb;version="2.1.0.BUILD-SNAPSHOT";
   uses:="org.reactivestreams,
    reactor.core.processor.rb.disruptor,
@@ -43,7 +43,7 @@ Import-Package: javax.annotation,
  org.slf4j;version="[1.5.4,2)",
  rx;version="[1.0,2)",
  rx.internal.util;version="[1.0,2)",
- sun.misc
+ sun.misc;resolution:=optional
 Tool: Bnd-2.1.0.20130426-122213
 Created-By: 1.8.0 (Oracle Corporation)
 Bnd-LastModified: 1446764092340

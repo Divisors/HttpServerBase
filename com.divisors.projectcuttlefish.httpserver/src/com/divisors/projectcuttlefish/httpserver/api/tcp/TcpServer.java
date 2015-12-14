@@ -3,41 +3,29 @@ package com.divisors.projectcuttlefish.httpserver.api.tcp;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
-
-import com.divisors.projectcuttlefish.httpserver.api.RunnableService;
+import java.util.function.Consumer;
 
 /**
  * Generic server interface.
  * @author mailmindlin
  *
  */
-public interface TcpServer extends RunnableService {
-	@Override
-	void init() throws IOException;
+public interface TcpServer {
 	
-	@Override
-	void destroy() throws IOException;
-	
-	@Override
-	void start() throws IOException, IllegalStateException;
-	@Override
-	void start(ExecutorService executor) throws IOException, IllegalStateException;
-	
-	@Override
-	void run();
-	
-	public boolean stop() throws IOException, InterruptedException;
-	public boolean stop(Duration timeout) throws IOException, InterruptedException;
+	TcpServer start(Consumer<? super TcpServer> initializer) throws IOException, IllegalStateException;
+	default TcpServer start() throws IOException, IllegalStateException {
+		return this.start((x)->{});
+	}
 	
 	InetSocketAddress getAddress();
 	
 	boolean isRunning();
 	
-	void registerConnectionListener(BiConsumer<Connection, TcpServer> handler);
-	void deregisterConnectionListener(BiConsumer<Connection, TcpServer> handler);
-	
 	boolean isSSL();
-
+	
+	TcpServer onConnect(BiConsumer<TcpServer, TcpChannel> handler);
+	
+	public boolean stop() throws IOException, InterruptedException;
+	public boolean stop(Duration timeout) throws IOException, InterruptedException;
 }

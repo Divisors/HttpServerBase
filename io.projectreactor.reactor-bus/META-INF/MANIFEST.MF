@@ -44,11 +44,6 @@ Import-Package: com.fasterxml.jackson.core;version="[2.5,3)";resolution:=optiona
  com.gs.collections.api.list,
  com.gs.collections.impl.list.mutable,
  com.gs.collections.impl.map.mutable,
- com.jayway.jsonpath;version="[2.0,3)";resolution:=optional,
- com.jayway.jsonpath.internal;version="[2.0,3)";resolution:=optional,
- com.jayway.jsonpath.spi;resolution:=optional,
- com.jayway.jsonpath.spi.json;version="[2.0,3)",
- com.jayway.jsonpath.spi.mapper;version="[2.0,3)",
  javax.annotation,
  org.reactivestreams;version="[1.0,2)",
  org.slf4j;version="[1.7,2)",
@@ -61,8 +56,7 @@ Import-Package: com.fasterxml.jackson.core;version="[2.5,3)";resolution:=optiona
  reactor.fn;version="[2.1,3)",
  reactor.fn.timer;version="[2.1,3)",
  reactor.fn.tuple;version="[2.1,3)",
- reactor.io.buffer;version="[2.1,3)",
- reactor.jarjar.jsr166e
+ reactor.io.buffer;version="[2.1,3)"
 Tool: Bnd-2.1.0.20130426-122213
 Created-By: 1.8.0 (Oracle Corporation)
 Bnd-LastModified: 1446764207345

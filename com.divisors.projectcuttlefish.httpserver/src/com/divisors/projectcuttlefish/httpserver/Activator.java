@@ -1,33 +1,31 @@
 package com.divisors.projectcuttlefish.httpserver;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.divisors.projectcuttlefish.httpserver.api.HttpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
-import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
-import com.divisors.projectcuttlefish.httpserver.impl.HttpServerFactoryImpl;
-import com.divisors.projectcuttlefish.httpserver.impl.TcpServerFactoryImpl;
+import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
 
 import reactor.core.processor.ProcessorGroup;
+import reactor.core.processor.RingBufferProcessor;
 
 
 public class Activator implements BundleActivator {
 
 	ServiceRegistration<?> httpServerFactoryServiceRegistration;
 	ServiceRegistration<?> serverFactoryServiceRegistration;
-	TcpServer server;
+	TcpServer tcp;
 	public static ProcessorGroup<?> processor;
 	@Override
 	public void start(BundleContext context) throws Exception {
 		try {
 			System.out.println("Initializing: ProjectCuttlefish|HttpServer");
-			serverFactoryServiceRegistration = context.registerService(TcpServerFactory.class.getName(), new TcpServerFactoryImpl(), null);
-			httpServerFactoryServiceRegistration = context.registerService(HttpServerFactory.class.getName(), new HttpServerFactoryImpl(), null);
-//			server = new ServerImpl(new InetSocketAddress("localhost", 8082));
-//			server.init();
-//			server.start(Executors.newSingleThreadExecutor());
+			tcp = new TcpServerImpl(new InetSocketAddress(8080))
+					.start(server->((TcpServerImpl)server).dispatchOn(RingBufferProcessor.create("tcpserver",32)).runOn(Executors.newCachedThreadPool()));
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -37,12 +35,8 @@ public class Activator implements BundleActivator {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		System.out.println("Goodbye!");
-		httpServerFactoryServiceRegistration.unregister();
-		serverFactoryServiceRegistration.unregister();
-		
 		try {
-//			server.stop();
-//			server.destroy();
+			tcp.stop();
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;
