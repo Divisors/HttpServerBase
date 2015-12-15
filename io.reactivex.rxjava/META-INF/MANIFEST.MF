@@ -26,7 +26,7 @@ Build-Java-Version: 1.7.0_65
 Build-Number: 18
 Built-By: jenkins
 Bundle-RequiredExecutionEnvironment: J2SE-1.8
-X-Compile-Target-JDK: 1.6
+X-Compile-Target-JDK: 1.8
 Bundle-DocURL: https://github.com/ReactiveX/RxJava
 Export-Package: rx;version="1.0.2",
  rx.annotations;version="1.0.2",

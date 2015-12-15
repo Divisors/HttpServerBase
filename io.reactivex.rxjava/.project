@@ -31,11 +31,4 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>rxjava-1.0.2.jar</name>
-			<type>1</type>
-			<location>C:/Users/wfeehery/Documents/GitHub/HttpServerBase/com.divisors.projectcuttlefish.httpserver/lib/rxjava-1.0.2.jar</location>
-		</link>
-	</linkedResources>
 </projectDescription>

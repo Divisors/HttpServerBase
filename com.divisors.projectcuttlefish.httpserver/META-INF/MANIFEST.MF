@@ -12,12 +12,15 @@ Import-Package: javax.servlet.annotation;version="3.1.0",
  org.slf4j;version="1.7.2"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.divisors.projectcuttlefish.httpserver.api;uses:="com.divisors.projectcuttlefish.httpserver.api.error,com.divisors.projectcuttlefish.httpserver.api.request,com.divisors.projectcuttlefish.httpserver.api.response",
+ com.divisors.projectcuttlefish.httpserver.api.compression,
  com.divisors.projectcuttlefish.httpserver.api.error,
  com.divisors.projectcuttlefish.httpserver.api.request;uses:="com.divisors.projectcuttlefish.httpserver.api",
  com.divisors.projectcuttlefish.httpserver.api.response;uses:="com.divisors.projectcuttlefish.httpserver.api",
- com.divisors.projectcuttlefish.httpserver.api.websocket
+ com.divisors.projectcuttlefish.httpserver.api.tcp,
+ com.divisors.projectcuttlefish.httpserver.api.websocket,
+ com.divisors.projectcuttlefish.httpserver.impl;x-friends:="com.divisors.projectcuttlefish.ssl"
 Bundle-ClassPath: lib/javatuples-1.2.jar,
  .
 Require-Bundle: io.projectreactor.reactor-stream;bundle-version="[2.1.0,3.0.0)",
  io.projectreactor.reactor-bus;bundle-version="[2.1.0,3.0.0)",
- io.projectreactor.reactor-core;bundle-version="2.1.0"
+ io.projectreactor.reactor-core;bundle-version="[2.1.0,3.0.0)"

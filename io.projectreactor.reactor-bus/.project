@@ -25,11 +25,4 @@
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>reactor-bus-2.1.0.BUILD-SNAPSHOT.jar</name>
-			<type>1</type>
-			<location>C:/Users/wfeehery/Documents/GitHub/HttpServerBase/com.divisors.projectcuttlefish.httpserver/lib/reactor-bus-2.1.0.BUILD-SNAPSHOT.jar</location>
-		</link>
-	</linkedResources>
 </projectDescription>

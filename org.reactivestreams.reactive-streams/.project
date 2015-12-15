@@ -25,11 +25,4 @@
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>reactive-streams-1.0.0.jar</name>
-			<type>1</type>
-			<location>C:/Users/wfeehery/Documents/GitHub/HttpServerBase/com.divisors.projectcuttlefish.httpserver/lib/reactive-streams-1.0.0.jar</location>
-		</link>
-	</linkedResources>
 </projectDescription>
