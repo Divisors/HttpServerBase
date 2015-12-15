@@ -2,13 +2,12 @@ package com.divisors.projectcuttlefish.httpserver.api.tcp;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.nio.Buffer;
 import java.nio.channels.SocketChannel;
+import java.util.function.Consumer;
 
 import com.divisors.projectcuttlefish.httpserver.api.Channel;
 import com.divisors.projectcuttlefish.httpserver.api.Codec;
-
-import reactor.fn.Consumer;
-import reactor.io.buffer.Buffer;
 
 public class TcpChannelImpl implements TcpChannel {
 	protected final SocketChannel socket;
