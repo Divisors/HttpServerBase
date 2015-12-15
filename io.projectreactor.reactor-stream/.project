@@ -31,11 +31,4 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>reactor-stream-2.1.0.BUILD-SNAPSHOT.jar</name>
-			<type>1</type>
-			<location>C:/Users/wfeehery/Documents/GitHub/HttpServerBase/com.divisors.projectcuttlefish.httpserver/lib/reactor-stream-2.1.0.BUILD-SNAPSHOT.jar</location>
-		</link>
-	</linkedResources>
 </projectDescription>
