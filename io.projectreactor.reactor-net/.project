@@ -31,4 +31,11 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>reactor-net-2.1.0.BUILD-SNAPSHOT.jar</name>
+			<type>1</type>
+			<location>lib/reactor-net-2.1.0.BUILD-SNAPSHOT.jar</location>
+		</link>
+	</linkedResources>
 </projectDescription>

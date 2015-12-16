@@ -5,6 +5,8 @@ import java.net.SocketAddress;
 
 import com.divisors.projectcuttlefish.httpserver.api.Channel;
 
+import reactor.io.buffer.Buffer;
+
 /**
  * A connection between a server and a client. Methods are (mostly) non-blocking,
  * and queue-based.

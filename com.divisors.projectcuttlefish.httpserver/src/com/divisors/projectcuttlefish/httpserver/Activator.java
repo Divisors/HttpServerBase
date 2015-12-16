@@ -10,7 +10,6 @@ import org.osgi.framework.ServiceRegistration;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
 
-import reactor.core.processor.ProcessorGroup;
 import reactor.core.processor.RingBufferProcessor;
 
 
@@ -19,13 +18,12 @@ public class Activator implements BundleActivator {
 	ServiceRegistration<?> httpServerFactoryServiceRegistration;
 	ServiceRegistration<?> serverFactoryServiceRegistration;
 	TcpServer tcp;
-	public static ProcessorGroup<?> processor;
 	@Override
 	public void start(BundleContext context) throws Exception {
 		try {
 			System.out.println("Initializing: ProjectCuttlefish|HttpServer");
-			tcp = new TcpServerImpl(new InetSocketAddress(8080))
-					.start(server->((TcpServerImpl)server).dispatchOn(RingBufferProcessor.create("tcpserver",32)).runOn(Executors.newCachedThreadPool()));
+			tcp = new TcpServerImpl(new InetSocketAddress(8085))
+					.start(server->((TcpServerImpl)server).dispatchOn(RingBufferProcessor.create("test1", 32)).runOn(Executors.newCachedThreadPool()));
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;

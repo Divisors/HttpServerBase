@@ -3,8 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: reactor-stream
 Bundle-SymbolicName: io.projectreactor.reactor-stream
 Bundle-Version: 2.1.0.BUILD-SNAPSHOT
-Bundle-ClassPath: reactor-stream-2.1.0.BUILD-SNAPSHOT.jar
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ClassPath: lib/reactor-stream-2.1.0.BUILD-SNAPSHOT.jar,
+ reactor-stream-2.1.0.BUILD-SNAPSHOT.jar
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bnd-LastModified: 1446761225625
 Import-Package: javax.annotation,
  org.reactivestreams;version="[1.0,2)",

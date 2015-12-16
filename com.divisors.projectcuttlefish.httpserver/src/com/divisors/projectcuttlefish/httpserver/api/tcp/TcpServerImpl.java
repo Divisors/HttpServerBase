@@ -4,7 +4,6 @@ import static reactor.bus.selector.Selectors.$;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.SelectionKey;
@@ -19,7 +18,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.omg.CORBA.portable.InputStream;
 import org.reactivestreams.Processor;
 
 import reactor.bus.Event;
@@ -50,6 +48,7 @@ public class TcpServerImpl implements TcpServer, Runnable {
 	}
 	public TcpServerImpl(SocketAddress addr) throws IOException {
 		this.addr = addr;
+		System.out.println("Binding to " + addr.toString());
 		selector = Selector.open();
 		server = ServerSocketChannel.open();
 		server.socket().bind(addr);
@@ -102,14 +101,16 @@ public class TcpServerImpl implements TcpServer, Runnable {
 
 	@Override
 	public boolean stop() throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		return false;
+		this.server.close();
+		this.selector.close();
+		System.out.println("Bye!");
+		this.executor.shutdown();
+		return true;
 	}
 
 	@Override
 	public boolean stop(Duration timeout) throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		return false;
+		return stop();
 	}
 	public void run() {
 		if (!running.weakCompareAndSet(false, true))
@@ -170,9 +171,7 @@ public class TcpServerImpl implements TcpServer, Runnable {
 		bus.notify("read.chan"+channel.getConnectionID(), Event.wrap(key));
 	}
 	protected Buffer readSocket(SocketChannel socket) throws IOException {
-		
-		socket.read(buf.byteBuffer());
-		return buf;
+		return null; //TODO finish
 	}
 	protected void write(SelectionKey key) {
 		bus.notify("write",Event.wrap(key));

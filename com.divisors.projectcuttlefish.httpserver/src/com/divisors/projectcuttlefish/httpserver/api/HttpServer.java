@@ -4,12 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 
-import org.reactivestreams.Processor;
-
-import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpChannel;
-import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpConnection;
-
-public interface HttpServer extends RunnableService, Processor<TcpChannel, HttpExchange> {
+public interface HttpServer extends RunnableService {
 	
 	public boolean stop() throws IOException, InterruptedException;
 	public boolean stop(Duration timeout) throws IOException, InterruptedException;

@@ -1,6 +1,6 @@
 package com.divisors.projectcuttlefish.httpserver.api;
 
-import reactor.fn.Consumer;
+import java.util.function.Consumer;
 
 public interface Channel<IN,OUT> extends AutoCloseable {
 	/**

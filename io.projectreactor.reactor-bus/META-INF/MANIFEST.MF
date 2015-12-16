@@ -3,7 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: reactor-bus
 Bundle-SymbolicName: io.projectreactor.reactor-bus
 Bundle-Version: 2.1.0.BUILD-SNAPSHOT
-Bundle-ClassPath: reactor-bus-2.1.0.BUILD-SNAPSHOT.jar
+Bundle-ClassPath: lib/json-path-2.1.0.jar,
+ lib/reactor-bus-2.1.0.BUILD-SNAPSHOT.jar,
+ reactor-bus-2.1.0.BUILD-SNAPSHOT.jar
 Export-Package: reactor.bus;version="2.1.0.BUILD-SNAPSHOT";
   uses:="javax.annotation,
    org.reactivestreams,
@@ -60,3 +62,4 @@ Import-Package: com.fasterxml.jackson.core;version="[2.5,3)";resolution:=optiona
 Tool: Bnd-2.1.0.20130426-122213
 Created-By: 1.8.0 (Oracle Corporation)
 Bnd-LastModified: 1446764207345
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

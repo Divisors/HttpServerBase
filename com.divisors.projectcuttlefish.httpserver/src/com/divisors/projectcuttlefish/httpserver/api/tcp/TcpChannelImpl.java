@@ -2,7 +2,6 @@ package com.divisors.projectcuttlefish.httpserver.api.tcp;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.Buffer;
 import java.nio.channels.SocketChannel;
 import java.util.function.Consumer;
 
@@ -15,22 +14,6 @@ public class TcpChannelImpl implements TcpChannel {
 	public TcpChannelImpl(TcpServerImpl server, SocketChannel socket) {
 		this.server = server;
 		this.socket = socket;
-	}
-	@Override
-	public Channel<Buffer, Buffer> write(Buffer data) {
-		return null;
-	}
-
-	@Override
-	public Channel<Buffer, Buffer> onRead(Consumer<Buffer> handler) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public <X, Y> Channel<X, Y> map(Codec<Buffer, X, Buffer, Y> codec) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -64,6 +47,22 @@ public class TcpChannelImpl implements TcpChannel {
 	@Override
 	public SocketAddress getRemoteAddress() throws IOException {
 		return socket.getRemoteAddress();
+	}
+	@Override
+	public Channel<reactor.io.buffer.Buffer, reactor.io.buffer.Buffer> write(reactor.io.buffer.Buffer data) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public Channel<reactor.io.buffer.Buffer, reactor.io.buffer.Buffer> onRead(
+			Consumer<reactor.io.buffer.Buffer> handler) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public <X, Y> Channel<X, Y> map(Codec<reactor.io.buffer.Buffer, X, reactor.io.buffer.Buffer, Y> codec) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
