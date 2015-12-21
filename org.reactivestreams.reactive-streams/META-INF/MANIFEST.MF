@@ -3,7 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: reactive-streams
 Bundle-SymbolicName: org.reactivestreams.reactive-streams
 Bundle-Version: 1.0.0.release
-Bundle-ClassPath: reactive-streams-1.0.0.jar
+Bundle-ClassPath: lib/reactive-streams-1.0.0.jar,
+ reactive-streams-1.0.0.jar
 Bundle-Vendor: Reactive Streams SIG
 Created-By: 1.8.0_31 (Oracle Corporation)
 Tool: Bnd-2.1.0.20130426-122213

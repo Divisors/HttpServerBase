@@ -2,9 +2,11 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/javatuples-1.2.jar" sourcepath="lib/javatuples-1.2-sources.jar">
 		<attributes>
-			<attribute name="owner.project.facets" value="java"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/com.divisors.projectcuttlefish.httpserver/lib/javatuples-1.2-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>

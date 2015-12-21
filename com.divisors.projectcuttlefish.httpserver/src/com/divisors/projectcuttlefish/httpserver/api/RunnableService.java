@@ -1,12 +1,11 @@
 package com.divisors.projectcuttlefish.httpserver.api;
 
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
 /**
  * Describes a service that is 
- * @author Liam
- *
+ * @author mailmindlin
  */
 public interface RunnableService extends Runnable {
 	/**
@@ -25,7 +24,7 @@ public interface RunnableService extends Runnable {
 	 * @throws UnsupportedOperationException if this service cannot be started in another thread
 	 */
 	void start() throws Exception;
-	void start(ExecutorService executor) throws Exception;
+	void start(Consumer<? extends RunnableService> initiator) throws Exception;
 	/**
 	 * Cease operation of this service. If this service accepts any input (e.g., a webserver)
 	 * it SHOULD reject any input after this method is called. The service SHOULD attempt a

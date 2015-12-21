@@ -31,4 +31,11 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>rxjava-1.1.0.jar</name>
+			<type>1</type>
+			<location>lib/rxjava-1.1.0.jar</location>
+		</link>
+	</linkedResources>
 </projectDescription>

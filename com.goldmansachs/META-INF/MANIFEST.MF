@@ -166,3 +166,6 @@ Export-Package: com.gs.collections.api;version="7.0.0",
  com.gs.collections.impl.utility.internal;version="7.0.0",
  com.gs.collections.impl.utility.internal.primitive;version="7.0.0",
  com.gs.collections.impl.utility.primitive;version="7.0.0"
+Bundle-ClassPath: lib/gs-collections-7.0.0.jar,
+ lib/gs-collections-api-7.0.0.jar,
+ .

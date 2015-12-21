@@ -8,6 +8,11 @@ import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
 import com.divisors.projectcuttlefish.httpserver.api.HttpHeaderValue;
 import com.divisors.projectcuttlefish.httpserver.api.SeekableInputStream;
 
+/**
+ * Immutable HTTP response
+ * @author mailmindlin
+ * @see HttpResponse
+ */
 public class ImmutableHttpResponse implements HttpResponse {
 	HttpResponseLine line;
 	List<HttpHeader> headers;

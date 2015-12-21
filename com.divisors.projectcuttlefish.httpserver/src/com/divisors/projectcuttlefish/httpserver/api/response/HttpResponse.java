@@ -6,6 +6,12 @@ import java.util.List;
 import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
 import com.divisors.projectcuttlefish.httpserver.api.HttpHeaderValue;
 
+/**
+ * Represents a HTTP response
+ * @author mailmindlin
+ * @see HttpResponseLine
+ * @see ImmutableHttpResponse
+ */
 public interface HttpResponse {
 	HttpResponseLine getResponseLine();
 	

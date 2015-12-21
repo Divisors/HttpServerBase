@@ -35,7 +35,7 @@
 		<link>
 			<name>reactor-core-2.1.0.BUILD-SNAPSHOT.jar</name>
 			<type>1</type>
-			<location>lib/reactor-core-2.1.0.BUILD-SNAPSHOT.jar</location>
+			<locationURI>lib/reactor-core-2.1.0.BUILD-SNAPSHOT.jar</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

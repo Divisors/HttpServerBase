@@ -4,40 +4,9 @@ Bundle-Name: reactor-bus
 Bundle-SymbolicName: io.projectreactor.reactor-bus
 Bundle-Version: 2.1.0.BUILD-SNAPSHOT
 Bundle-ClassPath: lib/json-path-2.1.0.jar,
- lib/reactor-bus-2.1.0.BUILD-SNAPSHOT.jar,
- reactor-bus-2.1.0.BUILD-SNAPSHOT.jar
-Export-Package: reactor.bus;version="2.1.0.BUILD-SNAPSHOT";
-  uses:="javax.annotation,
-   org.reactivestreams,
-   reactor.bus.registry,
-   reactor.bus.routing,
-   reactor.bus.selector,
-   reactor.bus.spec,
-   reactor.core.support,
-   reactor.fn,
-   reactor.fn.tuple",
- reactor.bus.filter;version="2.1.0.BUILD-SNAPSHOT",
- reactor.bus.publisher;version="2.1.0.BUILD-SNAPSHOT";
-  uses:="javax.annotation,
-   org.reactivestreams,
-   reactor.bus,
-   reactor.bus.selector",
- reactor.bus.registry;version="2.1.0.BUILD-SNAPSHOT";uses:="reactor.bus.selector,reactor.fn",
- reactor.bus.routing;version="2.1.0.BUILD-SNAPSHOT";
-  uses:="reactor.bus,
-   reactor.bus.filter,
-   reactor.bus.registry,
-   reactor.fn",
- reactor.bus.selector;version="2.1.0.BUILD-SNAPSHOT";uses:="com.fasterxml.jackson.databind,com.jayway.jsonpath,reactor.fn",
- reactor.bus.spec;version="2.1.0.BUILD-SNAPSHOT";
-  uses:="org.reactivestreams,
-   reactor.bus,
-   reactor.bus.filter,
-   reactor.bus.registry,
-   reactor.bus.routing,
-   reactor.fn",
- reactor.bus.support;version="2.1.0.BUILD-SNAPSHOT";uses:="javax.annotation,reactor.bus,reactor.fn",
- reactor.bus.timer;version="2.1.0.BUILD-SNAPSHOT";uses:="reactor.bus.registry,reactor.fn,reactor.fn.timer"
+ lib/reactor-bus-2.1.0.BUILD-SNAPSHOT.jar
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bnd-LastModified: 1446764207345
 Import-Package: com.fasterxml.jackson.core;version="[2.5,3)";resolution:=optional,
  com.fasterxml.jackson.databind;version="[2.5,3)";resolution:=optional,
  com.fasterxml.jackson.databind.node;version="[2.5,3)";resolution:=optional,
@@ -59,7 +28,25 @@ Import-Package: com.fasterxml.jackson.core;version="[2.5,3)";resolution:=optiona
  reactor.fn.timer;version="[2.1,3)",
  reactor.fn.tuple;version="[2.1,3)",
  reactor.io.buffer;version="[2.1,3)"
-Tool: Bnd-2.1.0.20130426-122213
 Created-By: 1.8.0 (Oracle Corporation)
-Bnd-LastModified: 1446764207345
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Tool: Bnd-2.1.0.20130426-122213
+Export-Package: com.jayway.jsonpath;version="2.1.0",
+ com.jayway.jsonpath.internal;version="2.1.0",
+ com.jayway.jsonpath.internal.filter;version="2.1.0",
+ com.jayway.jsonpath.internal.function;version="2.1.0",
+ com.jayway.jsonpath.internal.function.numeric;version="2.1.0",
+ com.jayway.jsonpath.internal.path;version="2.1.0",
+ com.jayway.jsonpath.spi.cache;version="2.1.0",
+ com.jayway.jsonpath.spi.json;version="2.1.0",
+ com.jayway.jsonpath.spi.mapper;version="2.1.0",
+ reactor.bus;version="2.1.0",
+ reactor.bus.filter;version="2.1.0",
+ reactor.bus.publisher;version="2.1.0",
+ reactor.bus.registry;version="2.1.0",
+ reactor.bus.routing;version="2.1.0",
+ reactor.bus.selector;version="2.1.0",
+ reactor.bus.spec;version="2.1.0",
+ reactor.bus.support;version="2.1.0",
+ reactor.bus.timer;version="2.1.0",
+ reactor.jarjar.jsr166e;version="2.1.0",
+ reactor.jarjar.jsr166e.extra

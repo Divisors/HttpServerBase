@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: HttpServer
 Bundle-SymbolicName: com.divisors.projectcuttlefish.httpserver
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.0.1.alpha
 Bundle-ClassPath: lib/javatuples-1.2.jar,
  .
 Bundle-Activator: com.divisors.projectcuttlefish.httpserver.Activator
@@ -17,10 +17,16 @@ Export-Package: com.divisors.projectcuttlefish.httpserver,
  com.divisors.projectcuttlefish.httpserver.api.websocket
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Import-Package: com.google.common.eventbus,
+Import-Package: com.gs.collections.api.tuple;version="7.0.0",
  javax.servlet.annotation;version="3.1.0",
  org.osgi.framework;version="1.3.0",
- org.slf4j;version="1.7.2"
-Require-Bundle: io.projectreactor.reactor-core;bundle-version="[2.1.0,3.0.0)",
- io.projectreactor.reactor-bus;bundle-version="[2.1.0,3.0.0)",
- org.reactivestreams.reactive-streams;bundle-version="[1.0.0,2.0.0)"
+ org.reactivestreams;version="[1.0.0,2.0.0)",
+ org.slf4j;version="1.7.2",
+ reactor.bus,
+ reactor.bus.selector,
+ reactor.core.processor,
+ reactor.io.buffer
+Require-Bundle: io.reactivex.rxjava,
+ io.projectreactor.reactor-core,
+ org.junit,
+ io.projectreactor.reactor-bus

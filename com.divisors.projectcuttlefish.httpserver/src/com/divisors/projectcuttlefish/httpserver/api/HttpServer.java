@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 
-public interface HttpServer extends RunnableService {
+import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
+import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
+
+public interface HttpServer extends RunnableService, Server<HttpRequest, HttpResponse, HttpChannel> {
 	
 	public boolean stop() throws IOException, InterruptedException;
 	public boolean stop(Duration timeout) throws IOException, InterruptedException;
-	
-	
 	
 	InetSocketAddress getAddress();
 	/**
@@ -20,6 +21,4 @@ public interface HttpServer extends RunnableService {
 	default int getPort() {
 		return getAddress().getPort();
 	}
-	
-	boolean isSSL();  
 }

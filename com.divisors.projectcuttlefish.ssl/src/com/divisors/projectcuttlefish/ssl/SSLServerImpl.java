@@ -7,15 +7,13 @@ import java.net.Socket;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.divisors.projectcuttlefish.httpserver.impl.TcpServerImpl;
+public class SSLServerImpl extends com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl{
 
-public class SSLServerImpl extends TcpServerImpl{
-
-	public SSLServerImpl(int port) {
+	public SSLServerImpl(int port) throws IOException {
 		super(port);
 	}
 	
-	public SSLServerImpl(InetSocketAddress address) {
+	public SSLServerImpl(InetSocketAddress address) throws IOException {
 		super(address);
 	}
 

@@ -1,7 +1,14 @@
 package com.divisors.projectcuttlefish.httpserver.api;
 
-import java.util.function.Consumer;
+import reactor.fn.Consumer;
 
+/**
+ * Channel
+ * @author mailmindlin
+ *
+ * @param <IN> input type (type to receive)
+ * @param <OUT> output type (type to write)
+ */
 public interface Channel<IN,OUT> extends AutoCloseable {
 	/**
 	 * 
@@ -20,8 +27,12 @@ public interface Channel<IN,OUT> extends AutoCloseable {
 	 * @param codec codec to map with
 	 * @return new channel
 	 */
-	<X,Y> Channel<X,Y> map(Codec<IN,X,OUT,Y> codec);
+	<X,Y> Channel<X,Y> map(Codec<IN,OUT,X,Y> codec);
 	
+	/**
+	 * Whether this channel is currently open for I/O
+	 * @return flag
+	 */
 	boolean isOpen();
 	
 }
