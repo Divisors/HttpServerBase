@@ -1,7 +1,7 @@
 package com.divisors.projectcuttlefish.httpserver.api.tcp;
 
 import static reactor.bus.selector.Selectors.$;
-import static com.divisors.projectcuttlefish.httpserver.api.tcp.SubsetSelector.$t;
+//import static com.divisors.projectcuttlefish.httpserver.api.tcp.SubsetSelector.$t;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -128,21 +128,24 @@ public class TcpServerImpl implements TcpServer, Runnable {
 		try {
 			while (true) {
 				try {
+					System.out.println("Polling...");
 					int nKeys = selector.select();
 					if (nKeys > 0) {
+						System.out.println(""+nKeys+ " keys");
 						Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
 						while (keyIterator.hasNext()) {
 							SelectionKey key = keyIterator.next();
 							keyIterator.remove();
+							System.out.println(key.toString() + " | " + key.interestOps() + " |V" + key.isValid() + " |A" + key.isAcceptable() + " |R" + key.isReadable() + " |W" + key.isWritable() + " |C" + key.isConnectable());
 							if (!key.isValid())
 								continue;
 							
 							if (key.isAcceptable()) {
 								this.accept(key);
 							} else {
-								if (key.isReadable())
+								if (key.isValid() && key.isReadable())
 									this.read(key);
-								if (key.isWritable())
+								if (key.isValid() && key.isWritable())
 									this.write(key);
 							}
 						}
@@ -152,15 +155,17 @@ public class TcpServerImpl implements TcpServer, Runnable {
 					return;
 				}
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			if (!running.weakCompareAndSet(true, false))
 				throw new IllegalStateException("...I'm not even sure what caused this...");
 		}
 	}
 	/**
-	 * Connect to a socket
-	 * @param key
-	 * @throws IOException
+	 * Accept an incoming connection.
+	 * @param key selection key
+	 * @throws IOException if there was a problem setting it up
 	 */
 	protected void accept(SelectionKey key) throws IOException {
 		System.out.println("Accepting...");
@@ -172,14 +177,22 @@ public class TcpServerImpl implements TcpServer, Runnable {
 		long id = this.nextId.incrementAndGet();
 		TcpChannelImpl channel = new TcpChannelImpl(this, socket, id);
 		channelMap.put(id, channel);
-		socket.register(selector, SelectionKey.OP_READ, id);
 		
 		bus.notify("tcp.connect",Event.<TcpChannel>wrap(channel));
-		System.out.println("Connected to "+channel.getRemoteAddress().toString());
+		System.out.println("\tAccepted from "+channel.getRemoteAddress().toString());
+		System.out.println("\tID #"+id);
+		
+		socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, id);
+		System.out.println("\tDone Accepting");
 	}
+	/**
+	 * Read buffer of data from socket
+	 * @param key
+	 * @throws IOException
+	 */
 	protected void read(SelectionKey key) throws IOException {
-		System.out.println("188 | Reading...");
 		long id = (Long)key.attachment();
+		System.out.println("Reading #" + id + "...");
 		TcpChannelImpl channel = this.channelMap.get(id);
 		SocketChannel socket = (SocketChannel)key.channel();
 		
@@ -189,7 +202,7 @@ public class TcpServerImpl implements TcpServer, Runnable {
 		
 		if (read < 0) {
 			//close channel
-			System.out.println("199 | Closing channel...");
+			System.out.println("\tClosing channel...");
 			channel.close();
 			this.channelMap.remove(channel.getConnectionID());
 			return;
@@ -212,24 +225,35 @@ public class TcpServerImpl implements TcpServer, Runnable {
 		
 		//register socket with selector
 		try {
-			socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+			socket.register(selector, SelectionKey.OP_READ, id);
 		} catch (ClosedChannelException e) {
 			this.channelMap.remove(id);
+			channel.close();
 			e.printStackTrace();
 			return;
 		}
 	}
-	protected void write(SelectionKey key) {
-		System.out.println("Writing...");
-		long id = (Long)key.attachment();
+	protected void write(SelectionKey key) throws IOException {
+		Object attachment = key.attachment();
+		if (!key.isValid()) {
+			System.err.println("Invalid key"+attachment);
+			return;
+		}
+		long id = (Long)attachment;
+		System.out.println("Writing #" + id + "...");
+		
+		TcpChannelImpl channel = this.channelMap.get(id);
+		SocketChannel socket = (SocketChannel)key.channel();
+
+		channel.doWrite();
+		
 		try {
-			((SocketChannel)key.channel()).register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+			socket.register(selector, SelectionKey.OP_READ, id);
 		} catch (ClosedChannelException e) {
 			this.channelMap.remove(id);
+			channel.close();
 			e.printStackTrace();
 			return;
 		}
-		//TODO finish (or make it do... anything whatsoever)
-		bus.notify("tcp.write",Event.wrap(this.channelMap.get(id)));
 	}
 }

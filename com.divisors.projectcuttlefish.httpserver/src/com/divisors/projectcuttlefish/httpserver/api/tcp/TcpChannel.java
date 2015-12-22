@@ -22,6 +22,10 @@ public interface TcpChannel extends Channel<ByteBuffer, ByteBuffer> {
 	 * @return connection id
 	 */
 	long getConnectionID();
+	/**
+	 * Get parent server
+	 * @return parent
+	 */
 	TcpServer getServer();
 	/**
 	 * Get address of the other end of the socket
@@ -30,12 +34,16 @@ public interface TcpChannel extends Channel<ByteBuffer, ByteBuffer> {
 	 */
 	SocketAddress getRemoteAddress();
 	/**
-	 * Queue buffer for writing to the tcp socket
+	 * Queue buffer for writing to the tcp socket. Note that the data may not be writen to the socket
+	 * immediately, so if you were to call this method, and then immediately call {@link #close()}, the
+	 * socket may be closed before the bytes are finished being written. 
+	 * @return self
 	 */
 	@Override
 	TcpChannel write(ByteBuffer data);
 	/**
 	 * Add read handler
+	 * @return self
 	 */
 	@Override
 	TcpChannel onRead(Consumer<ByteBuffer> handler);

@@ -53,7 +53,6 @@ public class SubsetSelector implements Selector<Object>{
 			//if this empty (matching anything) or is a size of 1, and the entry is the same as the key
 			if (this.args.length == 0 || (this.args.length == 1 && this.args[0].equals(key)))
 				return true;
-			System.err.println("Key is not tuple: "+key.toString());
 			return false;
 		}
 		Tuple tupl = (Tuple) key;
