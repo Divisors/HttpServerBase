@@ -15,6 +15,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
+import com.divisors.projectcuttlefish.httpserver.util.ByteParsingUtils.ByteBufferTokenizer;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
 import reactor.core.processor.RingBufferProcessor;
@@ -55,6 +56,15 @@ public class Activator implements BundleActivator {
 								channel.onRead(data->{
 									//print out the data sent to this
 									System.out.println("Recieved request from " + channel.getRemoteAddress());
+									{
+										byte[] inBytes = data.array();
+										ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(new byte[]{'\r','\n'},inBytes.length);
+										tokenizer.put(inBytes);
+										ByteBuffer token;
+										while ((token = tokenizer.next()) != null)
+											System.out.println("TOKEN: "+FormatUtils.bytesToHex(token, true));
+									}
+									
 									String text = new String(data.array());
 									byte[] output = new StringBuilder(toWrite)
 											.append(text.getBytes().length * 4 + 17)

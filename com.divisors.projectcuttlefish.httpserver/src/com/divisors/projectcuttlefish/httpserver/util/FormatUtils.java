@@ -1,6 +1,8 @@
 package com.divisors.projectcuttlefish.httpserver.util;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
+
 
 public class FormatUtils {
 	/**
@@ -68,5 +70,10 @@ public class FormatUtils {
 			}
 			return bytesToHex(bytes);
 		}
+	}
+	public static String bytesToHex(ByteBuffer buf, boolean split) {
+		byte[] arr = new byte[buf.remaining()];
+		buf.get(arr);
+		return bytesToHex(arr, split, 0);
 	}
 }
