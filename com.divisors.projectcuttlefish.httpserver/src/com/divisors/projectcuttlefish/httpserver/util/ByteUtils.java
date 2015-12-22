@@ -2,7 +2,16 @@ package com.divisors.projectcuttlefish.httpserver.util;
 
 import java.nio.ByteBuffer;
 
-public class ByteParsingUtils {
+/**
+ * 
+ * @author mailmindlin
+ *
+ */
+public class ByteUtils {
+	/**
+	 * Lets you do stuff like {@link String#split(String)}, but with ByteBuffers
+	 * @author mailmindlin
+	 */
 	public static final class ByteBufferTokenizer {
 		public static final int DEFAULT_CAPACITY = 8196;
 		protected final byte[] token;
@@ -14,12 +23,12 @@ public class ByteParsingUtils {
 		public ByteBufferTokenizer(byte[] token, int capacity) {
 			this(token, ByteBuffer.allocate(capacity));
 		}
+		/**
+		 * 
+		 */
 		public ByteBufferTokenizer(byte[] token, ByteBuffer buffer) {
 			this.token = token;
 			this.buffer = buffer;
-		}
-		public int remaining() {
-			return -1;//TODO finish
 		}
 		public int available() {
 			return buffer.remaining();
@@ -63,7 +72,6 @@ public class ByteParsingUtils {
 		 */
 		public ByteBuffer next() {
 			synchronized (this.buffer) {
-				System.out.println("Offset " + offset);
 				ByteBuffer mirror = buffer.duplicate();
 				mirror.limit(mirror.position()).position(offset);
 				//TODO optimize for speed
@@ -93,11 +101,15 @@ public class ByteParsingUtils {
 		/**
 		 * Return a buffer containing whatever bytes have not yet been tokenized.
 		 */
-		public ByteBuffer scraps() {
-			System.out.println("Offset: "+offset);
+		public ByteBuffer remaining() {
 			ByteBuffer mirror = buffer.duplicate().asReadOnlyBuffer();
 			mirror.position(offset).limit(buffer.position());
 			return mirror;
 		}
+	}
+	public static byte[] toArray(ByteBuffer buffer) {
+		byte[] result = new byte[buffer.remaining()];
+		buffer.get(result);
+		return result;
 	}
 }

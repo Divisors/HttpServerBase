@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
-import com.divisors.projectcuttlefish.httpserver.util.ByteParsingUtils.ByteBufferTokenizer;
+import com.divisors.projectcuttlefish.httpserver.util.ByteUtils.ByteBufferTokenizer;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
 public class ByteBufferTokenizerTest {
@@ -18,7 +18,7 @@ public class ByteBufferTokenizerTest {
 		ByteBuffer result;
 		while ((result = tokenizer.next()) != null)
 			System.out.println(FormatUtils.bytesToHex(result, true));
-		System.out.println("Scraps: " + FormatUtils.bytesToHex(tokenizer.scraps(), true));
+		System.out.println("Scraps: " + FormatUtils.bytesToHex(tokenizer.remaining(), true));
 //		fail("Not yet implemented");
 	}
 

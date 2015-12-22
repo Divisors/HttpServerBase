@@ -37,5 +37,8 @@ public final class ImmutableHttpRequestLine implements HttpRequestLine {
 	public boolean isMutable() {
 		return false;
 	}
-
+	@Override
+	public String toString() {
+		return method + ' ' + path + ' ' + httpv;
+	}
 }

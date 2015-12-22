@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: HttpServer
 Bundle-SymbolicName: com.divisors.projectcuttlefish.httpserver
-Bundle-Version: 0.0.1.alpha
+Bundle-Version: 0.0.2.alpha
 Bundle-ClassPath: lib/javatuples-1.2.jar,
  .
 Bundle-Activator: com.divisors.projectcuttlefish.httpserver.Activator

@@ -5,9 +5,13 @@ import java.util.List;
 
 import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
 
+/**
+ * 
+ * @author mailmindlin
+ */
 public final class ImmutableHttpRequest implements HttpRequest {
-	List<HttpHeader> headers;
-	final HttpRequestLine requestLine;
+	protected final List<HttpHeader> headers;
+	protected final HttpRequestLine requestLine;
 	public ImmutableHttpRequest(HttpRequest r) {
 		headers = Collections.unmodifiableList(r.getHeaders());
 		requestLine = r.getRequestLine().immutable();
@@ -31,5 +35,4 @@ public final class ImmutableHttpRequest implements HttpRequest {
 	public List<HttpHeader> getHeaders() {
 		return headers;
 	}
-
 }

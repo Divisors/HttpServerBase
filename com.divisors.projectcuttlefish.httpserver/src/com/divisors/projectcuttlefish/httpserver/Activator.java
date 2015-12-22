@@ -12,10 +12,12 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
-import com.divisors.projectcuttlefish.httpserver.util.ByteParsingUtils.ByteBufferTokenizer;
+import com.divisors.projectcuttlefish.httpserver.util.ByteUtils;
+import com.divisors.projectcuttlefish.httpserver.util.ByteUtils.ByteBufferTokenizer;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
 import reactor.core.processor.RingBufferProcessor;
@@ -58,13 +60,16 @@ public class Activator implements BundleActivator {
 									System.out.println("Recieved request from " + channel.getRemoteAddress());
 									{
 										byte[] inBytes = data.array();
-										ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(new byte[]{'\r','\n'},inBytes.length);
-										tokenizer.put(inBytes);
-										ByteBuffer token;
-										while ((token = tokenizer.next()) != null)
-											System.out.println("TOKEN: "+FormatUtils.bytesToHex(token, true));
+										HttpRequest.parse(inBytes);
+//										ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(new byte[]{'\r','\n'},inBytes.length);
+//										tokenizer.put(inBytes);
+//										ByteBuffer token;
+//										while ((token = tokenizer.next()) != null) {
+//											byte[] bytes = ByteUtils.toArray(token);
+//											System.out.println("TOKEN: " + FormatUtils.bytesToHex(bytes, true, 0));
+//											System.out.println("STRING: " + new String(bytes));
+//										}
 									}
-									
 									String text = new String(data.array());
 									byte[] output = new StringBuilder(toWrite)
 											.append(text.getBytes().length * 4 + 17)
