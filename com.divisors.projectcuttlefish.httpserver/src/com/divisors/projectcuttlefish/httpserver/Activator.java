@@ -16,8 +16,6 @@ import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
-import com.divisors.projectcuttlefish.httpserver.util.ByteUtils;
-import com.divisors.projectcuttlefish.httpserver.util.ByteUtils.ByteBufferTokenizer;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
 import reactor.core.processor.RingBufferProcessor;
@@ -60,7 +58,7 @@ public class Activator implements BundleActivator {
 									System.out.println("Recieved request from " + channel.getRemoteAddress());
 									{
 										byte[] inBytes = data.array();
-										HttpRequest.parse(inBytes);
+										HttpRequest request = HttpRequest.parse(inBytes);
 //										ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(new byte[]{'\r','\n'},inBytes.length);
 //										tokenizer.put(inBytes);
 //										ByteBuffer token;
@@ -102,7 +100,7 @@ public class Activator implements BundleActivator {
 	public void stop(BundleContext context) throws Exception {
 		System.out.println("Goodbye!");
 		try {
-//			tcp.stop();
+			tcp.shutdownNow();
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;

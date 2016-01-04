@@ -7,6 +7,7 @@ public interface HttpResponseLine extends Mutable<HttpResponseLine> {
 	int getStatusCode();
 	String getStatusText();
 	default String getText() {
+		//TODO maybe optimize
 		return getHttpVersion() + ' ' + getStatusCode() + ' ' + getStatusText();
 	}
 	@Override

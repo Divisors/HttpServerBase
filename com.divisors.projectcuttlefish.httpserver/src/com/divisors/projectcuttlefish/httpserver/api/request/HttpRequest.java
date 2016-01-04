@@ -1,6 +1,7 @@
 package com.divisors.projectcuttlefish.httpserver.api.request;
 
 import java.nio.ByteBuffer;
+import java.util.AbstractMap;
 
 import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
 import com.divisors.projectcuttlefish.httpserver.api.HttpHeaders;
@@ -27,6 +28,11 @@ public interface HttpRequest extends Mutable<HttpRequest> {
 	public static final String HTTP_1 = "HTTP/1.0";
 	public static final String HTTP_1_1 = "HTTP/1.1";
 	public static final String HTTP_2 = "HTTP/2";
+	/**
+	 * Parse byte array
+	 * @param data
+	 * @return
+	 */
 	public static HttpRequest parse(byte[] data) {
 		ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(newline, data.length);//TODO maybe pool
 		tokenizer.put(data);
@@ -56,7 +62,11 @@ public interface HttpRequest extends Mutable<HttpRequest> {
 				headers.add(key, value);
 			}
 			System.out.println("Parsed headers:");
-			System.out.println(headers.toString());
+			headers.entrySet().stream()
+				.flatMap(entry->entry.getValue().stream()
+						.map((value)->(new AbstractMap.SimpleEntry<>(entry.getKey(), value))))
+				.map(entry->("=>"+entry.getKey()+": "+entry.getValue()))
+				.forEach(System.out::println);
 		}
 		return builder.build();
 	}

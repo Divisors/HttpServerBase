@@ -114,10 +114,11 @@ public class TcpServerImpl implements TcpServer, Runnable {
 
 	@Override
 	public boolean shutdownNow() throws IOException, InterruptedException {
+		this.running.set(false);
 		this.server.close();
 		this.selector.close();
 		System.out.println("Bye!");
-		this.executor.shutdown();
+		this.executor.shutdownNow();
 		return true;
 	}
 	public void run() {
