@@ -1,14 +1,28 @@
 package com.divisors.projectcuttlefish.httpserver.api;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 
-public class HttpHeader implements Map.Entry<String, String[]> {
+/**
+ * Explains a one-to-many relationship between HTTP header keys and values.
+ * <br/>
+ * Most headers will have one value, but RFC 2616 says that multiple headers with the same 'field-name' can
+ * be used, as long as they can be concatenated by adding commas.
+ * 
+ * (thanks to http://stackoverflow.com/a/4371395/2759984)
+ * @author mailmindlin
+ */
+public class HttpHeader implements Map.Entry<String, Collection<String>> {
 	protected final String key;
-	protected final String[] values;
-	public HttpHeader (String key, String...values) {
+	protected final Collection<String> values;
+	public HttpHeader(String key, Collection<String> values) {
 		this.key = key;
 		this.values = values;
+	}
+	public HttpHeader(String key, String...values) {
+		this.key = key;
+		this.values = Arrays.asList(values);
 	}
 	
 	@Override
@@ -17,23 +31,29 @@ public class HttpHeader implements Map.Entry<String, String[]> {
 	}
 
 	@Override
-	public String[] getValue() {
+	public Collection<String> getValue() {
 		return values;
 	}
-
+	public String flatValue() {
+		StringBuilder result = new StringBuilder();
+		for (String value : values)
+			result.append(value).append(", ");
+		result.delete(result.length()-2,result.length());
+		return result.toString();
+	}
+	
 	@Override
-	public String[] setValue(String[] arg0) {
+	public Collection<String> setValue(Collection<String> arg0) {
 		throw new UnsupportedOperationException("HttpHeader is immutable");
 	}
 	
-	public Optional<HttpHeaderValue> first() {
-		return values.length>0 ? Optional.of(new HttpHeaderValue(key, values[0])) : Optional.empty();
-	}
-	
-	public HttpHeaderValue[] toArray() {
-		HttpHeaderValue[] result = new HttpHeaderValue[values.length];
-		for (int i=0;i<values.length;i++)
-			result[i] = new HttpHeaderValue(key, values[i]);
-		return result;
+	public String toString() {
+		StringBuilder result = new StringBuilder(this.getKey()).append(": ");
+		if (values.size() == 0)
+			throw new IllegalStateException("HTTP header {key:"+getKey()+"} has 0 values!");
+		for (String value : values)
+			result.append(value).append(", ");
+		result.delete(result.length()-2, result.length());//remove last 2 characters from end
+		return result.toString();
 	}
 }

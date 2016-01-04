@@ -20,8 +20,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.reactivestreams.Processor;
+
+import com.divisors.projectcuttlefish.httpserver.api.Server;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -98,7 +101,7 @@ public class TcpServerImpl implements TcpServer, Runnable {
 	}
 
 	@Override
-	public boolean isSSL() {
+	public boolean isSecure() {
 		return false;
 	}
 
@@ -110,17 +113,12 @@ public class TcpServerImpl implements TcpServer, Runnable {
 	}
 
 	@Override
-	public boolean stop() throws IOException, InterruptedException {
+	public boolean shutdownNow() throws IOException, InterruptedException {
 		this.server.close();
 		this.selector.close();
 		System.out.println("Bye!");
 		this.executor.shutdown();
 		return true;
-	}
-
-	@Override
-	public boolean stop(Duration timeout) throws IOException, InterruptedException {
-		return stop();
 	}
 	public void run() {
 		if (!running.weakCompareAndSet(false, true))
@@ -175,15 +173,17 @@ public class TcpServerImpl implements TcpServer, Runnable {
 		socket.setOption(StandardSocketOptions.TCP_NODELAY, true);//We should *hopefully* be writing large amounts of data at a time, so this just decreases the RTT
 		
 		long id = this.nextId.incrementAndGet();
-		TcpChannelImpl channel = new TcpChannelImpl(this, socket, id);
+		TcpChannelImpl channel = upgradeSocket(socket, id);
 		channelMap.put(id, channel);
-		
 		bus.notify("tcp.connect",Event.<TcpChannel>wrap(channel));
 		System.out.println("\tAccepted from "+channel.getRemoteAddress().toString());
 		System.out.println("\tID #"+id);
 		
 		socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, id);
 		System.out.println("\tDone Accepting");
+	}
+	protected TcpChannelImpl upgradeSocket(SocketChannel socket, long id) {
+		return new TcpChannelImpl(this, socket, id);
 	}
 	/**
 	 * Read buffer of data from socket
@@ -255,5 +255,25 @@ public class TcpServerImpl implements TcpServer, Runnable {
 			e.printStackTrace();
 			return;
 		}
+	}
+	@Override
+	public Server<ByteBuffer, ByteBuffer, TcpChannel> onConnect(Predicate<TcpChannel> handler) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public boolean shutdown() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public boolean shutdown(Duration timeout) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public boolean isShuttingDown() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

@@ -102,7 +102,7 @@ public class Activator implements BundleActivator {
 	public void stop(BundleContext context) throws Exception {
 		System.out.println("Goodbye!");
 		try {
-			tcp.stop();
+//			tcp.stop();
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;

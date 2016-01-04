@@ -24,6 +24,12 @@ public interface RunnableService extends Runnable {
 	 * @throws UnsupportedOperationException if this service cannot be started in another thread
 	 */
 	void start() throws Exception;
+	/**
+	 * Start with initializer
+	 * @param initiator
+	 * @throws Exception
+	 * @see #start()
+	 */
 	void start(Consumer<? extends RunnableService> initiator) throws Exception;
 	/**
 	 * Cease operation of this service. If this service accepts any input (e.g., a webserver)
@@ -36,19 +42,26 @@ public interface RunnableService extends Runnable {
 	 */
 	boolean shutdown() throws Exception;
 	/**
-	 * 
+	 * TODO finish documenting
 	 * @param timeout
 	 * @return
 	 * @throws Exception
 	 */
 	boolean shutdown(Duration timeout) throws Exception;
 	/**
-	 * 
+	 * TODO finish documenting
 	 * @return
 	 * @throws Exception
 	 */
 	boolean shutdownNow() throws Exception;
-	
+	/**
+	 * TODO finish documenting
+	 * @throws Exception
+	 */
 	void init() throws Exception;
+	/**
+	 * TODO finish documenting
+	 * @throws Exception
+	 */
 	void destroy() throws Exception;
 }

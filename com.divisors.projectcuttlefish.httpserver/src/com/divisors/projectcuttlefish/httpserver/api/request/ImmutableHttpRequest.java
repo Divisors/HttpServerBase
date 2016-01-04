@@ -1,19 +1,16 @@
 package com.divisors.projectcuttlefish.httpserver.api.request;
 
-import java.util.Collections;
-import java.util.List;
-
-import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
+import com.divisors.projectcuttlefish.httpserver.api.HttpHeaders;
 
 /**
  * 
  * @author mailmindlin
  */
 public final class ImmutableHttpRequest implements HttpRequest {
-	protected final List<HttpHeader> headers;
+	protected final HttpHeaders headers;//TODO fix mutability
 	protected final HttpRequestLine requestLine;
 	public ImmutableHttpRequest(HttpRequest r) {
-		headers = Collections.unmodifiableList(r.getHeaders());
+		headers = r.getHeaders();
 		requestLine = r.getRequestLine().immutable();
 	}
 	@Override
@@ -32,7 +29,7 @@ public final class ImmutableHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	public List<HttpHeader> getHeaders() {
+	public HttpHeaders getHeaders() {
 		return headers;
 	}
 }

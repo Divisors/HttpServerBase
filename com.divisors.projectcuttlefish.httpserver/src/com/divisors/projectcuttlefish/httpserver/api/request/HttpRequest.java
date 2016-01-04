@@ -1,9 +1,9 @@
 package com.divisors.projectcuttlefish.httpserver.api.request;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
+import com.divisors.projectcuttlefish.httpserver.api.HttpHeaders;
 import com.divisors.projectcuttlefish.httpserver.api.Mutable;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils.ByteBufferTokenizer;
@@ -47,13 +47,16 @@ public interface HttpRequest extends Mutable<HttpRequest> {
 		}
 		System.out.println("Parsing headers...");
 		{
+			HttpHeaders headers = builder.getHeaders();
 			while ((token = tokenizer.next()) != null && token.remaining() > 2) {
 				String header = new String(ByteUtils.toArray(token)).trim();
 				//TODO better parsing/optimization
 				String key = header.substring(0, header.indexOf(':'));
 				String value = header.substring(header.indexOf(':')+1).trim();
-				System.out.println("HEADER "+key+'/'+value);
+				headers.add(key, value);
 			}
+			System.out.println("Parsed headers:");
+			System.out.println(headers.toString());
 		}
 		return builder.build();
 	}
@@ -72,12 +75,9 @@ public interface HttpRequest extends Mutable<HttpRequest> {
 
 	HttpRequestLine getRequestLine();
 	
-	List<HttpHeader> getHeaders();
+	HttpHeaders getHeaders();
 	default HttpHeader getHeader(String key) {
-		for (HttpHeader header : getHeaders())
-			if (header.getKey().equalsIgnoreCase(key))
-				return header;
-		return null;
+		return getHeaders().getHeader(key);
 	}
 	
 	default ImmutableHttpRequest immutable() {

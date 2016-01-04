@@ -2,15 +2,22 @@ package com.divisors.projectcuttlefish.httpserver.api.tcp;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.time.Duration;
+import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
+
+import org.reactivestreams.Processor;
+
+import com.divisors.projectcuttlefish.httpserver.api.Server;
+
+import reactor.bus.Event;
 
 /**
  * Generic server interface.
  * @author mailmindlin
  * @see TcpServerImpl
  */
-public interface TcpServer {
+public interface TcpServer extends Server<ByteBuffer, ByteBuffer, TcpChannel>{
 	
 	/**
 	 * Start server with initializer
@@ -39,34 +46,36 @@ public interface TcpServer {
 	SocketAddress getAddress();
 	
 	/**
-	 * Whether this server is currently bound to its address and recieving requests
+	 * Whether this server is currently bound to its address and accept (or able to accept) requests
 	 * @return flag
+	 * @see Server#isRunning()
 	 */
 	boolean isRunning();
 	
 	/**
-	 * Whether this server's communications are encrypted via SSL
-	 * @return flag
+	 * Whether this server's communications are encrypted via SSL/TLS.
+	 * @return that
+	 * @see Server#isSecure()
 	 */
-	boolean isSSL();
+	@Override
+	boolean isSecure();
 	
+	/**
+	 * @param handler
+	 * @return self
+	 */
+	@Override
 	TcpServer onConnect(Consumer<TcpChannel> handler);
-	
 	/**
 	 * 
-	 * @return
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * @param processor
+	 * @return self
 	 */
-	public boolean stop() throws IOException, InterruptedException;
+	TcpServer dispatchOn(Processor<Event<?>,Event<?>> processor);
 	/**
-	 * Attempts to stop the server.
-	 * <br/>
-	 * Will time out, and gracefully fail
-	 * @param timeout
-	 * @return success in stopping the server
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * 
+	 * @param executor
+	 * @return self
 	 */
-	public boolean stop(Duration timeout) throws IOException, InterruptedException;
+	TcpServer runOn(ExecutorService executor);
 }

@@ -6,6 +6,11 @@ import java.net.ServerSocket;
 
 import com.divisors.projectcuttlefish.httpserver.api.HttpServerFactory;
 
+/**
+ * 
+ * @author mailmindlin
+ *
+ */
 public interface HttpsServerFactory extends HttpServerFactory {
 	public HttpsServer createServer(int port) throws IOException;
 	public HttpsServer createServer(int port, InetAddress address) throws IOException;

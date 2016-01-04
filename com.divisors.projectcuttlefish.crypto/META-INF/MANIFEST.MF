@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Project Cuttlefish SSL Server
+Bundle-SymbolicName: com.divisors.projectcuttlefish.crypto
+Bundle-Version: 0.0.4.alpha
+Bundle-Activator: com.divisors.projectcuttlefish.ssl.Activator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: org.osgi.framework;version="1.3.0"
+Bundle-ActivationPolicy: lazy
+Export-Package: com.divisors.projectcuttlefish.ssl.api
+Require-Bundle: com.divisors.projectcuttlefish.httpserver;bundle-version="[0.0.4,0.1.0)";visibility:=reexport,
+ io.projectreactor.reactor-core;bundle-version="2.1.0",
+ org.reactivestreams.reactive-streams;bundle-version="1.0.0",
+ io.projectreactor.reactor-bus;bundle-version="2.1.0"
