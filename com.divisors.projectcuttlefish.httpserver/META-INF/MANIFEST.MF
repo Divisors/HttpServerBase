@@ -11,10 +11,14 @@ Export-Package: com.divisors.projectcuttlefish.httpserver,
  com.divisors.projectcuttlefish.httpserver.api,
  com.divisors.projectcuttlefish.httpserver.api.compression,
  com.divisors.projectcuttlefish.httpserver.api.error,
+ com.divisors.projectcuttlefish.httpserver.api.http,
  com.divisors.projectcuttlefish.httpserver.api.request,
  com.divisors.projectcuttlefish.httpserver.api.response,
  com.divisors.projectcuttlefish.httpserver.api.tcp,
- com.divisors.projectcuttlefish.httpserver.api.websocket
+ com.divisors.projectcuttlefish.httpserver.api.websocket,
+ com.divisors.projectcuttlefish.httpserver.util,
+ org.javatuples,
+ org.javatuples.valueintf
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: com.gs.collections.api.tuple;version="7.0.0",

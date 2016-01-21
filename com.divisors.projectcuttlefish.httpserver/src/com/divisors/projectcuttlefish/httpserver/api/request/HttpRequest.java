@@ -3,9 +3,9 @@ package com.divisors.projectcuttlefish.httpserver.api.request;
 import java.nio.ByteBuffer;
 import java.util.AbstractMap;
 
-import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
-import com.divisors.projectcuttlefish.httpserver.api.HttpHeaders;
 import com.divisors.projectcuttlefish.httpserver.api.Mutable;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeader;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils.ByteBufferTokenizer;
 
