@@ -58,7 +58,7 @@ public class SubsetSelector implements Selector<Object>{
 		Tuple tupl = (Tuple) key;
 		if (this.args.length > tupl.size())
 			return false;
-		for (int i=0; i < tupl.size(); i++)
+		for (int i=0; i < this.args.length; i++)
 			if (!(args[i] == MATCH_ANY || args[i].equals(tupl.get(i))))
 				return false;
 		return true;
