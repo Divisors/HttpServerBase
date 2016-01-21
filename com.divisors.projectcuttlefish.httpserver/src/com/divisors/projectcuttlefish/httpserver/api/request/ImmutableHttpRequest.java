@@ -1,6 +1,6 @@
 package com.divisors.projectcuttlefish.httpserver.api.request;
 
-import com.divisors.projectcuttlefish.httpserver.api.HttpHeaders;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
 
 /**
  * 

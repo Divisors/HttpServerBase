@@ -1,5 +1,5 @@
 /**
- * For simplified handling of errors on {@link com.projectcuttlefish.httpserver.api.HttpChannel HttpChannel}s.
+ * For simplified handling of errors on {@link com.divisors.projectcuttlefish.httpserver.api.http.projectcuttlefish.httpserver.api.HttpChannel HttpChannel}s.
  * <p>
  * Ideally, an implementation of HttpChannel will allow for individual handlers to throw HttpErrors. Upon
  * catching an error, it would trigger a {@link HttpErrorHandler} to respond to the request. This allows

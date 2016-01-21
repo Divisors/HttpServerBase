@@ -1,8 +1,8 @@
 package com.divisors.projectcuttlefish.httpserver.api.request;
 
 import com.divisors.projectcuttlefish.httpserver.api.Builder;
-import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
-import com.divisors.projectcuttlefish.httpserver.api.HttpHeaders;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeader;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
 
 /**
  * Builds HTTP requests
