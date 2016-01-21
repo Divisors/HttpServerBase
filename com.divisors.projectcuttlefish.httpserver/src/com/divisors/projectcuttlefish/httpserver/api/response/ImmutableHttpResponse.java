@@ -1,10 +1,7 @@
 package com.divisors.projectcuttlefish.httpserver.api.response;
 
-import java.nio.channels.SeekableByteChannel;
-
-import com.divisors.projectcuttlefish.httpserver.api.HttpHeader;
-import com.divisors.projectcuttlefish.httpserver.api.HttpHeaders;
-import com.divisors.projectcuttlefish.httpserver.api.SeekableInputStream;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeader;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
 
 /**
  * Immutable HTTP response
@@ -14,9 +11,17 @@ import com.divisors.projectcuttlefish.httpserver.api.SeekableInputStream;
 public class ImmutableHttpResponse implements HttpResponse {
 	protected final HttpResponseLine line;
 	protected final HttpHeaders headers;//TODO make immutable (version)
-	public ImmutableHttpResponse(HttpResponseLine line, HttpHeaders headers, SeekableInputStream body) {
+	/**
+	 * Payload.
+	 * <p>
+	 * NOTE: this field is NOT immutable.
+	 * </p>
+	 */
+	protected final HttpResponsePayload payload;
+	public ImmutableHttpResponse(HttpResponseLine line, HttpHeaders headers, HttpResponsePayload body) {
 		this.line = line.immutable();
 		this.headers = headers;
+		this.payload = body;
 	}
 	@Override
 	public HttpResponseLine getResponseLine() {
@@ -29,37 +34,48 @@ public class ImmutableHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public boolean addHeader(HttpHeader header) {
+	public ImmutableHttpResponse addHeader(HttpHeader header) {
 		throw new UnsupportedOperationException("ImmutableHttpResponse is immutable");
 	}
 
 	@Override
-	public boolean addHeader(String key, String... values) {
+	public ImmutableHttpResponse addHeader(String key, String... values) {
 		throw new UnsupportedOperationException("ImmutableHttpResponse is immutable");
 	}
 
 	@Override
-	public boolean setHeader(HttpHeader header) {
+	public ImmutableHttpResponse setHeader(HttpHeader header) {
 		throw new UnsupportedOperationException("ImmutableHttpResponse is immutable");
 	}
 
 	@Override
-	public boolean setHeader(String key, String... values) {
+	public ImmutableHttpResponse setHeader(String key, String... values) {
 		throw new UnsupportedOperationException("ImmutableHttpResponse is immutable");
 	}
 
 	@Override
-	public void removeHeader(String key) {
+	public ImmutableHttpResponse removeHeader(String key) {
 		throw new UnsupportedOperationException("ImmutableHttpResponse is immutable");
 	}
 
 	@Override
-	public SeekableByteChannel getResponseBody() {
-		// TODO Auto-generated method stub
-		return null;
+	public HttpResponsePayload getBody() {
+		return this.payload;
 	}
 	@Override
 	public HttpHeader getHeader(String key) {
 		return headers.getHeader(key);
+	}
+	@Override
+	public boolean isMutable() {
+		return false;
+	}
+	@Override
+	public ImmutableHttpResponse immutable() {
+		return this;
+	}
+	@Override
+	public HttpResponse setBody(HttpResponsePayload payload) {
+		throw new UnsupportedOperationException("ImmutableHttpResponse is immutable");
 	}
 }
