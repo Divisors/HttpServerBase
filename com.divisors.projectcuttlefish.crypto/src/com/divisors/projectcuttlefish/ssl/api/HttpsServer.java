@@ -1,6 +1,6 @@
 package com.divisors.projectcuttlefish.ssl.api;
 
-import com.divisors.projectcuttlefish.httpserver.api.HttpServer;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpServer;
 
 /**
  * 

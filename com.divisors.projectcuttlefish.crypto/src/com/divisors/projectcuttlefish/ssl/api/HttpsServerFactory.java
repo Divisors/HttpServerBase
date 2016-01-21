@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 
-import com.divisors.projectcuttlefish.httpserver.api.HttpServerFactory;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpServerFactory;
 
 /**
  * 
