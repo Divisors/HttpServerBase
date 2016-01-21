@@ -27,7 +27,7 @@ public interface Channel<IN,OUT> extends AutoCloseable {
 	 * @param codec codec to map with
 	 * @return new channel
 	 */
-	<X,Y> Channel<X,Y> map(Codec<IN,OUT,X,Y> codec);
+//	<X,Y> Channel<X,Y> map(Codec<IN,OUT,X,Y> codec);
 	
 	/**
 	 * Whether this channel is currently open for I/O
@@ -35,4 +35,5 @@ public interface Channel<IN,OUT> extends AutoCloseable {
 	 */
 	boolean isOpen();
 	
+	<E> Channel<IN, OUT> setOption(ChannelOption<E> key, E value);
 }

@@ -12,18 +12,24 @@ import java.util.function.Predicate;
  * @param <OUT> output type (type written to this server)
  * @param <CHANNEL> channel type
  */
-public interface Server<IN, OUT, CHANNEL extends Channel<IN,OUT>> {
+public interface Server<IN, OUT, CHANNEL extends Channel<IN,OUT>> extends RunnableService {
 	/**
 	 * 
 	 * @param handler
-	 * @return
+	 * @return self
 	 */
 	default Server<IN, OUT, CHANNEL> onConnect(Consumer<CHANNEL> handler) {
-		return onConnect(channel-> {
+		return onConnect(channel -> {
 			handler.accept(channel);
 			return true;
 		});
 	}
+	/**
+	 * Similar to {@link #onConnect(Consumer)}, but if the handler returns false, it will not
+	 * receive any more events.
+	 * @param handler
+	 * @return self
+	 */
 	Server<IN, OUT, CHANNEL> onConnect(Predicate<CHANNEL> handler);
 	/**
 	 * Whether all channels from this server are guaranteed to be secure, usually through implementing
@@ -40,34 +46,32 @@ public interface Server<IN, OUT, CHANNEL extends Channel<IN,OUT>> {
 	 */
 	boolean isSecure();
 	/**
-	 * Whether the server is currently running. SHOULD return true
-	 * when the server is shutting down.
-	 * @return if the server is running
-	 */
-	boolean isRunning();
-	/**
 	 * Gracefully shutdown the server, such that it will not accept any new incoming requests,
 	 * and will close connections that are not actively being used. This method will
 	 * fail quietly and return <code>false</code> if the server is not currently running.<br/>
-	 * If the server is able to shutdown immediately, then it should do so and return <code>true</code>, but
-	 * calls to {@link #isRunning()} or {@link #isShuttingDown()} should return false throughout the shutdown process.
+	 * If the server is able to shutdown immediately, then it should do so and return <code>true</code>.
+	 * Calls to {@link #getState()} while the server is shutting down should return
+	 * {@link com.divisors.projectcuttlefish.httpserver.api.RunnableServiceState#STOPPING STOPPING}.
+	 * <p>
+	 * While the server is shutting down, further calls to this method SHOULD NOT do anything,
+	 * but return true.
+	 * </p> 
 	 * @return if the server was queued for shutdown.
 	 * @see #shutdown(Duration)
-	 * @see #isShuttingDown()
-	 * @see #isRunning()
 	 * @see #shutdownNow()
 	 */
+	@Override
 	boolean shutdown();
 	/**
 	 * Like {@link #shutdown()}, but will block for up to <var>timeout</var> to wait for the server to shut down.
 	 * @param timeout
 	 * @return whether the server was shut down
+	 * @throws InterruptedException 
 	 * @see #shutdown()
-	 * @see #isShuttingDown()
-	 * @see #isRunning()
 	 * @see #shutdownNow()
 	 */
-	boolean shutdown(Duration timeout);
+	@Override
+	boolean shutdown(Duration timeout) throws InterruptedException;
 	/**
 	 * Immediately shuts down the server, closing all open channels, and blocking the current
 	 * thread until it is shut down. While this method is blocking, {@link #isShuttingDown()} SHOULD
@@ -77,18 +81,19 @@ public interface Server<IN, OUT, CHANNEL extends Channel<IN,OUT>> {
 	 * @return success in stopping down the server
 	 * @throws Exception if there was a problem shutting down the server
 	 * @see #shutdown()
-	 * @see #isShuttingDown()
-	 * @see #isRunning()
 	 * @see #shutdownNow()
 	 */
+	@Override
 	boolean shutdownNow() throws Exception;
 	/**
 	 * Whether the server is currently shutting down. When it is shutting down,
 	 * no new channels should be opened, and idle channels should be closed gracefully.
 	 * @return whether it is currently shutting down
+	 * @see #init()
+	 * @see #start()
 	 * @see #shutdown()
 	 * @see #shutdownNow()
-	 * @see #isRunning()
+	 * @see #destroy()
 	 */
-	boolean isShuttingDown();
+	ServiceState getState();
 }
