@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: HttpServer
-Bundle-SymbolicName: com.divisors.projectcuttlefish.httpserver
-Bundle-Version: 0.0.4.alpha
+Bundle-SymbolicName: com.divisors.projectcuttlefish.httpserver;singleton:=true
+Bundle-Version: 0.0.5.alpha
 Bundle-ClassPath: lib/javatuples-1.2.jar,
  .
 Bundle-Activator: com.divisors.projectcuttlefish.httpserver.Activator
@@ -16,6 +16,7 @@ Export-Package: com.divisors.projectcuttlefish.httpserver,
  com.divisors.projectcuttlefish.httpserver.api.response,
  com.divisors.projectcuttlefish.httpserver.api.tcp,
  com.divisors.projectcuttlefish.httpserver.api.websocket,
+ com.divisors.projectcuttlefish.httpserver.ua,
  com.divisors.projectcuttlefish.httpserver.util,
  org.javatuples,
  org.javatuples.valueintf
@@ -33,4 +34,5 @@ Import-Package: com.gs.collections.api.tuple;version="7.0.0",
 Require-Bundle: io.reactivex.rxjava,
  io.projectreactor.reactor-core,
  org.junit,
- io.projectreactor.reactor-bus
+ io.projectreactor.reactor-bus,
+ com.google.guava;bundle-version="18.0.0"
