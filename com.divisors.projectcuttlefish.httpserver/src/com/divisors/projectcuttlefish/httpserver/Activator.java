@@ -1,16 +1,14 @@
 package com.divisors.projectcuttlefish.httpserver;
 
-import java.awt.Desktop;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executors;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.reactivestreams.Processor;
 
 import com.divisors.projectcuttlefish.httpserver.api.StandardChannelOptions;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpServer;
@@ -26,6 +24,8 @@ import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
+import reactor.bus.Event;
+import reactor.bus.EventBus;
 import reactor.core.processor.RingBufferProcessor;
 
 /**
@@ -41,6 +41,7 @@ public class Activator implements BundleActivator {
 	ServiceRegistration<?> httpServerFactoryServiceRegistration;
 	ServiceRegistration<?> serverFactoryServiceRegistration;
 	TcpServer tcp;
+	HttpServer http;
 	/**
 	 * Standard htttp header text
 	 */
@@ -54,50 +55,34 @@ public class Activator implements BundleActivator {
 		try {
 			System.out.println("Initializing: ProjectCuttlefish|HttpServer");
 			//just random testing -- binds to a random local port
-			tcp = TcpServerFactory.getInstance().createServer(new InetSocketAddress("localhost", (int)(Math.random() * 55536) + 1000))
-					.start(server-> {
-						((TcpServerImpl)server)
-							.dispatchOn(RingBufferProcessor.create("test1", 32))
-							.runOn(Executors.newCachedThreadPool())
-							.onConnect((channel)-> {
-								System.out.println("Connected to channel @ " + channel.getRemoteAddress() + ", id=" + channel.getConnectionID());
-								channel.onRead(data->{
-									//print out the data sent to this
-									System.out.println("Recieved request from " + channel.getRemoteAddress());
-									{
-										byte[] inBytes = data.array();
-										HttpRequest request = HttpRequest.parse(inBytes);
-//										ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(new byte[]{'\r','\n'},inBytes.length);
-//										tokenizer.put(inBytes);
-//										ByteBuffer token;
-//										while ((token = tokenizer.next()) != null) {
-//											byte[] bytes = ByteUtils.toArray(token);
-//											System.out.println("TOKEN: " + FormatUtils.bytesToHex(bytes, true, 0));
-//											System.out.println("STRING: " + new String(bytes));
-//										}
-									}
-									String text = new String(data.array());
-									byte[] output = new StringBuilder(toWrite)
-											.append(text.getBytes().length * 4 + 17)
-											.append("\r\n\r\n")
-											.append(text)
-											.append("\n=====BYTES=====\n")
-											.append(FormatUtils.bytesToHex(data.array(), true, 0))
-											.toString()
-											.getBytes();
-									ByteBuffer bytes = ByteBuffer.allocate(output.length).put(output);
-									bytes.flip();
-									channel.write(bytes);
-								});
+			Processor<Event<?>,Event<?>> processor = RingBufferProcessor.create("test1", 32);
+//			tcp = testTCP(processor);
+			http = new HttpServerImpl()
+				.init()
+				.dispatchOn(EventBus.create(processor))
+				.runOn(Executors.newCachedThreadPool())
+				.start(server-> {
+				try {
+					((HttpServerImpl)server)
+						.listenOn(new InetSocketAddress("localhost",8080))
+						.onConnect((channel) -> {
+							channel.onRead((request) -> {
+								HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(request.getRequestLine().getHttpVersion(),200,"OK"))
+										.addHeader("Server","PC-0.0.5")
+										.addHeader("Content-Type","text/plain; charset=utf-8");
+								
+								StringBuilder responseText = new StringBuilder().append("Hello, World!");
+								HttpResponsePayload payload = HttpResponsePayload.wrap(ByteBuffer.wrap(responseText.toString().getBytes()));
+								response.addHeader("Content-Length",""+payload.remaining()).setBody(payload);
+								channel.write(response);
 							});
-						//try to open the default browser to send a request to this server
-						if (Desktop.isDesktopSupported())
-							try {
-								Desktop.getDesktop().browse(new URI("http://localhost:" + ((InetSocketAddress)server.getAddress()).getPort()));
-							} catch (URISyntaxException | IOException e) {
-								e.printStackTrace();
-							}
-					});
+							System.err.println("New channel: " + channel);
+						});
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(0);
+				}
+			});
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -114,5 +99,46 @@ public class Activator implements BundleActivator {
 			throw e;
 		}
 	}
-
+	public TcpServer testTCP(Processor<Event<?>,Event<?>> processor) throws IllegalStateException, IOException, Exception {
+		return TcpServerFactory.getInstance().createServer(new InetSocketAddress("localhost", 8080))
+				.init()
+				.start(server-> {
+					((TcpServerImpl)server)
+						.dispatchOn(EventBus.create(processor))
+						.runOn(Executors.newCachedThreadPool())
+						.onConnect((channel)-> {
+							System.out.println("Connected to channel @ " + channel.getRemoteAddress() + ", id=" + channel.getConnectionID());
+							channel.onRead(data->{
+								//print out the data sent to this
+								System.out.println("Recieved request from " + channel.getRemoteAddress());
+								
+								HttpRequest request = HttpRequest.parse(data);
+								
+								String text = new String(data.array());
+								HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(request.getRequestLine().getHttpVersion(),200,"OK"))
+										.setHeader("Server", "PC-0.0.1")
+										.setHeader("Content-Type", "text/plain; charset=utf-8");
+								
+								byte[] output = new StringBuilder(text)
+										.append("\n=====BYTES=====\n")
+										.append(FormatUtils.bytesToHex(data.array(), true, 0))
+										.toString()
+										.getBytes();
+								
+								response.setHeader("Content-Length", "" + output.length);
+								
+								channel.setOption(StandardChannelOptions.CLOSE_AFTER_WRITE, true)
+										.write(StandardHttpResponseSerializer.serialize(response))
+										.write((ByteBuffer)ByteBuffer.allocate(output.length).put(output).flip());
+							});
+						});
+					//try to open the default browser to send a request to this server
+//					if (Desktop.isDesktopSupported())
+//						try {
+//							Desktop.getDesktop().browse(new URI("http://localhost:" + ((InetSocketAddress)server.getAddress()).getPort()));
+//						} catch (URISyntaxException | IOException e) {
+//							e.printStackTrace();
+//						}
+				});
+	}
 }
