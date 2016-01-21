@@ -6,11 +6,9 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
-import org.reactivestreams.Processor;
-
 import com.divisors.projectcuttlefish.httpserver.api.Server;
 
-import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 /**
  * Generic server interface.
@@ -18,7 +16,6 @@ import reactor.bus.Event;
  * @see TcpServerImpl
  */
 public interface TcpServer extends Server<ByteBuffer, ByteBuffer, TcpChannel>{
-	
 	/**
 	 * Start server with initializer
 	 * @param initializer function to be run immediately before server start
@@ -35,6 +32,7 @@ public interface TcpServer extends Server<ByteBuffer, ByteBuffer, TcpChannel>{
 	 * @throws IllegalStateException if this server is currently running
 	 * @see #start(Consumer)
 	 */
+	@Override
 	default TcpServer start() throws IOException, IllegalStateException {
 		return this.start((x)->{});
 	}
@@ -44,13 +42,6 @@ public interface TcpServer extends Server<ByteBuffer, ByteBuffer, TcpChannel>{
 	 * @return address
 	 */
 	SocketAddress getAddress();
-	
-	/**
-	 * Whether this server is currently bound to its address and accept (or able to accept) requests
-	 * @return flag
-	 * @see Server#isRunning()
-	 */
-	boolean isRunning();
 	
 	/**
 	 * Whether this server's communications are encrypted via SSL/TLS.
@@ -71,11 +62,14 @@ public interface TcpServer extends Server<ByteBuffer, ByteBuffer, TcpChannel>{
 	 * @param processor
 	 * @return self
 	 */
-	TcpServer dispatchOn(Processor<Event<?>,Event<?>> processor);
+	TcpServer dispatchOn(EventBus bus);
 	/**
 	 * 
 	 * @param executor
 	 * @return self
 	 */
 	TcpServer runOn(ExecutorService executor);
+	
+	@Override
+	TcpServer init() throws Exception;
 }
