@@ -109,7 +109,7 @@ public class ByteUtils {
 				ByteBuffer mirror = buffer.duplicate();
 				mirror.limit(mirror.position()).position(offset);
 				//small buffer for reading tokens
-				final byte[] minibuf;
+				final byte[] minibuf;//(make it only once to decrease the total allocation of this fn)
 				if (token.length > 1)
 					minibuf = new byte[token.length - 1];
 				else
