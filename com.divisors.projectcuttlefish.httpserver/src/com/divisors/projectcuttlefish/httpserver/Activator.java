@@ -22,6 +22,7 @@ import com.divisors.projectcuttlefish.httpserver.api.response.StandardHttpRespon
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
+import com.divisors.projectcuttlefish.httpserver.ua.UserAgentParser;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
 import reactor.bus.Event;
@@ -37,7 +38,11 @@ import reactor.core.processor.RingBufferProcessor;
  *
  */
 public class Activator implements BundleActivator {
-
+	protected static Activator INSTANCE;
+	public static Activator getInstance() {
+		return INSTANCE;
+	}
+	BundleContext ctx;
 	ServiceRegistration<?> httpServerFactoryServiceRegistration;
 	ServiceRegistration<?> serverFactoryServiceRegistration;
 	TcpServer tcp;
@@ -45,18 +50,15 @@ public class Activator implements BundleActivator {
 	/**
 	 * Standard htttp header text
 	 */
-	final String toWrite = 
-			  "HTTP/1.1 200 OK\r\n"
-			+ "Server: PC-0.0.1\r\n"
-			+ "Content-Type: text/plain; charset=utf-8\r\n"
-			+ "Content-Length: ";
 	@Override
 	public void start(BundleContext context) throws Exception {
+		INSTANCE = this;
+		this.ctx = context;
 		try {
 			System.out.println("Initializing: ProjectCuttlefish|HttpServer");
-			//just random testing -- binds to a random local port
 			Processor<Event<?>,Event<?>> processor = RingBufferProcessor.create("test1", 32);
 //			tcp = testTCP(processor);
+			UserAgentParser uaParser = new UserAgentParser();
 			http = new HttpServerImpl()
 				.init()
 				.dispatchOn(EventBus.create(processor))
@@ -67,6 +69,7 @@ public class Activator implements BundleActivator {
 						.listenOn(new InetSocketAddress("localhost",8080))
 						.onConnect((channel) -> {
 							channel.onRead((request) -> {
+								uaParser.apply(request.getHeader("User-Agent").first());
 								HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(request.getRequestLine().getHttpVersion(),200,"OK"))
 										.addHeader("Server","PC-0.0.5")
 										.addHeader("Content-Type","text/plain; charset=utf-8");
@@ -93,11 +96,16 @@ public class Activator implements BundleActivator {
 	public void stop(BundleContext context) throws Exception {
 		System.out.println("Goodbye!");
 		try {
-			tcp.shutdownNow();
+			if (tcp != null)
+				tcp.shutdownNow();
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
+		INSTANCE = null;
+	}
+	public BundleContext getContext() {
+		return ctx;
 	}
 	public TcpServer testTCP(Processor<Event<?>,Event<?>> processor) throws IllegalStateException, IOException, Exception {
 		return TcpServerFactory.getInstance().createServer(new InetSocketAddress("localhost", 8080))

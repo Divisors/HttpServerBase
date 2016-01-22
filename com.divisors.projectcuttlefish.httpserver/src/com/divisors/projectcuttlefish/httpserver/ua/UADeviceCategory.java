@@ -5,6 +5,8 @@ public enum UADeviceCategory {
 	 * 
 	 */
 	DESKTOP,
+	EMBEDED,
+	GAME_CONSOLE,
 	/**
 	 * A phone that has internet capabilities. Most likely less powerful CPU, and a touch screen.
 	 * Probably no keyboard. Possible slow or metered connection speeds.
@@ -14,9 +16,9 @@ public enum UADeviceCategory {
 	 * A larger wireless device. Most likely has a touch screen, 
 	 */
 	TABLET,
-	MOBILE,
-	LAPTOP,
-	CONSOLE,
+	/**
+	 * 
+	 */
 	WEARABLE,
 	/**
 	 * Crawler robot, like GoogleBot.
