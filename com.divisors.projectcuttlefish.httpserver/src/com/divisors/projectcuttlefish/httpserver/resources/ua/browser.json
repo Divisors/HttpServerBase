@@ -1,0 +1,12 @@
+{
+	families: [
+		{
+			name: "Chrome",
+			mfr: "Google",
+			devtype: {
+				"smartphone": "Chrome Mobile",
+				"tablet": "Chrome Mobile",
+				"pc": "Chrome Desktop"
+			}
+			}
+	]}
