@@ -3,10 +3,17 @@
 		{
 			name: "Chrome",
 			mfr: "Google",
-			devtype: {
-				"smartphone": "Chrome Mobile",
-				"tablet": "Chrome Mobile",
-				"pc": "Chrome Desktop"
-			}
-			}
+			patternRules: [
+				{
+					token: 0,
+					product: "Mozilla/5.0",
+					required: true
+				}
+				{
+					token: 2,
+					productName: "Chrome",
+					required: true
+				}
+			]
+		}
 	]}
