@@ -66,7 +66,7 @@ public class Activator implements BundleActivator {
 				.start(server-> {
 				try {
 					((HttpServerImpl)server)
-						.listenOn(new InetSocketAddress("localhost",8080))
+						.listenOn(new InetSocketAddress(8080))
 						.onConnect((channel) -> {
 							channel.onRead((request) -> {
 								uaParser.apply(request.getHeader("User-Agent").first());

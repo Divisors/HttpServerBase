@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
+@SuppressWarnings("unused")
 public class FormatUtilsTest {
 
 	@Test

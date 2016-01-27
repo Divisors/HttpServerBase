@@ -7,6 +7,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class UserAgentDetector implements Function<String, UserAgent> {
+	protected static final UserAgentDetector INSTANCE = new UserAgentDetector();
+	public UserAgentDetector getInstance() {
+		return INSTANCE;
+	}
 	List<UAPattern> patterns = new LinkedList<UAPattern>();
 	public void registerPattern(String name, String pattern) {
 		this.patterns.add(new UAPattern(name, pattern));

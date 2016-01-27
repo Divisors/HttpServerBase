@@ -4,11 +4,7 @@
 			name: "smartphone",
 			gpuPressure: true,
 			forceTouch: true,
-			ramPressure: true,
-			children: [
-				{
-					name: "iPhone"
-			}]
+			ramPressure: true
 		},
 		{
 			name: "pc",
