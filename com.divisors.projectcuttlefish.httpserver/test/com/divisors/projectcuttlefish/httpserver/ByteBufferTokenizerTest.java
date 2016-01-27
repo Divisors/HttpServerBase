@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils.ByteBufferTokenizer;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
+@SuppressWarnings("unused")
 public class ByteBufferTokenizerTest {
 
 	@Test

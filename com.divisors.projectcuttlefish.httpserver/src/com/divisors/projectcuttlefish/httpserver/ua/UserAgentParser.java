@@ -16,7 +16,7 @@ public class UserAgentParser implements Function<String, UserAgent> {
 	/**
 	 * Online demo @ <a href="http://www.regexpal.com/?fam=93936">regexpal.com/?fam=93936</a>.
 	 */
-	public static final Pattern tokenizer = Pattern.compile("(([A-Za-z]+)(\\/?([0-9\\.]+)?))( \\(((([A-Za-z0-9\\ \\_\\-\\,\\.]+); ?)*([A-Za-z0-9\\ \\_\\-\\,\\.]+))\\))?");
+	public static final Pattern tokenizer = Pattern.compile("(([A-Za-z]+)(\\/?([a-zA-Z0-9\\.]+)?))( \\(((([A-Za-z0-9\\ \\_\\-\\,\\.]+); ?)*([A-Za-z0-9\\ \\_\\-\\,\\.]+))\\))?");
 	@Override
 	public UserAgent apply(String ua) {
 		ParsedUAToken[] tokens = tokenize(ua);
@@ -29,8 +29,9 @@ public class UserAgentParser implements Function<String, UserAgent> {
 			switch (tokens[0].details.length) {
 				case 4:
 					//get language
+					language = tokens[0].details[3];
 				case 3:
-					
+					platform = tokens[0].details[2];
 				case 2:
 					switch (tokens[0].details[1]) {
 						case "U":
@@ -48,6 +49,8 @@ public class UserAgentParser implements Function<String, UserAgent> {
 			}
 		}
 		System.out.println("Security: " + security);
+		System.out.println("Language: " + language);
+		System.out.println("Platform: " + platform);
 		return null;
 	}
 	protected ParsedUAToken[] tokenize(String ua) {
@@ -57,7 +60,7 @@ public class UserAgentParser implements Function<String, UserAgent> {
 			result.add(new ParsedUAToken(m.group(2), m.group(4), m.group(6)));
 		return result.toArray(new ParsedUAToken[result.size()]);
 	}
-	protected class ParsedUAToken {
+	public static class ParsedUAToken {
 		/**
 		 * ProductName
 		 */

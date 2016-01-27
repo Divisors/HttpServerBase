@@ -1,0 +1,103 @@
+{
+	version: "0.0.1-alpha",
+	lastUpdated: "27 Jan 2016",
+	browsers: [
+		{
+			name: "Chrome",
+			mfr: "Google",
+			patternRules: [
+				{
+					token: 0,
+					product: "Mozilla/5.0"
+				},
+				{
+					token: 2,
+					productName: "Chrome"
+				}
+			],
+			parseRules: [
+				{
+					token: 2,
+					version: "browser.version"
+				}
+			]
+		},
+		{
+			name: "Safari",
+			mfr: "Apple",
+			patternRules: [
+				{
+					token: 0,
+					product: "Mozilla/5.0"
+				},
+				{
+					token: 0,
+					detail: 0,
+					value: "Macintosh"
+				},
+				{
+					token: 3,
+					productName: "Safari"
+				}
+			],
+			parseRules: [
+				{
+					token: 2,
+					version: "browser.version"
+				}
+			]
+		},
+		{
+			name: "Safari Mobile",
+			mfr: "Apple",
+			patternRules: [
+				{
+					token: 0,
+					product: "Mozilla/5.0"
+				},
+				{
+					token: 4,
+					productName: "Safari"
+				},
+				{
+					token: 2,
+					productName: "Mobile"
+				}
+			],
+			parseRules: [
+				{
+					token: 2,
+					version: "version"
+				},
+				{
+					token: 0,
+					target: "details",
+					regex: "^(?<device>iPhone|iPad|iPod); [UIN]; CPU iPhone OS (?<osv>\d\_?)+ like Mac OS X; (?<lang>[a-zA-Z0-9\-]+)$",
+					groups: {
+						device: "device.name",
+						osv: {
+							replaceChar: [
+								{
+									from: "_",
+									to: "."
+								}
+							],
+							key: "os.version"
+						},
+						lang: "lang"
+					}
+				},
+				{
+					key: "os.family",
+					value: "iOS",
+					safe: true
+				},
+				{
+					key: "device.type",
+					value: "smartphone",
+					safe: true
+				}
+			]
+		}
+	]
+}

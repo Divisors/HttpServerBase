@@ -1,0 +1,25 @@
+{
+	families: [
+		{
+			name: "smartphone",
+			gpuPressure: true,
+			forceTouch: true,
+			ramPressure: true
+		},
+		{
+			name: "pc",
+			gpuPressure: false,
+			forceTouch: false,
+			ramPressure: false
+		},
+		{
+			name: "tablet",
+			gpuPressure: true,
+			forceTouch: true,
+			ramPressure: true
+		},
+		{
+			name: 
+		}
+	]
+}
