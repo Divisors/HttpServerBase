@@ -57,10 +57,11 @@ public class UserAgentParser implements Function<String, UserAgent> {
 		List<ParsedUAToken> result = new LinkedList<>();
 		Matcher m = tokenizer.matcher(ua);
 		while (m.find())
-			result.add(new ParsedUAToken(m.group(2), m.group(4), m.group(6)));
+			result.add(new ParsedUAToken(m.group(), m.group(2), m.group(4), m.group(6)));
 		return result.toArray(new ParsedUAToken[result.size()]);
 	}
 	public static class ParsedUAToken {
+		final String raw;
 		/**
 		 * ProductName
 		 */
@@ -73,19 +74,23 @@ public class UserAgentParser implements Function<String, UserAgent> {
 		 * ProductDetails
 		 */
 		final String[] details;
-		
-		public ParsedUAToken(String name, String version, String[] details) {
+		final String rawDetails;
+		public ParsedUAToken(String raw, String name, String version, String[] details) {
+			this.raw = raw;
 			this.name = name;
 			this.version = version;
 			this.details = details;
+			rawDetails = null;
 		}
-		public ParsedUAToken(String name, String version, String details) {
+		public ParsedUAToken(String raw, String name, String version, String details) {
+			this.raw = raw;
 			this.name = name;
 			this.version = version;
 			if (details == null)
 				this.details = new String[0];
 			else
 				this.details = details.split("; ");
+			this.rawDetails = details;
 		}
 		public String getName() {
 			return name;

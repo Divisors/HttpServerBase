@@ -5,7 +5,7 @@ package com.divisors.projectcuttlefish.httpserver.ua;
  * @author mailmindlin
  */
 public interface UserAgent {
-	UAFamily getFamily();
+	UABrowser getBrowser();
 	UADeviceCategory getDeviceCategory();
 	UAOperatingSystem getOperatingSystem();
 	/**
