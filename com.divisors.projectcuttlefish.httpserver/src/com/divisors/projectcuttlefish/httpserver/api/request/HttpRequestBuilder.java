@@ -9,10 +9,18 @@ import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
  * @author mailmindlin
  */
 public class HttpRequestBuilder implements HttpRequest, Builder<HttpRequest> {
-	protected HttpRequestLine requestLine;
+	protected HttpRequestLineBuilder requestLine = new HttpRequestLineBuilder();
 	protected final HttpHeaders headers = new HttpHeaders();
-	public HttpRequestBuilder setRequestLine(HttpRequestLine requestLine) {
-		this.requestLine = requestLine;
+	public HttpRequestBuilder setMethod(String method) {
+		requestLine.setMethod(method);
+		return this;
+	}
+	public HttpRequestBuilder setPath(String path) {
+		requestLine.setPath(path);
+		return this;
+	}
+	public HttpRequestBuilder setHttpVersion(String version) {
+		requestLine.setVersion(version);
 		return this;
 	}
 	@Override

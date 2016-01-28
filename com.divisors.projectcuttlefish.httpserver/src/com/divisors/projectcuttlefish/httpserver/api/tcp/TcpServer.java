@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
+import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.Server;
 
 import reactor.bus.EventBus;
@@ -56,7 +57,7 @@ public interface TcpServer extends Server<ByteBuffer, ByteBuffer, TcpChannel>{
 	 * @return self
 	 */
 	@Override
-	TcpServer onConnect(Consumer<TcpChannel> handler);
+	Action onConnect(Consumer<TcpChannel> handler);
 	/**
 	 * 
 	 * @param processor

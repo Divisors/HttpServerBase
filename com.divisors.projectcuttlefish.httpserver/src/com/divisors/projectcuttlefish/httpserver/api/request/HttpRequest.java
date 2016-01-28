@@ -44,11 +44,9 @@ public interface HttpRequest extends Mutable<HttpRequest> {
 			if ((token = tokenizer.next()) == null)
 				throw new ParseException("Token is null");
 			String[] sections = new String(ByteUtils.toArray(token)).split(" ");//TODO optimize
-			builder.setRequestLine(new HttpRequestLineBuilder()
-					.setMethod(sections[0])
+			builder.setMethod(sections[0])
 					.setPath(sections[1])
-					.setVersion(sections[2].trim())
-					.build());
+					.setHttpVersion(sections[2].trim());
 		}
 		System.out.print("Parsing headers...");
 		{

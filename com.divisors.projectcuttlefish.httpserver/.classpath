@@ -9,5 +9,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/com.divisors.projectcuttlefish.httpserver/lib/javatuples-1.2-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

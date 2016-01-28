@@ -8,6 +8,7 @@ import reactor.bus.EventBus;
 import reactor.bus.registry.Registration;
 import reactor.bus.selector.Selector;
 
+@Deprecated
 public class CancellingHandler {
 	public static void bind(EventBus bus, Selector<?> selector, Predicate<Event<?>> handler) {
 		final CancellingHandler canceller = new CancellingHandler();

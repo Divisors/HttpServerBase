@@ -12,10 +12,11 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.Channel;
 import com.divisors.projectcuttlefish.httpserver.api.ChannelOption;
+import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
 
-import reactor.bus.Event;
 import reactor.bus.registry.Registration;
 import reactor.fn.Consumer;
 
@@ -42,7 +43,7 @@ public class TcpChannelImpl implements TcpChannel {
 	 * @see #getConnectionID()
 	 */
 	protected final long connID;
-	protected final List<Registration<Object, Consumer<? extends Event<?>>>> subscriptions = new ArrayList<>();
+	protected final List<Registration<?, ?>> subscriptions = new ArrayList<>();
 	//TODO use better queue
 	protected final Deque<ByteBuffer> writeQueue = new LinkedList<>();
 
@@ -125,9 +126,10 @@ public class TcpChannelImpl implements TcpChannel {
 	}
 	
 	@Override
-	public TcpChannelImpl onRead(Consumer<ByteBuffer> handler) {
-		this.subscriptions.add(server.bus.on($t("tcp.read", this.getConnectionID()), event -> handler.accept((ByteBuffer) event.getData())));
-		return this;
+	public Action onRead(Consumer<ByteBuffer> handler) {
+		Registration<?, ?> registration = server.bus.on($t("tcp.read", this.getConnectionID()), event -> handler.accept((ByteBuffer) event.getData()));
+		this.subscriptions.add(registration);
+		return new RegistrationCancelAction(registration);
 	}
 	protected int doWrite() throws IOException {
 		System.out.println("\tWill write...");

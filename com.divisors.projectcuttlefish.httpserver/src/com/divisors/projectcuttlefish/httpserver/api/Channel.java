@@ -19,9 +19,9 @@ public interface Channel<IN,OUT> extends AutoCloseable {
 	/**
 	 * Read handler.
 	 * @param handler
-	 * @return self
+	 * @return cancellation action
 	 */
-	Channel<IN, OUT> onRead(Consumer<IN> handler);
+	Action onRead(Consumer<IN> handler);
 	/**
 	 * Convert to another channel type
 	 * @param codec codec to map with

@@ -1,16 +1,13 @@
-package com.divisors.projectcuttlefish.httpserver.api.tcp;
+package com.divisors.projectcuttlefish.httpserver.client;
 
-import static reactor.bus.selector.Selectors.$;
-//import static com.divisors.projectcuttlefish.httpserver.api.tcp.SubsetSelector.$t;
+import static com.divisors.projectcuttlefish.httpserver.api.tcp.SubsetSelector.$t;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
 import java.time.Instant;
@@ -23,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import com.divisors.projectcuttlefish.httpserver.api.Action;
+import com.divisors.projectcuttlefish.httpserver.api.Server;
 import com.divisors.projectcuttlefish.httpserver.api.ServiceState;
 import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
 
@@ -35,49 +33,44 @@ import reactor.fn.tuple.Tuple;
  * @author mailmindlin
  * @see TcpServer
  */
-public class TcpServerImpl implements TcpServer {
+public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChannel>, Runnable {
 	public static final int BUFFER_SIZE = 4096;
 	protected EventBus bus;
-	protected final ConcurrentHashMap<Long, TcpChannelImpl> channelMap = new ConcurrentHashMap<>();
+	protected final ConcurrentHashMap<Long, TcpClientChannel> channelMap = new ConcurrentHashMap<>();
 	protected final AtomicLong nextId = new AtomicLong(0L);
 	protected Selector selector;
-	/**
-	 * Server socket
-	 */
-	protected ServerSocketChannel server;
-	/**
-	 * Address to connect to
-	 */
-	protected final SocketAddress addr;
 	/**
 	 * Executor that this server runs on
 	 */
 	protected ExecutorService executor;
+	/**
+	 * Current state of this
+	 */
 	protected final AtomicReference<ServiceState> state = new AtomicReference<>(ServiceState.UNINITIALIZED);
 	protected ByteBuffer readBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 	
-	
-	public TcpServerImpl(int port) throws IOException {
-		this(new InetSocketAddress("localhost",port));
+	public TcpClient() throws IOException {
 	}
-	public TcpServerImpl(SocketAddress addr) throws IOException {
-		this.addr = addr;
-		System.out.println("TCP::Binding to " + addr.toString());
+	public TcpClient(EventBus bus) {
+		this(bus, null);
+	}
+	public TcpClient(ExecutorService executor) {
+		this(null, executor);
+	}
+	public TcpClient(EventBus bus, ExecutorService executor) {
+		this.bus = bus;
+		this.executor = executor;
 	}
 	@Override
-	public TcpServerImpl init() throws Exception {
+	public TcpClient init() throws Exception {
 		if (getState() != ServiceState.UNINITIALIZED)
 			throw new IllegalStateException("Expected: UNITNITIALIZED; State: "+getState().name());
 		selector = Selector.open();
-		server = ServerSocketChannel.open();
-		server.socket().bind(addr);
-		server.configureBlocking(false);
-		server.register(selector, SelectionKey.OP_ACCEPT);
 		state.set(ServiceState.INITIALIZED);
 		return this;
 	}
 	@Override
-	public TcpServerImpl start() {
+	public TcpClient start() {
 		if (!state.compareAndSet(ServiceState.INITIALIZED, ServiceState.STARTING))
 			throw new IllegalStateException("Expected: INITIALIZED; State: "+state.get().name());
 		if (executor == null) {
@@ -87,8 +80,7 @@ public class TcpServerImpl implements TcpServer {
 		}
 		return this;
 	}
-	@Override
-	public TcpServerImpl start(Consumer<? super TcpServer> initializer) throws IOException, IllegalStateException {
+	public TcpClient start(Consumer<? super TcpClient> initializer) throws IOException, IllegalStateException {
 		if (!state.compareAndSet(ServiceState.INITIALIZED, ServiceState.STARTING))
 			throw new IllegalStateException("Expected: INITIALIZED; State: "+state.get().name());
 		initializer.accept(this);
@@ -99,23 +91,17 @@ public class TcpServerImpl implements TcpServer {
 		}
 		return this;
 	}
-	@Override
-	public TcpServerImpl dispatchOn(EventBus bus) {
+	public TcpClient dispatchOn(EventBus bus) {
 		this.bus = bus;
 		return this;
 	}
-	@Override
-	public TcpServerImpl runOn(ExecutorService executor) {
+	public TcpClient runOn(ExecutorService executor) {
 		final ServiceState cstate = getState();
 		if (cstate == ServiceState.UNINITIALIZED || cstate == ServiceState.INITIALIZED || cstate == ServiceState.STARTING)
 			this.executor = executor;
 		else
 			throw new IllegalStateException("Expected: INITIALIZED or STARTING; State: "+cstate.name());	
 		return this;
-	}
-	@Override
-	public SocketAddress getAddress() {
-		return addr;
 	}
 
 	@Override
@@ -125,8 +111,8 @@ public class TcpServerImpl implements TcpServer {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public Action onConnect(Consumer<TcpChannel> handler) {
-		return new RegistrationCancelAction(this.bus.on($("tcp.connect"), event -> handler.accept(((Event<TcpChannel>)event).getData())));
+	public Action onConnect(Consumer<TcpClientChannel> handler) {
+		return new RegistrationCancelAction(this.bus.on($t("tcp.connect"), event -> handler.accept(((Event<TcpClientChannel>)event).getData())));
 	}
 	
 	@Override
@@ -155,8 +141,8 @@ public class TcpServerImpl implements TcpServer {
 							if (!key.isValid())
 								continue;
 							
-							if (key.isAcceptable()) {
-								this.accept(key);
+							if (key.isConnectable()) {
+								this.connect(key);
 							} else {
 								if (key.isValid() && key.isReadable())
 									this.read(key);
@@ -213,8 +199,6 @@ public class TcpServerImpl implements TcpServer {
 	@Override
 	public void destroy() throws RuntimeException {
 		try {
-			this.server.close();
-			this.server = null;
 			this.selector.close();
 			this.selector = null;
 			this.channelMap.clear();
@@ -231,9 +215,9 @@ public class TcpServerImpl implements TcpServer {
 	 * @param key selection key
 	 * @throws IOException if there was a problem setting it up
 	 */
-	protected void accept(SelectionKey key) throws IOException {
+	protected void connect(SelectionKey key) throws IOException {
 		System.out.println("TCP::Accepting...");
-		SocketChannel socket = server.accept();
+		SocketChannel socket = (SocketChannel) key.channel();
 		
 		//if shutting down, don't accept any new threads
 		if (getState() == ServiceState.STOPPING) {
@@ -249,24 +233,24 @@ public class TcpServerImpl implements TcpServer {
 		socket.setOption(StandardSocketOptions.TCP_NODELAY, true);//We should *hopefully* be writing large amounts of data at a time, so this just decreases the RTT
 		
 		//create channel
-		long id = this.nextId.incrementAndGet();
-		TcpChannelImpl channel = upgradeSocket(socket, id);
-		channelMap.put(id, channel);
-		System.out.println("\tAccepted from "+channel.getRemoteAddress().toString());
+		long id = (Long)key.attachment();
+		upgradeSocket(socket, id);
+		TcpClientChannel channel = channelMap.get(id);
+		System.out.println("\tConnected to "+channel.getRemoteAddress().toString());
 		System.out.println("\tID #"+id);
 		
 		//trigger handlers
 		Event.Headers eventHeaders = new Event.Headers();
-		eventHeaders.setOrigin("TcpServerImpl@"+addr.toString());
-		bus.notify("tcp.connect",new Event<TcpChannel>(eventHeaders, channel));
+		eventHeaders.setOrigin("TcpClient@"+channel.getRemoteAddress().toString());
+		bus.notify("tcp.connect",new Event<TcpClientChannel>(eventHeaders, channel));
 		
 		//queue for future I/O
 		socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, id);
 		System.out.println("\tDone.");
 	}
-	protected TcpChannelImpl upgradeSocket(SocketChannel socket, long id) {
+	protected void upgradeSocket(SocketChannel socket, long id) throws IOException {
 		//this method can be overridden by children of this class offering encryption & stuff
-		return new TcpChannelImpl(this, socket, id);
+		socket.finishConnect();
 	}
 	/**
 	 * Read buffer of data from socket
@@ -277,7 +261,7 @@ public class TcpServerImpl implements TcpServer {
 		//get socket & channel
 		long id = (Long)key.attachment();
 		System.out.println("TCP::Reading #" + id + "...");
-		TcpChannelImpl channel = this.channelMap.get(id);
+		TcpClientChannel channel = this.channelMap.get(id);
 		SocketChannel socket = (SocketChannel)key.channel();
 		
 		//read from socket
@@ -334,9 +318,9 @@ public class TcpServerImpl implements TcpServer {
 		long id = (Long)attachment;
 		System.out.println("TCP::Writing #" + id + "...");
 		
-		TcpChannelImpl channel = this.channelMap.get(id);
+		TcpClientChannel channel = this.channelMap.get(id);
 
-		channel.doWrite();
+//		channel.doWrite();
 		
 		if (!((SocketChannel)key.channel()).isOpen()) {
 			try {
@@ -352,5 +336,22 @@ public class TcpServerImpl implements TcpServer {
 	@Override
 	public ServiceState getState() {
 		return this.state.get();
+	}
+	/**
+	 * 
+	 * @param addr
+	 * @return
+	 * @throws IOException if an I/O error occurs
+	 */
+	public TcpClientChannel open(SocketAddress addr) throws IOException {
+		return new TcpClientChannel(this, addr, nextId.getAndIncrement());
+	}
+	
+	protected void doConnect(TcpClientChannel channel) throws IOException {
+		SelectionKey key = channel.socket.register(this.selector, SelectionKey.OP_CONNECT);
+		if (channel.socket.connect(channel.getRemoteAddress())) {
+			this.connect(key);
+			return;
+		}
 	}
 }

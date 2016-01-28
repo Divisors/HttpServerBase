@@ -2,7 +2,6 @@ package com.divisors.projectcuttlefish.httpserver.api;
 
 import java.time.Duration;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * A generic class for standardizing non-blocking IO controllers, such as TCP servers, SQL connections, etc.
@@ -16,21 +15,9 @@ public interface Server<IN, OUT, CHANNEL extends Channel<IN,OUT>> extends Runnab
 	/**
 	 * 
 	 * @param handler
-	 * @return self
+	 * @return canceller
 	 */
-	default Server<IN, OUT, CHANNEL> onConnect(Consumer<CHANNEL> handler) {
-		return onConnect(channel -> {
-			handler.accept(channel);
-			return true;
-		});
-	}
-	/**
-	 * Similar to {@link #onConnect(Consumer)}, but if the handler returns false, it will not
-	 * receive any more events.
-	 * @param handler
-	 * @return self
-	 */
-	Server<IN, OUT, CHANNEL> onConnect(Predicate<CHANNEL> handler);
+	Action onConnect(Consumer<CHANNEL> handler);
 	/**
 	 * Whether all channels from this server are guaranteed to be secure, usually through implementing
 	 * some form of encryption, such as TLS.<br/>

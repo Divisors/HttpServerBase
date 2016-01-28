@@ -3,6 +3,7 @@ package com.divisors.projectcuttlefish.httpserver.api.tcp;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
+import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.Channel;
 
 import reactor.fn.Consumer;
@@ -46,5 +47,5 @@ public interface TcpChannel extends Channel<ByteBuffer, ByteBuffer> {
 	 * @return self
 	 */
 	@Override
-	TcpChannel onRead(Consumer<ByteBuffer> handler);
+	Action onRead(Consumer<ByteBuffer> handler);
 }

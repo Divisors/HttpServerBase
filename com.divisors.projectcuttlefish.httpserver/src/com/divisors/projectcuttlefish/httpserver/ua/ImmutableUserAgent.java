@@ -1,13 +1,8 @@
 package com.divisors.projectcuttlefish.httpserver.ua;
 
 public class ImmutableUserAgent implements UserAgent {
-	public ImmutableUserAgent(UAFamily family, UADeviceCategory category, UAOperatingSystem os, String ua, UASecurity security) {
+	public ImmutableUserAgent(UADeviceCategory category, UAOperatingSystem os, String ua, UASecurity security) {
 		
-	}
-	@Override
-	public UAFamily getFamily() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -30,6 +25,12 @@ public class ImmutableUserAgent implements UserAgent {
 
 	@Override
 	public UASecurity getSecurity() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public UABrowser getBrowser() {
 		// TODO Auto-generated method stub
 		return null;
 	}
