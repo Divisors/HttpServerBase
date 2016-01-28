@@ -3,7 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: HttpServer
 Bundle-SymbolicName: com.divisors.projectcuttlefish.httpserver;singleton:=true
 Bundle-Version: 0.0.5.alpha
-Bundle-ClassPath: lib/javatuples-1.2.jar,
+Bundle-ClassPath: lib/json-20151123.jar,
+ lib/javatuples-1.2.jar,
  .
 Bundle-Activator: com.divisors.projectcuttlefish.httpserver.Activator
 Bundle-Vendor: DIVISORS
@@ -19,7 +20,9 @@ Export-Package: com.divisors.projectcuttlefish.httpserver,
  com.divisors.projectcuttlefish.httpserver.ua,
  com.divisors.projectcuttlefish.httpserver.util,
  org.javatuples,
- org.javatuples.valueintf
+ org.javatuples.valueintf,
+ org.json,
+ resources
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: com.gs.collections.api.tuple;version="7.0.0",

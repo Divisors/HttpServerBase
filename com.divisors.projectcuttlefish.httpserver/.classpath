@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/javatuples-1.2.jar" sourcepath="lib/javatuples-1.2-sources.jar">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+		<accessrules>
+			<accessrule kind="accessible" pattern="**/*"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/javatuples-1.2.jar" sourcepath="lib/javatuples-1.2-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/com.divisors.projectcuttlefish.httpserver/lib/javatuples-1.2-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/json-20151123.jar" sourcepath="lib/json-20151123-sources.jar"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

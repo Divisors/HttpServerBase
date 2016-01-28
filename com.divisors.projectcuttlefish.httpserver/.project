@@ -37,4 +37,16 @@
 		<nature>org.eclipse.pde.api.tools.apiAnalysisNature</nature>
 		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>json-20151123.jar</name>
+			<type>1</type>
+			<location>lib/json-20151123.jar</location>
+		</link>
+		<link>
+			<name>javatuples-1.2.jar</name>
+			<type>1</type>
+			<location>lib/javatuples-1.2.jar</location>
+		</link>
+	</linkedResources>
 </projectDescription>
