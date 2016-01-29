@@ -18,15 +18,17 @@ import org.json.JSONObject;
 import com.divisors.projectcuttlefish.httpserver.Activator;
 import com.divisors.projectcuttlefish.httpserver.ua.UserAgentParser.ParsedUAToken;
 
-public class UserAgentDetector implements Function<String, UserAgent> {
-	protected static final UserAgentDetector INSTANCE = new UserAgentDetector();
-	public static UserAgentDetector getInstance() {
-		return INSTANCE;
-	}
-	protected static String load(String location) throws IOException {
-		System.out.println("Loading: '" + location + "'");
+public class UserAgentDetector implements Function<String, UserAgent>, RunnableService {
+	/**
+	 * Load a resource from the bundle's jar
+	 * @param path
+	 * @return
+	 * @throws IOException
+	 */
+	protected static String loadFromJar(String path) throws IOException {
+		System.out.println("Loading: '" + path + "'");
 		StringBuffer sb = new StringBuffer();
-		URL url = Activator.getInstance().getContext().getBundle().getEntry(location);
+		URL url = Activator.getInstance().getContext().getBundle().getEntry(path);
 		if (url == null)
 			throw new FileNotFoundException(location);
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream()))) {
@@ -36,6 +38,14 @@ public class UserAgentDetector implements Function<String, UserAgent> {
 		}
 		System.out.println("\tDone loading");
 		return sb.toString();
+	}
+	protected static String loadLocal(String path) {
+		IPath stateLocation = Platform.getStateLocation(Activator.getInstance().getContext().getBundle());
+		System.out.println(stateLocation);
+		return null;
+	}
+	protected static boolean saveLocal(String path, String data) {
+		return false;
 	}
 	UserAgentParser parser = new UserAgentParser();
 	List<UABrowser> browsers;
