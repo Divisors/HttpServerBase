@@ -3,6 +3,7 @@ package com.divisors.projectcuttlefish.httpserver.api.http;
 import java.util.Optional;
 
 import com.divisors.projectcuttlefish.httpserver.api.Channel;
+import com.divisors.projectcuttlefish.httpserver.api.ChannelOption;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpChannel;
@@ -39,4 +40,10 @@ public interface HttpChannel extends Channel<HttpRequest, HttpResponse> {
 	 * @return connection id
 	 */
 	long getConnectionID();
+	
+	@Override
+	HttpChannel write(HttpResponse response);
+	
+	@Override
+	<E> HttpChannel setOption(ChannelOption<E> key, E value);
 }

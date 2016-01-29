@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.divisors.projectcuttlefish.httpserver.api.Channel;
+import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.ChannelOption;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
-import com.divisors.projectcuttlefish.httpserver.api.response.StandardHttpResponseSerializer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpChannel;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
+import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
 
 import reactor.bus.Event;
 import reactor.bus.registry.Registration;
@@ -46,7 +46,7 @@ public class HttpChannelImpl implements HttpChannel {
 		});
 	}
 	@Override
-	public Channel<HttpRequest, HttpResponse> write(HttpResponse data) {
+	public HttpChannelImpl write(HttpResponse response) {
 		source.write(StandardHttpResponseSerializer.serialize(data));
 		return this;
 	}
@@ -86,7 +86,7 @@ public class HttpChannelImpl implements HttpChannel {
 		return null;
 	}
 	@Override
-	public <E> Channel<HttpRequest, HttpResponse> setOption(ChannelOption<E> key, E value) {
+	public <E> HttpChannelImpl setOption(ChannelOption<E> key, E value) {
 		// TODO Auto-generated method stub
 		return this;
 	}
