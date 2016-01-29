@@ -33,7 +33,7 @@ import reactor.fn.tuple.Tuple;
  * @author mailmindlin
  * @see TcpServer
  */
-public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChannel>, Runnable {
+public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChannel> {
 	public static final int BUFFER_SIZE = 4096;
 	protected EventBus bus;
 	protected final ConcurrentHashMap<Long, TcpClientChannel> channelMap = new ConcurrentHashMap<>();
@@ -344,7 +344,10 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 	 * @throws IOException if an I/O error occurs
 	 */
 	public TcpClientChannel open(SocketAddress addr) throws IOException {
-		return new TcpClientChannel(this, addr, nextId.getAndIncrement());
+		long id = nextId.incrementAndGet();
+		TcpClientChannel channel = new TcpClientChannel(this, addr, id);
+		this.channelMap.put(id, channel);
+		return channel;
 	}
 	
 	protected void doConnect(TcpClientChannel channel) throws IOException {
