@@ -1,24 +1,22 @@
 package com.divisors.projectcuttlefish.httpserver.client;
 
-import java.net.URL;
-import java.nio.ByteBuffer;
-import java.sql.Blob;
+import static com.divisors.projectcuttlefish.httpserver.api.tcp.SubsetSelector.$t;
+
+import java.io.IOException;
+import java.net.SocketAddress;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
-
-import org.json.JSONObject;
 
 import com.divisors.projectcuttlefish.httpserver.api.Action;
-import com.divisors.projectcuttlefish.httpserver.api.RunnableService;
 import com.divisors.projectcuttlefish.httpserver.api.Server;
 import com.divisors.projectcuttlefish.httpserver.api.ServiceState;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
-import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequestBuilder;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
+import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
 
+import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 /**
@@ -28,77 +26,70 @@ import reactor.bus.EventBus;
 public class HttpClient implements Server<HttpResponse, HttpRequest, HttpClientChannel>{
 	protected ExecutorService executor;
 	protected EventBus bus;
-	protected final AtomicReference<HttpClientReadyState> state = new AtomicReference<>(HttpClientReadyState.UNSENT);
-	public HttpClient() {
+	protected final AtomicReference<ServiceState> state = new AtomicReference<>(ServiceState.UNINITIALIZED);
+	protected TcpClient tcpClient;
+	
+	public HttpClient() throws IOException {
+		this(new TcpClient());
 	}
-	public HttpClient runOn(Executor executor) {
+	public HttpClient(TcpClient tcp) {
+		this(tcp, null, null);
+	}
+	public HttpClient(ExecutorService executor) {
+		this(new TcpClient(executor), null, executor);
+	}
+	public HttpClient(EventBus bus) {
+		this(new TcpClient(bus), bus, null);
+	}
+	public HttpClient(EventBus bus, ExecutorService executor) {
+		this(new TcpClient(bus, executor), bus, executor);
+	}
+	public HttpClient(TcpClient tcp, EventBus bus, ExecutorService executor) {
+		this.tcpClient = tcp;
+		this.bus = bus;
+		this.executor = executor;
+	}
+	public HttpClient runOn(ExecutorService executor) {
 		this.executor = executor;
 		return this;
 	}
-	public void abort() {
-		
-	}
-	void open(String method, URL url) {
-	}
-	void open(String method, String url, boolean async) {
-		
-	}
-	void open(String method, String url, boolean async, String user) {
-		
-	}
-	void open(String method, String url, boolean async, String user, String password) {
-		
-	}
-	void overrideMimeType(String mime) {
-		
-	}
-	void send() {
-		
-	}
-	void send(ByteBuffer data) {
-		
-	}
-	void send(Blob data) {
-		
-	}
-	void send(String data) {
-		
-	}
-	void send(JSONObject data) {
-		
-	}
-	void setRequestHeader(String header, String value) {
-		
+	@Override
+	public HttpClient init() throws Exception {
+		if (!this.state.compareAndSet(ServiceState.UNINITIALIZED, ServiceState.INITIALIZED))
+			throw new IllegalStateException();//TODO add msg
+		tcpClient.init();
+		return this;
 	}
 	@Override
-	public RunnableService init() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public RunnableService start() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public void destroy() throws RuntimeException {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public Action onConnect(Consumer<HttpClientChannel> handler) {
-		// TODO Auto-generated method stub
-		return null;
+	public HttpClient start() throws Exception {
+		if (!this.state.compareAndSet(ServiceState.INITIALIZED, ServiceState.STARTING))
+			throw new IllegalStateException();//TODO add msg
+		tcpClient.start();
+		return this;
 	}
 	@Override
 	public boolean isSecure() {
-		// TODO Auto-generated method stub
 		return false;
+	}
+	@Override
+	public ServiceState getState() {
+		return this.state.get();
+	}
+	@Override
+	public void run() {
+		tcpClient.run();
+	}
+	public HttpClientChannel open(SocketAddress addr) throws IOException {
+		return new HttpClientChannel(this, tcpClient.open(addr));
+	}
+	protected void doConnect(HttpClientChannel channel) throws IOException {
+		channel.tcp.connect();
+	}
+	@Override
+	@SuppressWarnings("unchecked")
+	public Action onConnect(Consumer<HttpClientChannel> handler) {
+		return new RegistrationCancelAction(bus.on($t("http.accept"), event->handler.accept(((Event<HttpClientChannel>)event).getData())));
+		
 	}
 	@Override
 	public boolean shutdown() {
@@ -112,13 +103,15 @@ public class HttpClient implements Server<HttpResponse, HttpRequest, HttpClientC
 	}
 	@Override
 	public boolean shutdownNow() throws Exception {
-		// TODO Auto-generated method stub
-		return false;
+		//TODO release channels
+		return tcpClient.shutdownNow();
 	}
 	@Override
-	public ServiceState getState() {
-		// TODO Auto-generated method stub
-		return null;
+	public void destroy() throws RuntimeException {
+		this.bus = null;
+		this.tcpClient.destroy();
+		this.tcpClient = null;
+		this.executor.shutdownNow();
+		this.executor = null;
 	}
-	
 }
