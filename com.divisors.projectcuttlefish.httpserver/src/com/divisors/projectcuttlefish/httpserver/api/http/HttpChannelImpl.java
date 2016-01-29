@@ -96,4 +96,8 @@ public class HttpChannelImpl implements HttpChannel {
 		return this.source.getConnectionID();
 	}
 
+	@Override
+	public String toString() {
+		return getClass().getName() + "#" + getConnectionID();
+	}
 }
