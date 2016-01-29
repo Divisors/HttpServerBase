@@ -57,10 +57,21 @@ public class TcpServerImpl implements TcpServer {
 	protected ByteBuffer readBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 	
 	
-	public TcpServerImpl(int port) throws IOException {
-		this(new InetSocketAddress("localhost",port));
+	public TcpServerImpl(int port) {
+		this(new InetSocketAddress(port));
 	}
-	public TcpServerImpl(SocketAddress addr) throws IOException {
+	public TcpServerImpl(SocketAddress addr) {
+		this(null, null, addr);
+	}
+	public TcpServerImpl(ExecutorService executor, SocketAddress addr) {
+		this(null, executor, addr);
+	}
+	public TcpServerImpl(EventBus bus, SocketAddress addr) {
+		this(bus, null, addr);
+	}
+	public TcpServerImpl(EventBus bus, ExecutorService executor, SocketAddress addr) {
+		this.bus = bus;
+		this.executor = executor;
 		this.addr = addr;
 		System.out.println("TCP::Binding to " + addr.toString());
 	}

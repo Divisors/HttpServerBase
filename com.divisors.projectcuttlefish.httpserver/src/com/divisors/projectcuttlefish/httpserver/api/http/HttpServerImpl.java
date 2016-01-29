@@ -41,6 +41,19 @@ public class HttpServerImpl implements HttpServer {
 	 * @see ServerState
 	 */
 	protected final AtomicReference<ServiceState> state = new AtomicReference<>(ServiceState.UNINITIALIZED);
+	public HttpServerImpl() {
+		
+	}
+	public HttpServerImpl(EventBus bus) {
+		this(bus, null);
+	}
+	public HttpServerImpl(ExecutorService executor) {
+		this(null, executor);
+	}
+	public HttpServerImpl(EventBus bus, ExecutorService executor) {
+		this.bus = bus;
+		this.executor = executor;
+	}
 	/**
 	 * Create a TcpServer on the given SocketAddress, and start it.
 	 * @param addr address to listen on
