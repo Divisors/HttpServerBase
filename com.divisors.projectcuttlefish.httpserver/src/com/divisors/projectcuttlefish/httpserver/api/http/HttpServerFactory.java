@@ -8,6 +8,7 @@ import java.net.SocketAddress;
  * Factory for producing {@link HttpServer}s. 
  * @author mailmindlin
  */
+@FunctionalInterface
 public interface HttpServerFactory {
 	/**
 	 * Create a http server initially bound to the given port on localhost.
@@ -17,7 +18,7 @@ public interface HttpServerFactory {
 	 * @throws IOException if there was a problem with binding.
 	 */
 	default HttpServer createServer(int port) throws IOException {
-		return createServer("localhost", port);
+		return createServer(new InetSocketAddress(port));
 	}
 	/**
 	 * Create
@@ -35,5 +36,5 @@ public interface HttpServerFactory {
 	 * @return server
 	 * @throws IOException upon a binding problem
 	 */
-	public HttpServer createServer(SocketAddress addr) throws IOException;
+	HttpServer createServer(SocketAddress addr) throws IOException;
 }
