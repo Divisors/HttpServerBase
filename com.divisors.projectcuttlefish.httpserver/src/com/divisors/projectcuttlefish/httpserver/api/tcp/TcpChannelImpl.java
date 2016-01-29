@@ -113,6 +113,19 @@ public class TcpChannelImpl implements TcpChannel {
 	 */
 	@Override
 	public TcpChannelImpl write(ByteBuffer data) {
+		if (this.writeQueue.isEmpty())
+			try {
+				System.out.println("Attempting to write " + data.remaining() + " bytes on #" + this.getConnectionID());
+				int written = this.socket.write(data);
+				System.out.println("\tWrote " + written);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		if (data.remaining() == 0)
+			return this;
+		
 		System.out.println("Queueing " + data.remaining() + " bytes for writing #" + this.getConnectionID());
 		this.writeQueue.add(data);
 		SelectionKey key = this.socket.keyFor(this.getServer().selector);
