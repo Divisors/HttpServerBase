@@ -1,5 +1,6 @@
 package com.divisors.projectcuttlefish.httpserver.api.request;
 
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeader;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
 
 /**
@@ -31,5 +32,25 @@ public final class ImmutableHttpRequest implements HttpRequest {
 	@Override
 	public HttpHeaders getHeaders() {
 		return headers;
+	}
+	@Override
+	public ImmutableHttpRequest addHeader(HttpHeader header) {
+		throw new UnsupportedOperationException("ImmutableHttpRequest is immutable");
+	}
+	@Override
+	public ImmutableHttpRequest addHeader(String key, String... values) {
+		throw new UnsupportedOperationException("ImmutableHttpRequest is immutable");
+	}
+	@Override
+	public ImmutableHttpRequest setHeader(HttpHeader header) {
+		throw new UnsupportedOperationException("ImmutableHttpRequest is immutable");
+	}
+	@Override
+	public ImmutableHttpRequest setHeader(String key, String... values) {
+		throw new UnsupportedOperationException("ImmutableHttpRequest is immutable");
+	}
+	@Override
+	public ImmutableHttpRequest removeHeader(String key) {
+		throw new UnsupportedOperationException("ImmutableHttpRequest is immutable");
 	}
 }

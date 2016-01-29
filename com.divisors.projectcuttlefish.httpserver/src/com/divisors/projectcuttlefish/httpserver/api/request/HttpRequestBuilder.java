@@ -1,5 +1,7 @@
 package com.divisors.projectcuttlefish.httpserver.api.request;
 
+import java.util.Arrays;
+
 import com.divisors.projectcuttlefish.httpserver.api.Builder;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeader;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
@@ -47,6 +49,31 @@ public class HttpRequestBuilder implements HttpRequest, Builder<HttpRequest> {
 	@Override
 	public HttpHeader getHeader(String key) {
 		return headers.getHeader(key);
+	}
+	@Override
+	public HttpRequestBuilder addHeader(HttpHeader header) {
+		getHeaders().add(header);
+		return this;
+	}
+	@Override
+	public HttpRequestBuilder addHeader(String key, String... values) {
+		getHeaders().addAll(key, Arrays.asList(values));
+		return this;
+	}
+	@Override
+	public HttpRequestBuilder setHeader(HttpHeader header) {
+		getHeaders().put(header);
+		return this;
+	}
+	@Override
+	public HttpRequestBuilder setHeader(String key, String... values) {
+		getHeaders().put(key, values);
+		return this;
+	}
+	@Override
+	public HttpRequestBuilder removeHeader(String key) {
+		getHeaders().remove(key);
+		return this;
 	}
 	
 }

@@ -100,6 +100,11 @@ public interface HttpRequest extends Mutable<HttpRequest> {
 	default HttpHeader getHeader(String key) {
 		return getHeaders().getHeader(key);
 	}
+	HttpRequest addHeader(HttpHeader header);
+	HttpRequest addHeader(String key, String...values);
+	HttpRequest setHeader(HttpHeader header);
+	HttpRequest setHeader(String key, String...values);
+	HttpRequest removeHeader(String key);
 	
 	@Override
 	default ImmutableHttpRequest immutable() {
