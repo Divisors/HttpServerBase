@@ -3,7 +3,7 @@ package com.divisors.projectcuttlefish.httpserver.api.request;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
 
 /**
- * 
+ * An immutable HTTP request
  * @author mailmindlin
  */
 public final class ImmutableHttpRequest implements HttpRequest {

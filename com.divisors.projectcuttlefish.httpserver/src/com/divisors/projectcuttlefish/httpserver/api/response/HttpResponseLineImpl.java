@@ -6,6 +6,11 @@ public class HttpResponseLineImpl implements HttpResponseLine {
 	public HttpResponseLineImpl() {
 		
 	}
+	/**
+	 * @param httpv HTTP version
+	 * @param code response code
+	 * @param message response message
+	 */
 	public HttpResponseLineImpl(String httpv, int code, String message) {
 		this.httpv = httpv;
 		this.code = code;
