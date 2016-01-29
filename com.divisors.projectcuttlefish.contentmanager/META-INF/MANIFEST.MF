@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Project Cuttlefish Content Manager
 Bundle-SymbolicName: com.divisors.projectcuttlefish.contentmanager
-Bundle-Version: 0.0.5.alpha
+Bundle-Version: 0.0.6.alpha
 Bundle-Activator: com.divisors.projectcuttlefish.contentmanager.Activator
 Bundle-Vendor: DIVISORS
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
