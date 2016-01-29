@@ -32,7 +32,7 @@ public class HttpChannelImpl implements HttpChannel {
 	protected final TcpChannel source;
 	protected final HttpServerImpl server;
 	protected final AtomicBoolean open = new AtomicBoolean(true);
-	protected final List<Registration<Object, Consumer<? extends Event<?>>>>subscriptions = new LinkedList<>();
+	protected final List<Registration<?, ?>>subscriptions = new LinkedList<>();
 	public HttpChannelImpl(TcpChannel source, HttpServerImpl server) {
 		server.bus.notify(Tuple.<String,Long>of("http.connect", source.getConnectionID()), Event.wrap(this));
 		this.source = source;
@@ -52,9 +52,10 @@ public class HttpChannelImpl implements HttpChannel {
 	}
 
 	@Override
-	public Channel<HttpRequest, HttpResponse> onRead(Consumer<HttpRequest> handler) {
-		this.subscriptions.add(server.bus.on($t("http.request", this.source.getConnectionID()), event -> handler.accept((HttpRequest) event.getData())));
-		return this;
+	public Action onRead(Consumer<HttpRequest> handler) {
+		Registration<?, ?> registration = server.bus.on($t("http.request", this.source.getConnectionID()), event -> handler.accept((HttpRequest) event.getData()));
+		this.subscriptions.add(registration);
+		return new RegistrationCancelAction(registration);
 	}
 
 	@Override
