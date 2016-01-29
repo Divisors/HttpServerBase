@@ -43,8 +43,7 @@ public class TcpClientChannel implements Channel<ByteBuffer, ByteBuffer> {
 	}
 	@Override
 	public boolean isOpen() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.socket.isOpen();
 	}
 	@Override
 	public <E> Channel<ByteBuffer, ByteBuffer> setOption(ChannelOption<E> key, E value) {
@@ -65,8 +64,12 @@ public class TcpClientChannel implements Channel<ByteBuffer, ByteBuffer> {
 	}
 	@Override
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		
+		client.channelMap.remove(getConnectionID());
+		this.socket.close();
+	}
+	public void connect() throws IOException {
+		this.client.doConnect(this);
+	}
 	protected int doWrite() throws IOException {
 		System.out.println("\tWill write...");
 		ByteBuffer buf;
