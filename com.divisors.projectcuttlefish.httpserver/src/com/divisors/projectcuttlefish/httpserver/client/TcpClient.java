@@ -11,7 +11,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Deque;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,9 +31,8 @@ import reactor.bus.EventBus;
 import reactor.fn.tuple.Tuple;
 
 /**
- * Implementation of {@link TcpServer}. 
+ * Non-blocking TCP client implementation. 
  * @author mailmindlin
- * @see TcpServer
  */
 public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChannel> {
 	public static final int BUFFER_SIZE = 4096;
@@ -48,6 +49,7 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 	 */
 	protected final AtomicReference<ServiceState> state = new AtomicReference<>(ServiceState.UNINITIALIZED);
 	protected ByteBuffer readBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
+	protected final Deque<Consumer<Selector>> selectorUpdateQueue = new LinkedList<>();//TODO better queue
 	
 	public TcpClient() throws IOException {
 	}
@@ -130,6 +132,10 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 						nKeys = selector.select(1000);//the server is stopping now, so ensure that this doesn't hang for as long.
 					else
 						nKeys = selector.select();//there are some open channels & the server isn't closing, so we don't have to check as much
+					
+					//Apply selector events
+					while (!this.selectorUpdateQueue.isEmpty())
+						selectorUpdateQueue.pop().accept(selector);
 					
 					if (nKeys > 0) {
 						System.out.println("\tGot " + nKeys + " key(s)");
@@ -352,5 +358,9 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 	
 	protected void doConnect(TcpClientChannel channel) throws IOException {
 		channel.socket.connect(channel.getRemoteAddress());
+	}
+	protected void requireSelector(Consumer<Selector> action) {
+		this.selectorUpdateQueue.push(action);
+		this.selector.wakeup();
 	}
 }

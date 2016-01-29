@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.Channel;
 import com.divisors.projectcuttlefish.httpserver.api.ChannelOption;
+import com.divisors.projectcuttlefish.httpserver.util.RegisterChannelUpdate;
 import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
 
 import reactor.bus.Event;
@@ -32,6 +33,7 @@ public class TcpClientChannel implements Channel<ByteBuffer, ByteBuffer> {
 		this.id = id;
 		this.socket = SocketChannel.open();
 		socket.configureBlocking(false);
+		client.requireSelector(new RegisterChannelUpdate(this.socket, SelectionKey.OP_CONNECT, id));
 	}
 	@Override
 	public TcpClientChannel write(ByteBuffer data) {
