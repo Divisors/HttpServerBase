@@ -18,10 +18,10 @@ import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponseImpl;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponseLineImpl;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponsePayload;
-import com.divisors.projectcuttlefish.httpserver.api.response.StandardHttpResponseSerializer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
+import com.divisors.projectcuttlefish.httpserver.ua.UserAgentDetector;
 import com.divisors.projectcuttlefish.httpserver.ua.UserAgentParser;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
@@ -47,6 +47,9 @@ public class Activator implements BundleActivator {
 	ServiceRegistration<?> serverFactoryServiceRegistration;
 	TcpServer tcp;
 	HttpServer http;
+	UserAgentDetector uaDetector;
+	Processor<Event<?>,Event<?>> processor;
+	
 	/**
 	 * Standard htttp header text
 	 */
@@ -56,13 +59,10 @@ public class Activator implements BundleActivator {
 		this.ctx = context;
 		try {
 			System.out.println("Initializing: ProjectCuttlefish|HttpServer");
-			Processor<Event<?>,Event<?>> processor = RingBufferProcessor.create("test1", 32);
-//			tcp = testTCP(processor);
+			processor = RingBufferProcessor.create("pc.server.1", 32);
 			UserAgentParser uaParser = new UserAgentParser();
-			http = new HttpServerImpl()
+			http = new HttpServerImpl(EventBus.create(processor), Executors.newCachedThreadPool())
 				.init()
-				.dispatchOn(EventBus.create(processor))
-				.runOn(Executors.newCachedThreadPool())
 				.start(server-> {
 				try {
 					((HttpServerImpl)server)
@@ -72,7 +72,7 @@ public class Activator implements BundleActivator {
 								if (request.getHeaders().containsKey("User-Agent"))
 									uaParser.apply(request.getHeader("User-Agent").first());
 								HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(request.getRequestLine().getHttpVersion(),200,"OK"))
-										.addHeader("Server","PC-0.0.5")
+										.addHeader("Server","PC-0.0.6")
 										.addHeader("Content-Type","text/plain; charset=utf-8");
 								
 								StringBuilder responseText = new StringBuilder().append("Hello, World!");
@@ -125,7 +125,7 @@ public class Activator implements BundleActivator {
 								
 								String text = new String(data.array());
 								HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(request.getRequestLine().getHttpVersion(),200,"OK"))
-										.setHeader("Server", "PC-0.0.1")
+										.setHeader("Server", "PC-0.0.6")
 										.setHeader("Content-Type", "text/plain; charset=utf-8");
 								
 								byte[] output = new StringBuilder(text)
@@ -137,7 +137,7 @@ public class Activator implements BundleActivator {
 								response.setHeader("Content-Length", "" + output.length);
 								
 								channel.setOption(StandardChannelOptions.CLOSE_AFTER_WRITE, true)
-										.write(StandardHttpResponseSerializer.serialize(response))
+										.write(response.serialize())
 										.write((ByteBuffer)ByteBuffer.allocate(output.length).put(output).flip());
 							});
 						});

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: HttpServer
 Bundle-SymbolicName: com.divisors.projectcuttlefish.httpserver;singleton:=true
-Bundle-Version: 0.0.5.alpha
+Bundle-Version: 0.0.6.alpha
 Bundle-ClassPath: lib/json-20151123.jar,
  lib/javatuples-1.2.jar,
  .
@@ -17,6 +17,7 @@ Export-Package: com.divisors.projectcuttlefish.httpserver,
  com.divisors.projectcuttlefish.httpserver.api.response,
  com.divisors.projectcuttlefish.httpserver.api.tcp,
  com.divisors.projectcuttlefish.httpserver.api.websocket,
+ com.divisors.projectcuttlefish.httpserver.client,
  com.divisors.projectcuttlefish.httpserver.ua,
  com.divisors.projectcuttlefish.httpserver.util,
  org.javatuples,
