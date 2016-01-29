@@ -64,4 +64,8 @@ public class HttpRequestLineBuilder implements HttpRequestLine, Builder<Immutabl
 		return true;
 	}
 	
+	@Override
+	public String toString() {
+		return getMethod() + ' ' + getPath() + ' ' + getHttpVersion();
+	}
 }
