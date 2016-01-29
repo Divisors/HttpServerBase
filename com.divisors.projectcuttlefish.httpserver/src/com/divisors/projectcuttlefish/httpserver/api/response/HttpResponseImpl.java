@@ -9,15 +9,15 @@ public class HttpResponseImpl implements HttpResponse {
 	protected HttpResponseLine responseLine;
 	protected HttpHeaders headers;
 	protected HttpResponsePayload body;
-	public HttpResponseImpl(HttpResponseLine responseLine, HttpHeaders headers) {
-		this.responseLine = responseLine;
-		this.headers = headers;
+	public HttpResponseImpl() {
+		this(new HttpResponseLineImpl(), new HttpHeaders());
 	}
 	public HttpResponseImpl(HttpResponseLine responseLine) {
 		this(responseLine, new HttpHeaders());
 	}
-	public HttpResponseImpl() {
-		this(new HttpResponseLineImpl(), new HttpHeaders());
+	public HttpResponseImpl(HttpResponseLine responseLine, HttpHeaders headers) {
+		this.responseLine = responseLine;
+		this.headers = headers;
 	}
 	@Override
 	public HttpResponseLine getResponseLine() {
