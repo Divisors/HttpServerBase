@@ -22,7 +22,6 @@ import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
 import com.divisors.projectcuttlefish.httpserver.ua.UserAgentDetector;
-import com.divisors.projectcuttlefish.httpserver.ua.UserAgentParser;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
 import reactor.bus.Event;
@@ -60,7 +59,8 @@ public class Activator implements BundleActivator {
 		try {
 			System.out.println("Initializing: ProjectCuttlefish|HttpServer");
 			processor = RingBufferProcessor.create("pc.server.1", 32);
-			UserAgentParser uaParser = new UserAgentParser();
+			uaDetector = new UserAgentDetector();
+			uaDetector.init();
 			http = new HttpServerImpl(EventBus.create(processor), Executors.newCachedThreadPool())
 				.init()
 				.start(server-> {
@@ -70,7 +70,7 @@ public class Activator implements BundleActivator {
 						.onConnect((channel) -> {
 							channel.onRead((request) -> {
 								if (request.getHeaders().containsKey("User-Agent"))
-									uaParser.apply(request.getHeader("User-Agent").first());
+									uaDetector.apply(request.getHeader("User-Agent").first());
 								HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(request.getRequestLine().getHttpVersion(),200,"OK"))
 										.addHeader("Server","PC-0.0.6")
 										.addHeader("Content-Type","text/plain; charset=utf-8");

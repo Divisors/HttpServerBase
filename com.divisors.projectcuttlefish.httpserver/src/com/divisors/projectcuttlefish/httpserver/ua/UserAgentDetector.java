@@ -5,17 +5,22 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.LinkedList;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.divisors.projectcuttlefish.httpserver.Activator;
+import com.divisors.projectcuttlefish.httpserver.api.RunnableService;
+import com.divisors.projectcuttlefish.httpserver.api.ServiceState;
 import com.divisors.projectcuttlefish.httpserver.ua.UserAgentParser.ParsedUAToken;
 
 public class UserAgentDetector implements Function<String, UserAgent>, RunnableService {
@@ -30,7 +35,7 @@ public class UserAgentDetector implements Function<String, UserAgent>, RunnableS
 		StringBuffer sb = new StringBuffer();
 		URL url = Activator.getInstance().getContext().getBundle().getEntry(path);
 		if (url == null)
-			throw new FileNotFoundException(location);
+			throw new FileNotFoundException(path);
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream()))) {
 			String line;
 			while ((line = br.readLine()) != null)
@@ -48,44 +53,81 @@ public class UserAgentDetector implements Function<String, UserAgent>, RunnableS
 		return false;
 	}
 	UserAgentParser parser = new UserAgentParser();
-	List<UABrowser> browsers;
 	ConcurrentHashMap<String, UserAgent> cache = new ConcurrentHashMap<>();
-	public UserAgentDetector() throws JSONException {
-		//load resources
-		try {
-			init();
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
+	List<UABrowser> browsers;
+	public UserAgentDetector() {
 	}
-	public void init() throws IOException, JSONException {
-		JSONObject browserMeta = new JSONObject(load("/src/com/divisors/projectcuttlefish/httpserver/resources/ua/browser.json"));
+	@Override
+	public UserAgentDetector init() throws IOException, JSONException {
+		JSONObject browserMeta = new JSONObject(loadFromJar("/src/com/divisors/projectcuttlefish/httpserver/resources/ua/browser.json"));
 		JSONArray browserInfo = browserMeta.getJSONArray("browsers");
-		this.browsers = new LinkedList<>();
+		this.browsers = new ArrayList<>(browserInfo.length());
 		for (int i=0; i < browserInfo.length(); i++) {
 			UABrowser browser = new UABrowser(browserInfo.getJSONObject(i));
 			System.out.println("Loaded browser: " + browser.getName());
 			browsers.add(browser);
 		}
+		return this;
+	}
+	@Override
+	public UserAgentDetector start() throws Exception {
+		// TODO Auto-generated method stub
+		return this;
 	}
 	@Override
 	public UserAgent apply(String s) {
-		ParsedUAToken[] tokens = parser.tokenize(s);
-		for (UABrowser browser : browsers) {
-			if (browser.test(tokens)) {
-				System.out.println("Browser: " + browser.getName());
-				return null;
+		{
+			UserAgent result = this.cache.get(s);
+			if (result != null) {
+				System.out.println("Browser (cached): " + result.getBrowser());
+				return result;
 			}
 		}
+		ParsedUAToken[] tokens = parser.tokenize(s);
+		UABrowser browser;
+		for (UABrowser browserCandidate : browsers) {
+			if (browserCandidate.test(tokens)) {
+				browser = browserCandidate;
+				System.out.println("Browser: " + browser.getName());
+				break;
+			}
+		}
+		
+		UAOperatingSystem os;
+		
 		return null;
 	}
-	static class UAPattern {
-		public String name;
-		public Pattern pattern;
-		public UAPattern(String name, String pattern) {
-			this.name = name;
-			this.pattern = Pattern.compile(pattern);
-		}
+	
+	protected Map<String, String> applyParseRules(UABrowser browser, ParsedUAToken[] tokens) {
+		//TODO finish
+		return null;
+	}
+	
+	@Override
+	public void run() {	}
+	@Override
+	public boolean shutdown() throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public boolean shutdown(Duration timeout) throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public boolean shutdownNow() throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public void destroy() throws RuntimeException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public ServiceState getState() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
