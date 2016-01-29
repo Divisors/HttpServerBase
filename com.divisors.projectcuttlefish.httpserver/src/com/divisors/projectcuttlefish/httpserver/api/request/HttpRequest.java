@@ -18,7 +18,6 @@ import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
  *
  */
 public interface HttpRequest extends Mutable<HttpRequest> {
-	public static final byte[] newline = new byte[]{'\r','\n'};
 	public static final String METHOD_GET = "GET";
 	public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_POST = "POST";
@@ -105,5 +104,12 @@ public interface HttpRequest extends Mutable<HttpRequest> {
 	@Override
 	default ImmutableHttpRequest immutable() {
 		return new ImmutableHttpRequest(this);
+	}
+	default ByteBuffer serialize() {
+		StringBuilder headers = new StringBuilder(getRequestLine().toString())
+				.append("\r\n")
+				.append(getHeaders().toString())
+				.append("\r\n");
+		return ByteBuffer.wrap(headers.toString().getBytes());
 	}
 }

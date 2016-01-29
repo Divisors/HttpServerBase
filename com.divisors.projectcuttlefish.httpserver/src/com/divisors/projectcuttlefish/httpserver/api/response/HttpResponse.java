@@ -64,4 +64,16 @@ public interface HttpResponse extends Mutable<ImmutableHttpResponse> {
 	default ImmutableHttpResponse immutable() {
 		return new ImmutableHttpResponse(getResponseLine(), getHeaders(), getBody());
 	}
+	default ByteBuffer serialize() {
+		StringBuilder headers = new StringBuilder(getResponseLine().toString())
+				.append("\r\n")
+				.append(getHeaders().toString())
+				.append("\r\n");
+		byte[] bytes = headers.toString().getBytes();
+		ByteBuffer b = ByteBuffer.allocate(bytes.length + (int)getBody().remaining());//TODO: fix for big things
+		b.put(bytes);
+		getBody().drainTo(b::put);
+		b.flip();
+		return b;
+	}
 }
