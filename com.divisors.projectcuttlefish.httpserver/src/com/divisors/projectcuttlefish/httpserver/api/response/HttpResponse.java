@@ -11,6 +11,38 @@ import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
  * @see ImmutableHttpResponse
  */
 public interface HttpResponse extends Mutable<ImmutableHttpResponse> {
+	public static final int RC_PRECONDITION_FAILED = 412;
+	/**
+	 * Parse a ByteBuffer
+	 * @param data
+	 * @return parsed response
+	 * TODO test
+	 */
+	public static HttpResponse parse(ByteBuffer data) throws ParseException {
+		ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(ByteUtils.HTTP_NEWLINE, data);
+		ByteBuffer token;
+		System.out.println(new String(ByteUtils.toArray(data.duplicate())));
+		System.out.println(FormatUtils.bytesToHex(data.duplicate(), true));
+		// Parse response line
+		if ((token = tokenizer.next()) == null)
+			throw new ParseException("Token was null (while parsing response line).");
+		String[] sections = new String(ByteUtils.toArray(token)).split(" ");//TODO optimize
+		HttpResponseImpl result = new HttpResponseImpl(new HttpResponseLineImpl(sections[0], Integer.parseInt(sections[1]), sections[2]));
+		
+		// Parse headers
+		HttpRequest.parseHeaders(tokenizer, result.getHeaders());
+		System.out.println("Done");
+		
+		//TEST: print to console
+		System.out.println("\t=> "+result.getResponseLine());
+		result.getHeaders().entrySet().stream()
+			.flatMap(entry->entry.getValue().stream()
+				.map(value->(new AbstractMap.SimpleEntry<>(entry.getKey(), value))))
+			.map(entry->("\t=> "+entry.getKey()+": "+entry.getValue()))
+			.forEach(System.out::println);
+		return result;
+	}
+	
 	HttpResponseLine getResponseLine();
 	
 	HttpHeaders getHeaders();
