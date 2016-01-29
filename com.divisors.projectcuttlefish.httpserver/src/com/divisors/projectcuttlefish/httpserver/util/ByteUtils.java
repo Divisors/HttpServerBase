@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
  *
  */
 public class ByteUtils {
+	public static final byte[] HTTP_NEWLINE = new byte[]{'\r','\n'};
 	/**
 	 * Lets you do stuff like {@link String#split(String)}, but with ByteBuffers
 	 * 

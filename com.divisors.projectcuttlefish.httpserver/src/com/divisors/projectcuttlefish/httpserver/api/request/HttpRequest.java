@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.AbstractMap;
 
 import com.divisors.projectcuttlefish.httpserver.api.Mutable;
+import com.divisors.projectcuttlefish.httpserver.api.error.ParseException;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeader;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils;
@@ -36,40 +37,23 @@ public interface HttpRequest extends Mutable<HttpRequest> {
 	 * @throws ParseException
 	 */
 	public static HttpRequest parse(ByteBuffer data) throws ParseException {
-		ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(newline, data);
+		ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(ByteUtils.HTTP_NEWLINE, data);
 		HttpRequestBuilder builder = new HttpRequestBuilder();
 		ByteBuffer token;
+		
 		//parse request line
-		{
-			if ((token = tokenizer.next()) == null)
-				throw new ParseException("Token is null");
-			String[] sections = new String(ByteUtils.toArray(token)).split(" ");//TODO optimize
-			builder.setMethod(sections[0])
-					.setPath(sections[1])
-					.setHttpVersion(sections[2].trim());
-		}
+		if ((token = tokenizer.next()) == null)
+			throw new ParseException("Token is null (while parsing request line)");
+		String reqLine = new String(ByteUtils.toArray(token)).trim();
+		String[] sections = reqLine.split(" ");//TODO optimize
+		builder.setMethod(sections[0])
+				.setPath(sections[1])
+				.setHttpVersion(sections[2].trim());
+		
 		System.out.print("Parsing headers...");
-		{
-			HttpHeaders headers = builder.getHeaders();
-			while ((token = tokenizer.next()) != null && token.remaining() > 5) {//the smallest possible header is 5 bytes ('K:V\r\n')
-				//last 2 bytes are '\r\n', so this effectively does the same thing as String#trim()
-				byte[] header = new byte[token.remaining() - 2];
-				token.get(header);
-				int keyEnd = -1, length = header.length - 1;
-				search:
-				for (int i=1; i<length; i++)
-					if (header[i] == ':') {
-						keyEnd = i;
-						break search;
-					}
-				String key = new String(header, 0, keyEnd);
-				String value = new String(header, keyEnd, header.length - keyEnd).substring(2);
-				headers.add(key, value);
-			}
-			if (token != null && token.remaining() > 2)
-				throw new ParseException("Unknown bytes found in parsing: "+FormatUtils.bytesToHex(ByteUtils.toArray(token), true, -1));
-			System.out.println("Done");
-		}
+		parseHeaders(tokenizer, builder.getHeaders());
+		System.out.println("Done");
+		
 		//TEST: print to console
 		System.out.println("\t=> "+builder.getRequestLine());
 		builder.getHeaders().entrySet().stream()
@@ -79,7 +63,26 @@ public interface HttpRequest extends Mutable<HttpRequest> {
 			.forEach(System.out::println);
 		return builder.build();
 	}
-
+	public static void parseHeaders(ByteBufferTokenizer tokenizer, HttpHeaders headers) throws ParseException {
+		ByteBuffer token;
+		while ((token = tokenizer.next()) != null && token.remaining() > 5) {//the smallest possible header is 5 bytes ('K:V\r\n')
+			//last 2 bytes are '\r\n', so this effectively does the same thing as String#trim()
+			byte[] header = new byte[token.remaining() - 2];
+			token.get(header);
+			int keyEnd = -1, length = header.length - 1;
+			search:
+			for (int i=1; i<length; i++)
+				if (header[i] == ':') {
+					keyEnd = i;
+					break search;
+				}
+			String key = new String(header, 0, keyEnd);
+			String value = new String(header, keyEnd, header.length - keyEnd).substring(2);//TODO remove substring, add to keyEnd
+			headers.add(key, value);
+		}
+		if (token != null && token.remaining() > 2)
+			throw new ParseException("Unknown bytes found in parsing headers: "+FormatUtils.bytesToHex(ByteUtils.toArray(token), true, -1));
+	}
 	default String getMethod() {
 		return getRequestLine().getMethod();
 	}
