@@ -143,14 +143,14 @@ public class TcpServerImpl implements TcpServer {
 	@Override
 	public void run() {
 		if (!state.compareAndSet(ServiceState.STARTING, ServiceState.RUNNING))
-			throw new IllegalStateException("I was already running! (Expect: ServiceState#STARTING; was " + state.get() + ").");
+			throw new IllegalStateException("I was already running! (Expect: STARTING; was " + state.get() + ").");
 		try {
 			ServiceState cstate;//temporary state mirror for making life easy
 
 			while ((cstate = getState()) == ServiceState.RUNNING || (cstate == ServiceState.STOPPING && channelMap.size() > 0)) {
 				try {
 					int nKeys = 0;//number of keys selected
-					System.out.println("TCP::Polling... ("+this.channelMap.size()+" open)");
+					System.out.println("TCP::Polling... (" + this.channelMap.size() + " channels open)");
 					if ((cstate = getState()) == ServiceState.STOPPING)
 						nKeys = selector.select(1000);//the server is stopping now, so ensure that this doesn't hang for as long.
 					else
