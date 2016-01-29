@@ -76,7 +76,7 @@ public class TcpServerImpl implements TcpServer {
 		System.out.println("TCP::Binding to " + addr.toString());
 	}
 	@Override
-	public TcpServerImpl init() throws Exception {
+	public TcpServerImpl init() throws IllegalStateException, IOException {
 		if (getState() != ServiceState.UNINITIALIZED)
 			throw new IllegalStateException("Expected: UNITNITIALIZED; State: "+getState().name());
 		selector = Selector.open();
