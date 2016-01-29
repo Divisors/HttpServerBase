@@ -188,55 +188,6 @@ public class TcpServerImpl implements TcpServer {
 			this.state.notifyAll();
 		}
 	}
-	
-	@Override
-	public boolean shutdown() {
-		if (this.state.compareAndSet(ServiceState.RUNNING, ServiceState.STOPPING) || getState() == ServiceState.STOPPING) {
-			this.selector.wakeup();
-			return true;
-		}
-		return false;
-	}
-	@Override
-	public boolean shutdown(Duration timeout) throws InterruptedException {
-		if(!this.state.compareAndSet(ServiceState.RUNNING, ServiceState.STOPPING) && getState() != ServiceState.STOPPING)
-			return true;
-		this.selector.wakeup();
-		Instant now = null, end = Instant.now().plus(timeout);
-		while (getState() == ServiceState.STOPPING && end.isAfter(now = Instant.now())) {
-			Duration remaining = Duration.between(now, end);
-			this.state.wait(remaining.toMillis(), remaining.getNano() % 1000);
-		}
-		ServiceState state = getState();
-		return state == ServiceState.DESTROYED || state == ServiceState.INITIALIZED;
-	}
-	@Override
-	public boolean shutdownNow() throws IOException, InterruptedException {
-		if ((!this.state.compareAndSet(ServiceState.RUNNING, ServiceState.STOPPING)) && getState() != ServiceState.STOPPING)
-			return false;
-		this.selector.wakeup();
-		this.executor.shutdownNow();
-		final boolean result = this.executor.awaitTermination(20, TimeUnit.MILLISECONDS);
-		this.state.compareAndSet(ServiceState.STOPPING, ServiceState.INITIALIZED);
-		System.out.println("Bye!");
-		return result;
-	}
-	@Override
-	public void destroy() throws RuntimeException {
-		try {
-			this.server.close();
-			this.server = null;
-			this.selector.close();
-			this.selector = null;
-			this.channelMap.clear();
-			this.executor.shutdownNow();//is this right?
-			this.executor = null;
-		} catch (IOException e) {
-			this.state.set(ServiceState.DESTROYED);
-			throw new RuntimeException(e);
-		}
-		this.state.set(ServiceState.UNINITIALIZED);
-	}
 	/**
 	 * Accept an incoming connection.
 	 * @param key selection key
@@ -363,5 +314,54 @@ public class TcpServerImpl implements TcpServer {
 	@Override
 	public ServiceState getState() {
 		return this.state.get();
+	}
+	@Override
+	public boolean shutdown() {
+		if (this.state.compareAndSet(ServiceState.RUNNING, ServiceState.STOPPING) || getState() == ServiceState.STOPPING) {
+			this.selector.wakeup();
+			return true;
+		}
+		return false;
+	}
+	@Override
+	public boolean shutdown(Duration timeout) throws InterruptedException {
+		if(!this.state.compareAndSet(ServiceState.RUNNING, ServiceState.STOPPING) && getState() != ServiceState.STOPPING)
+			return true;
+		this.selector.wakeup();
+		Instant now = null, end = Instant.now().plus(timeout);
+		while (getState() == ServiceState.STOPPING && end.isAfter(now = Instant.now())) {
+			Duration remaining = Duration.between(now, end);
+			this.state.wait(remaining.toMillis(), remaining.getNano() % 1000);
+		}
+		ServiceState state = getState();
+		return state == ServiceState.DESTROYED || state == ServiceState.INITIALIZED;
+	}
+	@Override
+	public boolean shutdownNow() throws IOException, InterruptedException {
+		if ((!this.state.compareAndSet(ServiceState.RUNNING, ServiceState.STOPPING)) && getState() != ServiceState.STOPPING)
+			return false;
+		this.selector.wakeup();
+		this.executor.shutdownNow();
+		final boolean result = this.executor.awaitTermination(20, TimeUnit.MILLISECONDS);
+		this.state.compareAndSet(ServiceState.STOPPING, ServiceState.INITIALIZED);
+		System.out.println("Bye!");
+		return result;
+	}
+	@Override
+	public void destroy() throws RuntimeException {
+		try {
+			this.bus = null;
+			this.server.close();
+			this.server = null;
+			this.selector.close();
+			this.selector = null;
+			this.channelMap.clear();
+			this.executor.shutdownNow();//is this right?
+			this.executor = null;
+		} catch (IOException e) {
+			this.state.set(ServiceState.DESTROYED);
+			throw new RuntimeException(e);
+		}
+		this.state.set(ServiceState.UNINITIALIZED);
 	}
 }
