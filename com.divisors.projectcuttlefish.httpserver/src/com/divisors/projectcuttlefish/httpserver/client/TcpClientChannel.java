@@ -36,9 +36,10 @@ public class TcpClientChannel implements Channel<ByteBuffer, ByteBuffer> {
 		return this;
 	}
 	@Override
+	@SuppressWarnings("unchecked")
 	public Action onRead(Consumer<ByteBuffer> handler) {
-		// TODO Auto-generated method stub
-		return null;
+		Registration<?,?> registration = client.bus.on($t("tcp.read",getConnectionID()), event->handler.accept(((Event<ByteBuffer>)event).getData()));
+		return new RegistrationCancelAction(registration);
 	}
 	@Override
 	public boolean isOpen() {
@@ -53,9 +54,11 @@ public class TcpClientChannel implements Channel<ByteBuffer, ByteBuffer> {
 	public long getConnectionID() {
 		return this.id;
 	}
+	@SuppressWarnings("unchecked")
 	public Action onConnect(Consumer<TcpClientChannel> handler) {
-		client.bus.on($t("tcp.connect",getConnectionID()), null);//TODO finish
-		return null;
+		Registration<?,?> registration = client.bus.on($t("tcp.accept",getConnectionID()), event->handler.accept(((Event<TcpClientChannel>)event).getData()));
+		registration.cancelAfterUse();// Connect should be called only once, so clean it up soon
+		return new RegistrationCancelAction(registration);
 	}
 	public SocketAddress getRemoteAddress() {
 		return addr;
