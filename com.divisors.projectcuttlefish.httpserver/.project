@@ -39,14 +39,14 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>json-20151123.jar</name>
-			<type>1</type>
-			<location>lib/json-20151123.jar</location>
-		</link>
-		<link>
 			<name>javatuples-1.2.jar</name>
 			<type>1</type>
-			<location>lib/javatuples-1.2.jar</location>
+			<locationURI>lib/javatuples-1.2.jar</locationURI>
+		</link>
+		<link>
+			<name>json-20151123.jar</name>
+			<type>1</type>
+			<locationURI>lib/json-20151123.jar</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
