@@ -69,7 +69,8 @@ public class Activator implements BundleActivator {
 						.listenOn(new InetSocketAddress(8080))
 						.onConnect((channel) -> {
 							channel.onRead((request) -> {
-								uaParser.apply(request.getHeader("User-Agent").first());
+								if (request.getHeaders().containsKey("User-Agent"))
+									uaParser.apply(request.getHeader("User-Agent").first());
 								HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(request.getRequestLine().getHttpVersion(),200,"OK"))
 										.addHeader("Server","PC-0.0.5")
 										.addHeader("Content-Type","text/plain; charset=utf-8");

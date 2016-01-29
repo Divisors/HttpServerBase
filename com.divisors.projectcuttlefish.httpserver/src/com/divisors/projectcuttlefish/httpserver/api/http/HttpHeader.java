@@ -18,6 +18,8 @@ public class HttpHeader implements Map.Entry<String, Collection<String>> {
 	protected final Collection<String> values;
 	public HttpHeader(String key, Collection<String> values) {
 		this.key = key;
+		if (values == null)
+			throw new IllegalArgumentException("Values cannot be null");
 		this.values = values;
 	}
 	public HttpHeader(String key, String...values) {
@@ -35,6 +37,8 @@ public class HttpHeader implements Map.Entry<String, Collection<String>> {
 		return values;
 	}
 	public String first() {
+		if (values.isEmpty())
+			return null;
 		return values.iterator().next();
 	}
 	public String flatValue() {

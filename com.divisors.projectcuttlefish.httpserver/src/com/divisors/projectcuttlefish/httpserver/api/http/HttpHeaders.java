@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @see HttpHeader
  */
 public class HttpHeaders implements Map<String, Collection<String>> {
+	public static final Collection<String> EMPTY = new HashSet<>(0);
 	/**
 	 * Map that actually contains the data
 	 */
@@ -58,7 +59,7 @@ public class HttpHeaders implements Map<String, Collection<String>> {
 		return this.backingMap.get(key);
 	}
 	public HttpHeader getHeader(String key) {
-		return new HttpHeader(key, get(key));
+		return new HttpHeader(key, this.backingMap.getOrDefault(key, EMPTY));
 	}
 	public boolean add(String key, String value) {
 		return this.backingMap.computeIfAbsent(key, x->new LinkedHashSet<>(1)).add(value);
