@@ -1,15 +1,22 @@
 package com.divisors.projectcuttlefish.httpserver.client;
 
+import static com.divisors.projectcuttlefish.httpserver.api.tcp.SubsetSelector.$t;
+
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Deque;
+import java.util.LinkedList;
 
 import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.Channel;
 import com.divisors.projectcuttlefish.httpserver.api.ChannelOption;
-import static com.divisors.projectcuttlefish.httpserver.api.tcp.SubsetSelector.$t;
+import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
 
+import reactor.bus.Event;
+import reactor.bus.registry.Registration;
 import reactor.fn.Consumer;
 
 public class TcpClientChannel implements Channel<ByteBuffer, ByteBuffer> {
