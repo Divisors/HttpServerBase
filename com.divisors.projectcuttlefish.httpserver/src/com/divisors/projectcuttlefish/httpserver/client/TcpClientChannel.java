@@ -28,6 +28,7 @@ public class TcpClientChannel implements Channel<ByteBuffer, ByteBuffer> {
 	public Channel<ByteBuffer, ByteBuffer> write(ByteBuffer data) {
 		// TODO Auto-generated method stub
 		return null;
+		System.out.println("TCPc::Queuing " + data.remaining() + " bytes for writing.");
 	}
 	@Override
 	public Action onRead(Consumer<ByteBuffer> handler) {

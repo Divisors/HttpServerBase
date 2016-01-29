@@ -12,6 +12,7 @@ public class HttpClientChannel implements Channel<HttpResponse, HttpRequest> {
 	public Channel<HttpResponse, HttpRequest> write(HttpRequest data) {
 		// TODO Auto-generated method stub
 		return null;
+		System.out.println("HTTPc:: writing request");
 	}
 
 	@Override

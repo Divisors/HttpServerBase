@@ -125,7 +125,7 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 			while ((cstate = getState()) == ServiceState.RUNNING || (cstate == ServiceState.STOPPING && channelMap.size() > 0)) {
 				try {
 					int nKeys = 0;//number of keys selected
-					System.out.println("TCP::Polling... ("+this.channelMap.size()+" open)");
+					System.out.println("TCPc::Polling... ("+this.channelMap.size()+" open)");
 					if ((cstate = getState()) == ServiceState.STOPPING)
 						nKeys = selector.select(1000);//the server is stopping now, so ensure that this doesn't hang for as long.
 					else
@@ -216,7 +216,7 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 	 * @throws IOException if there was a problem setting it up
 	 */
 	protected void connect(SelectionKey key) throws IOException {
-		System.out.println("TCP::Accepting...");
+		System.out.println("TCPc::Connecting...");
 		SocketChannel socket = (SocketChannel) key.channel();
 		
 		//if shutting down, don't accept any new threads
@@ -236,7 +236,7 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 		long id = (Long)key.attachment();
 		upgradeSocket(socket, id);
 		TcpClientChannel channel = channelMap.get(id);
-		System.out.println("\tConnected to "+channel.getRemoteAddress().toString());
+		System.out.println("\tConnected to " + channel.getRemoteAddress().toString());
 		System.out.println("\tID #"+id);
 		
 		//trigger handlers
@@ -260,7 +260,7 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 	protected void read(SelectionKey key) throws IOException {
 		//get socket & channel
 		long id = (Long)key.attachment();
-		System.out.println("TCP::Reading #" + id + "...");
+		System.out.println("TCPc::Reading #" + id + "...");
 		TcpClientChannel channel = this.channelMap.get(id);
 		SocketChannel socket = (SocketChannel)key.channel();
 		
@@ -288,7 +288,7 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 		buffer.flip();
 		
 		//send event
-		System.out.println("TCP::Read " + read + " bytes from #" + id);
+		System.out.println("TCPc::Read " + read + " bytes from #" + id);
 		bus.notify(Tuple.<String,Long>of("tcp.read", channel.getConnectionID()), Event.<ByteBuffer>wrap(buffer));
 		
 		//FOR TESTING
@@ -312,11 +312,11 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 	protected void write(SelectionKey key) throws IOException {
 		Object attachment = key.attachment();
 		if (!key.isValid()) {
-			System.err.println("TCP::Invalid key" + attachment);
+			System.err.println("TCPc::Invalid key" + attachment);
 			return;
 		}
 		long id = (Long)attachment;
-		System.out.println("TCP::Writing #" + id + "...");
+		System.out.println("TCPc::Writing #" + id + "...");
 		
 		TcpClientChannel channel = this.channelMap.get(id);
 
