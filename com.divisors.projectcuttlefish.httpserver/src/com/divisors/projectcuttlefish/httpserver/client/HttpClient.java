@@ -4,7 +4,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.sql.Blob;
 import java.time.Duration;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -26,7 +26,7 @@ import reactor.bus.EventBus;
  * @author mailmindlin
  */
 public class HttpClient implements Server<HttpResponse, HttpRequest, HttpClientChannel>{
-	protected Executor executor;
+	protected ExecutorService executor;
 	protected EventBus bus;
 	protected final AtomicReference<HttpClientReadyState> state = new AtomicReference<>(HttpClientReadyState.UNSENT);
 	public HttpClient() {
