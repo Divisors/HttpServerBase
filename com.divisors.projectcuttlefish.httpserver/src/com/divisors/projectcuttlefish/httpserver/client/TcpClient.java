@@ -112,7 +112,7 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 	@Override
 	@SuppressWarnings("unchecked")
 	public Action onConnect(Consumer<TcpClientChannel> handler) {
-		return new RegistrationCancelAction(this.bus.on($t("tcp.connect"), event -> handler.accept(((Event<TcpClientChannel>)event).getData())));
+		return new RegistrationCancelAction(this.bus.on($t("tcp.accept"), event -> handler.accept(((Event<TcpClientChannel>)event).getData())));
 	}
 	
 	@Override
@@ -242,7 +242,7 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 		//trigger handlers
 		Event.Headers eventHeaders = new Event.Headers();
 		eventHeaders.setOrigin("TcpClient@"+channel.getRemoteAddress().toString());
-		bus.notify("tcp.connect",new Event<TcpClientChannel>(eventHeaders, channel));
+		bus.notify("tcp.accept",new Event<TcpClientChannel>(eventHeaders, channel));
 		
 		//queue for future I/O
 		socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, id);
@@ -320,7 +320,7 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 		
 		TcpClientChannel channel = this.channelMap.get(id);
 
-//		channel.doWrite();
+		channel.doWrite();
 		
 		if (!((SocketChannel)key.channel()).isOpen()) {
 			try {
@@ -351,10 +351,6 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 	}
 	
 	protected void doConnect(TcpClientChannel channel) throws IOException {
-		SelectionKey key = channel.socket.register(this.selector, SelectionKey.OP_CONNECT);
-		if (channel.socket.connect(channel.getRemoteAddress())) {
-			this.connect(key);
-			return;
-		}
+		channel.socket.connect(channel.getRemoteAddress());
 	}
 }
