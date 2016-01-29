@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
+import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.ServiceState;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpChannel;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
+import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -61,12 +62,11 @@ public class HttpServerImpl implements HttpServer {
 	 * @throws Exception 
 	 * @throws IllegalStateException 
 	 */
-	public HttpServer listenOn(SocketAddress addr) throws IllegalStateException, Exception {
+	public HttpServer listenOn(SocketAddress addr) throws IllegalStateException, IOException {
 		System.out.println("HTTP::Listening on " + addr);
-		TcpServerImpl tcp = new TcpServerImpl(addr);
 		ServiceState state = this.state.get();
 		if (state != ServiceState.DESTROYED && state != ServiceState.STOPPING)
-			tcp
+			new TcpServerImpl(addr)
 				.init()
 				.start((Consumer<TcpServer>)server->
 					server
@@ -79,17 +79,14 @@ public class HttpServerImpl implements HttpServer {
 	 * Upgrades TcpChannel to a HttpChannel and dispatches a '<code>http.connect</code>' event.
 	 * @param channel
 	 */
-	protected void upgradeTcpChannel(TcpChannel channel) {
+	protected HttpChannel upgradeTcpChannel(TcpChannel channel) {
 		System.out.println("HTTP::Attempting to upgrade channel from " + channel.getRemoteAddress() + " #" + channel.getConnectionID());
-		new HttpChannelImpl(channel, this);
+		return new HttpChannelImpl(channel, this);
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public HttpServerImpl onConnect(Predicate<HttpChannel> handler) {
-		this.bus.on($t("http.connect"), (event)->{
-			handler.test(((Event<HttpChannel>)event).getData());
-		});
-		return this;
+	public Action onConnect(Consumer<HttpChannel> handler) {
+		return new RegistrationCancelAction(this.bus.on($t("http.connect"), event -> handler.accept(((Event<HttpChannel>)event).getData())));
 	}
 	@Override
 	public ServiceState getState() {
