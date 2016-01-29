@@ -2,6 +2,7 @@ package com.divisors.projectcuttlefish.httpserver.api.http;
 
 import static com.divisors.projectcuttlefish.httpserver.api.tcp.SubsetSelector.$t;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,7 @@ public class HttpChannelImpl implements HttpChannel {
 	protected final TcpChannel source;
 	protected final HttpServerImpl server;
 	protected final AtomicBoolean open = new AtomicBoolean(true);
+	protected HashMap<ChannelOption<?>, Object> options;
 	protected final List<Registration<?, ?>>subscriptions = new LinkedList<>();
 	public HttpChannelImpl(TcpChannel source, HttpServerImpl server) {
 		server.bus.notify(Tuple.<String,Long>of("http.connect", source.getConnectionID()), Event.wrap(this));
@@ -88,8 +90,19 @@ public class HttpChannelImpl implements HttpChannel {
 	}
 	@Override
 	public <E> HttpChannelImpl setOption(ChannelOption<E> key, E value) {
-		// TODO Auto-generated method stub
+		//should this be synchronized?
+		if (this.options == null)
+			this.options = new HashMap<>();
+		this.options.put(key, value);
 		return this;
+	}
+	@Override
+	@SuppressWarnings("unchecked")
+	public <E> E getOption(ChannelOption<E> key) {
+		//should this be synchronized?
+		if (this.options == null)
+			return null;
+		return (E) this.options.get(key);
 	}
 	@Override
 	public long getConnectionID() {

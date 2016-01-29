@@ -46,4 +46,5 @@ public interface HttpChannel extends Channel<HttpRequest, HttpResponse> {
 	
 	@Override
 	<E> HttpChannel setOption(ChannelOption<E> key, E value);
+	<E> E getOption(ChannelOption<E> key);
 }
