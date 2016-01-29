@@ -47,7 +47,7 @@ public class HttpChannelImpl implements HttpChannel {
 	}
 	@Override
 	public HttpChannelImpl write(HttpResponse response) {
-		source.write(StandardHttpResponseSerializer.serialize(data));
+		source.write(response.serialize());
 		return this;
 	}
 
