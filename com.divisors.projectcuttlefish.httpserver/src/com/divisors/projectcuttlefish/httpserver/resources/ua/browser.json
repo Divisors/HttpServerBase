@@ -100,6 +100,48 @@
 			]
 		},
 		{
+			name: "Googlebot",
+			mfr: "Google",
+			patternRules: [
+				{
+					token: 0,
+					detail: 2,
+					value: "+http://www.google.com/bot.html"
+				}
+			],
+			parseRules: [
+				{
+					token: 0,
+					target: details,
+					regex: "^compatible; Googlebot/(?<version>(\\d+\\.)*\\d+);",
+					groups: {
+						version: "browser.version"
+					}
+				}
+			]
+		},
+		{
+			name: "Firefox",
+			mfr: "Mozilla",
+			patternRules: [
+				{
+					token: 0,
+					product: "Mozilla/5.0"
+				},
+				{
+					token: 2,
+					productName: "Firefox"
+				}
+			],
+			parseRules: [
+				{
+					token: 2,
+					target: "version",
+					key: "browser.version"
+				}
+			]
+		},
+		{
 			name: "Internet Explorer",
 			mfr: "Microsoft",
 			patternRules: [
