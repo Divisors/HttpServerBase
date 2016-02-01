@@ -2,6 +2,7 @@ package com.divisors.projectcuttlefish.httpserver.ua;
 
 import java.util.function.Predicate;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.divisors.projectcuttlefish.httpserver.ua.UserAgentParser.ParsedUAToken;
@@ -41,11 +42,26 @@ public interface UserAgentMatchingRule extends Predicate<ParsedUAToken[]> {
 				return new UAProductVersionMatchingRule(token, version);
 			}
 			if (rule.has("detail")) {
-				int detail = rule.getInt("detail");
-				String value = rule.getString("value");
-				System.out.println("\tLoading rule | token: " + token + ", detail: " + detail + ", value: " + value);
-				return new UADetailMatchingRule(token, detail, value);
+				Object detail = rule.get("detail");
+				if (detail instanceof Number) {
+					String value = rule.getString("value");
+					System.out.println("\tLoading rule | token: " + token + ", detail: " + detail + ", value: " + value);
+					return new UADetailMatchingRule(token, ((Number) detail).intValue(), value);
+				} else if (detail instanceof JSONObject) {
+					//TODO finish
+				}
 			}
+		} else if (rule.has("any") || rule.has("all") || rule.has("none")) {
+			JSONArray subjects = rule.getJSONArray("any");
+			UserAgentMatchingRule[] rules = new UserAgentMatchingRule[subjects.length()];
+			for (int i=0; i < subjects.length(); i++)
+				rules[i] = compileJSON(subjects.getJSONObject(i));
+			if (rule.has("any"))
+				return new UAMatchesAnyRule(rules);
+			if (rule.has("all"))
+				return new UAMatchesAllRule(rules);
+			if (rule.has("none"))
+				return new UAMatchesNoneRule(rules);
 		}
 		System.err.println("Could not compile rule: " + rule);
 		return null;
@@ -252,6 +268,30 @@ public interface UserAgentMatchingRule extends Predicate<ParsedUAToken[]> {
 			}
 			System.arraycopy(this.rules, 0, allRules, 0, this.rules.length);
 			return new UAMatchesAllRule(allRules);
+		}
+	}
+	public static class UAMatchesNoneRule implements UserAgentMatchingRule {
+		protected final UserAgentMatchingRule[] rules;
+		public UAMatchesNoneRule(UserAgentMatchingRule...rules) {
+			this.rules = rules;
+		}
+		@Override
+		public boolean test(ParsedUAToken[] tokens) {
+			for (UserAgentMatchingRule rule : rules)
+				if (!rule.test(tokens))
+					return false;
+			return true;
+		}
+		@Override
+		public UserAgentMatchingRule andThen(UserAgentMatchingRule otherRule) {
+			if (otherRule instanceof UAMatchesNoneRule) {
+				UAMatchesNoneRule other = (UAMatchesNoneRule) otherRule;
+				UserAgentMatchingRule[] allRules = new UserAgentMatchingRule[this.rules.length + other.rules.length];
+				System.arraycopy(this.rules, 0, allRules, 0, this.rules.length);
+				System.arraycopy(other.rules, 0, allRules, this.rules.length, other.rules.length);
+				return new UAMatchesNoneRule(rules);
+			}
+			return new UAMatchesAllRule(this, otherRule);
 		}
 	}
 }
