@@ -1,6 +1,6 @@
 {
-	version: "0.0.1-alpha",
-	lastUpdated: "27 Jan 2016",
+	version: "0.0.6-alpha",
+	lastUpdated: "01 Feb 2016",
 	browsers: [
 		{
 			name: "Chrome",
@@ -98,6 +98,21 @@
 					safe: true
 				}
 			]
+		},
+		{
+			name: "Internet Explorer",
+			mfr: "Microsoft",
+			patternRules: [
+				{
+					token: 0,
+					product: "Mozilla/5.0"
+				},
+				{
+					any: [
+					]
+				}
+			],
+			parseRules: []
 		}
 	]
 }
