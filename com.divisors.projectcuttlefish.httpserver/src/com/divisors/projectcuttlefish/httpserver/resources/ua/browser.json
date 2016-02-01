@@ -72,7 +72,7 @@
 				{
 					token: 0,
 					target: "details",
-					regex: "^(?<device>iPhone|iPad|iPod); [UIN]; CPU iPhone OS (?<osv>]\\d\\_?)+ like Mac OS X; (?<lang>[a-zA-Z0-9\\-]+)$",
+					regex: "^(?<device>iPhone|iPad|iPod);( [UIN];)? CPU (iPhone )?OS (?<osv>(\\d+\\_)+\\d+) like Mac OS X(; (?<lang>[a-zA-Z0-9\\-]+))?$",
 					groups: {
 						device: "device.name",
 						osv: {
