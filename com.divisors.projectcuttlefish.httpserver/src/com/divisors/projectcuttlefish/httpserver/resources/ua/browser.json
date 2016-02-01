@@ -56,12 +56,12 @@
 					product: "Mozilla/5.0"
 				},
 				{
-					token: 4,
-					productName: "Safari"
+					token: 3,
+					productName: "Mobile"
 				},
 				{
-					token: 2,
-					productName: "Mobile"
+					token: 4,
+					productName: "Safari"
 				}
 			],
 			parseRules: [
