@@ -1,2 +1,137 @@
 {
+	version: "0.0.6-alpha",
+	lastUpdated: "01 Feb 2016",
+	families: [
+		{
+			name: "Windows",
+			mfr: "Microsoft",
+			patternRules: [
+				{
+					token: 0,
+					target: "details",
+					contains: "Windows NT"
+				}
+			],
+			versions: [
+				{
+					name: "Windows 2000",
+					version: "5.0"
+				},
+				{
+					name: "Windows 2000 SP1",
+					version: "5.01"
+				},
+				{
+					name: "Windows XP",
+					version: "5.1"
+				},
+				{
+					name: "Windows Vista",
+					version: "6.0"
+				},
+				{
+					name: "Windows 7",
+					version: "6.1",
+					patternRules: [
+						{
+							token: 0,
+							target: "details",
+							detail: 0,
+							value: "Windows NT 6.1"
+						}
+					]
+				},
+				{
+					name: "Windows 8",
+					version: "6.2",
+					patternRules: [
+						{
+							token: 0,
+							target: "details",
+							detail: 0,
+							value: "Windows NT 6.2"
+						}
+					]
+				},
+				{
+					name: "Windows 8.1",
+					version: "6.3",
+					patternRules: [
+						{
+							token: 0,
+							target: "details",
+							detail: 0,
+							value: "Windows NT 6.3"
+						}
+					]
+				},
+				{
+					name: "Windows 10",
+					version: "10.0",
+					patternRules: [
+						{
+							token: 0,
+							target: "details",
+							detail: 0,
+							value: "Windows NT 10.0"
+						}
+					]
+				}
+			]
+		},
+		{
+			name: "Mac OS",
+			mfr: "Apple",
+			versions: [
+				{
+					name: "Mac OS X Cheetah",
+					version: "10.0"
+				},
+				{
+					name: "Mac OS X Puma",
+					version: "10.1"
+				},
+				{
+					name: "Mac OS X Jaguar",
+					version: "10.2"
+				},
+				{
+					name: "Mac OS X Panther",
+					version: "10.3"
+				},
+				{
+					name: "Mac OS X Tiger",
+					version: "10.4"
+				},
+				{
+					name: "Mac OS X Leopard",
+					version: "10.5"
+				},
+				{
+					name: "Mac OS X Snow Leopard",
+					version: "10.6"
+				},
+				{
+					name: "Mac OS X Lion",
+					version: "10.7"
+				},
+				{
+					name: "Mac OS X Mountain Lion",
+					version: "10.8"
+				},
+				{
+					name: "Mac OS X Mavericks",
+					version: "10.9"
+				},
+				{
+					name: "Mac OS X Yosemite",
+					version: "10.10"
+				},
+				{
+					name: "Mac OS X El Capitan",
+					version: "10.11"
+				}
+			]
+		}
+	]
 }
