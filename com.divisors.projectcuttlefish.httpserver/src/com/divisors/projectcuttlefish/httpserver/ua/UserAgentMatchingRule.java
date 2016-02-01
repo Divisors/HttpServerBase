@@ -54,21 +54,33 @@ public interface UserAgentMatchingRule extends Predicate<ParsedUAToken[]> {
 		return true;
 	}
 	/**
-	 * Whether a tokenized UA string that passes this test will ALWAYS pass the other test.
+	 * If you have a set of matching rules A and B, <code>A.implies(B)</code> will return true IFF B implies A.
+	 * Therefore, if <code>A == B</code>, A implies A, so <code>A.implies(A) == true</code>.
 	 * <br/>
 	 * If you're not sure, just return false.
 	 * @param otherRule
 	 * @return
 	 */
-	default boolean canSupersede(UserAgentMatchingRule otherRule) {
-		return false;
+	default boolean implies(UserAgentMatchingRule otherRule) {
+		return this.equals(otherRule);
 	}
+	
+	/**
+	 * Whether this rule is logically the same as the other rule
+	 * @param otherRule
+	 * @return
+	 */
+	default boolean equals(UserAgentMatchingRule otherRule) {
+		return this == otherRule;
+	}
+	
 	@Override
 	public boolean test(ParsedUAToken[] tokens);
-	default UserAgentMatchingRule andThen(UserAgentMatchingRule other) {
-		//TODO finish
-		return null;
+	
+	default UserAgentMatchingRule andThen(UserAgentMatchingRule otherRule) {
+		return new UAMatchesAllRule(this, otherRule);
 	}
+	
 	
 	public static class UAProductNameMatchingRule implements UserAgentMatchingRule {
 		public final int tokenNumber;
@@ -82,14 +94,22 @@ public interface UserAgentMatchingRule extends Predicate<ParsedUAToken[]> {
 			return (tokens.length > tokenNumber) && this.name.equals(tokens[tokenNumber].name);
 		}
 		@Override
-		public boolean canSupersede(UserAgentMatchingRule otherRule) {
-			return false;//TODO finish
+		public boolean equals(UserAgentMatchingRule otherRule) {
+			if (otherRule == this)
+				return true;
+			if (otherRule instanceof UAProductNameMatchingRule) {
+				UAProductNameMatchingRule uapnmr = (UAProductNameMatchingRule) otherRule;
+				return uapnmr.tokenNumber == this.tokenNumber && this.name.equals(uapnmr.name);
+			}
+			return false;
 		}
 		@Override
 		public UserAgentMatchingRule andThen(UserAgentMatchingRule other) {
+			if (other == this)
+				return this;
 			if (other instanceof UAProductVersionMatchingRule && ((UAProductVersionMatchingRule)other).tokenNumber == this.tokenNumber)
 				return new UAProductMatchingRule(this.tokenNumber, this.name, ((UAProductVersionMatchingRule) other).version);
-			return null; //TODO finish
+			return new UAMatchesAllRule(this, other);
 		}
 	}
 	public static class UAProductVersionMatchingRule implements UserAgentMatchingRule {
@@ -104,8 +124,14 @@ public interface UserAgentMatchingRule extends Predicate<ParsedUAToken[]> {
 			return (tokens.length > tokenNumber ) && this.version.equals(tokens[tokenNumber].version);
 		}
 		@Override
-		public boolean canSupersede(UserAgentMatchingRule otherRule) {
-			return false;//TODO finish
+		public boolean equals(UserAgentMatchingRule otherRule) {
+			if (otherRule == this)
+				return true;
+			if (otherRule instanceof UAProductVersionMatchingRule) {
+				UAProductVersionMatchingRule other = (UAProductVersionMatchingRule) otherRule;
+				return other.tokenNumber == this.tokenNumber && this.version.equals(other.version);
+			}
+			return false;
 		}
 	}
 	public static class UAProductMatchingRule implements UserAgentMatchingRule {
@@ -122,18 +148,25 @@ public interface UserAgentMatchingRule extends Predicate<ParsedUAToken[]> {
 			return (tokens.length > tokenNumber) && this.name.equals(tokens[tokenNumber].name) && this.version.equals(tokens[tokenNumber].version);
 		}
 		@Override
-		public boolean canSupersede(UserAgentMatchingRule otherRule) {
+		public boolean implies(UserAgentMatchingRule otherRule) {
+			if (this.equals(otherRule))
+				return true;
 			if (otherRule instanceof UAProductNameMatchingRule) {
 				UAProductNameMatchingRule other = (UAProductNameMatchingRule) otherRule;
-				if (other.tokenNumber == this.tokenNumber && this.name.equals(other.name))
-					return true;
+				return other.tokenNumber == this.tokenNumber && this.name.equals(other.name);
 			}
 			if (otherRule instanceof UAProductVersionMatchingRule) {
 				UAProductVersionMatchingRule other = (UAProductVersionMatchingRule) otherRule;
-				if (other.tokenNumber == this.tokenNumber && this.version.equals(other.version))
-					return true;
+				return other.tokenNumber == this.tokenNumber && this.version.equals(other.version);
 			}
-			//TODO: finish
+			return false;
+		}
+		@Override
+		public boolean equals(UserAgentMatchingRule otherRule) {
+			if (otherRule instanceof UAProductMatchingRule) {
+				UAProductMatchingRule other = (UAProductMatchingRule) otherRule;
+				return other.tokenNumber == this.tokenNumber && this.name.equals(other.name) && this.version.equals(other.version);
+			}
 			return false;
 		}
 	}
@@ -151,9 +184,74 @@ public interface UserAgentMatchingRule extends Predicate<ParsedUAToken[]> {
 			return (tokens.length > token) && (tokens[token].details.length > detail) && this.value.equals(tokens[token].details[detail]);
 		}
 		@Override
-		public boolean canSupersede(UserAgentMatchingRule otherRule) {
-			//TODO: finish
+		public boolean equals(UserAgentMatchingRule otherRule) {
+			if (otherRule == this)
+				return true;
+			if (otherRule instanceof UADetailMatchingRule) {
+				UADetailMatchingRule other = (UADetailMatchingRule) otherRule;
+				return other.token == this.token && this.detail == other.detail && this.value.equals(other.value);
+			}
 			return false;
+		}
+	}
+	public static class UAMatchesAnyRule implements UserAgentMatchingRule {
+		protected final UserAgentMatchingRule[] rules;
+		public UAMatchesAnyRule(UserAgentMatchingRule...rules) {
+			this.rules = rules;
+		}
+		@Override
+		public boolean test(ParsedUAToken[] tokens) {
+			for (UserAgentMatchingRule rule : rules)
+				if (rule.test(tokens))
+					return true;
+			return false;
+		}
+		@Override
+		public boolean equals(UserAgentMatchingRule otherRule) {
+			return otherRule == this;//TODO finish
+		}
+	}
+	public static class UAMatchesAllRule implements UserAgentMatchingRule {
+		protected final UserAgentMatchingRule[] rules;
+		public UAMatchesAllRule(UserAgentMatchingRule...rules) {
+			this.rules = rules;
+		}
+		@Override
+		public boolean test(ParsedUAToken[] tokens) {
+			for (UserAgentMatchingRule rule : rules)
+				if (!rule.test(tokens))
+					return false;
+			return true;
+		}
+		@Override
+		public boolean implies(UserAgentMatchingRule otherRule) {
+			if (this.equals(otherRule))//TODO add better equals(UserAgentMatchingRule) impl.
+				return true;
+			for (UserAgentMatchingRule rule : rules)
+				if (rule.implies(otherRule))
+					return true;
+			if (otherRule instanceof UAMatchesAnyRule) {
+				UAMatchesAnyRule anyOther = (UAMatchesAnyRule) otherRule;
+				for (UserAgentMatchingRule rule : rules)
+					for (UserAgentMatchingRule anyOtherRule : anyOther.rules)
+						if (rule.implies(anyOtherRule))
+							return true;
+			}
+			return false;
+		}
+		@Override
+		public UAMatchesAllRule andThen(UserAgentMatchingRule otherRule) {
+			UserAgentMatchingRule[] allRules;
+			if (otherRule instanceof UAMatchesAllRule) {
+				UAMatchesAllRule other = (UAMatchesAllRule) otherRule;
+				allRules = new UserAgentMatchingRule[this.rules.length + other.rules.length];
+				System.arraycopy(other.rules, 0, allRules, this.rules.length, other.rules.length);
+			} else {
+				allRules = new UserAgentMatchingRule[this.rules.length + 1];
+				allRules[this.rules.length] = otherRule;
+			}
+			System.arraycopy(this.rules, 0, allRules, 0, this.rules.length);
+			return new UAMatchesAllRule(allRules);
 		}
 	}
 }
