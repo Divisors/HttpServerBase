@@ -147,4 +147,23 @@ public class Version implements Comparable<Version> {
 		}
 		return sb.toString();
 	}
+	@Override
+	public boolean equals(final Object other) {
+		if (other == this)
+			return true;
+		if (other instanceof Version) {
+			Version otherVersion = (Version) other;
+			return otherVersion.getMajor() == this.major
+				&& otherVersion.getMinor() == this.minor
+				&& otherVersion.getPatch() == this.patch
+				&& (otherVersion.getMeta() == this.meta || (this.meta != null && this.meta.equals(otherVersion.getMeta())))
+				&& (this.prerelease == otherVersion.getPrerelease() || (this.prerelease != null && this.prerelease.equals(otherVersion.getPrerelease())));
+		}
+		return false;
+	}
+	@Override
+	public int hashCode() {
+		//TODO fix for efficiency and/or collision
+		return (getMajor() << 8) ^ (getMinor() << 4) ^ (getPatch()) ^ (meta == null ? 0 : meta.hashCode()) ^ (prerelease == null ? 0 : prerelease.hashCode());
+	}
 }

@@ -1,8 +1,10 @@
 package com.divisors.projectcuttlefish.httpserver.api.http;
 
 import java.io.IOException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.Server;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
@@ -35,4 +37,6 @@ public interface HttpServer extends Server<HttpRequest, HttpResponse, HttpChanne
 	
 	@Override
 	HttpServer init() throws Exception;
+	
+	Action onRequest(BiConsumer<HttpChannel, HttpRequest> handler);
 }

@@ -16,6 +16,9 @@ public class HttpResponseLineImpl implements HttpResponseLine {
 		this.code = code;
 		this.message = message;
 	}
+	public HttpResponseLineImpl(int code, String message) {
+		this("HTTP/1.1", code, message);
+	}
 	public HttpResponseLineImpl setHttpv(String value) {
 		httpv = value;
 		return this;

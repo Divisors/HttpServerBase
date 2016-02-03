@@ -36,21 +36,21 @@ import reactor.core.processor.RingBufferProcessor;
  * @author mailmindlin
  *
  */
-public class Activator implements BundleActivator {
-	protected static Activator INSTANCE;
-	public static Activator getInstance() {
+public class HttpServerActivator implements BundleActivator {
+	protected static HttpServerActivator INSTANCE;
+	public static HttpServerActivator getInstance() {
 		return INSTANCE;
 	}
 	BundleContext ctx;
 	ServiceRegistration<?> httpServerFactoryServiceRegistration;
 	ServiceRegistration<?> serverFactoryServiceRegistration;
 	TcpServer tcp;
-	HttpServer http;
+	public HttpServer http;
 	UserAgentDetector uaDetector;
 	Processor<Event<?>,Event<?>> processor;
 	
 	/**
-	 * Standard htttp header text
+	 * Standard http header text
 	 */
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -66,7 +66,7 @@ public class Activator implements BundleActivator {
 				.start(server-> {
 				try {
 					((HttpServerImpl)server)
-						.listenOn(new InetSocketAddress(8080))
+						.listenOn(new InetSocketAddress(8085))
 						.onConnect((channel) -> {
 							channel.onRead((request) -> {
 								if (request.getHeaders().containsKey("User-Agent"))

@@ -3,14 +3,25 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Project Cuttlefish Content Manager
 Bundle-SymbolicName: com.divisors.projectcuttlefish.contentmanager
 Bundle-Version: 0.0.6.alpha
-Bundle-Activator: com.divisors.projectcuttlefish.contentmanager.Activator
+Bundle-Activator: com.divisors.projectcuttlefish.contentmanager.ContentManagerActivator
 Bundle-Vendor: DIVISORS
+Export-Package: com.divisors.projectcuttlefish.contentmanager,
+ com.divisors.projectcuttlefish.contentmanager.api,
+ com.divisors.projectcuttlefish.contentmanager.test
+Require-Bundle: com.divisors.projectcuttlefish.httpserver;bundle-version="0.0.6",
+ com.divisors.projectcuttlefish.uac;bundle-version="1.0.0",
+ org.junit,
+ io.projectreactor.reactor-core;bundle-version="2.1.0",
+ org.reactivestreams.reactive-streams;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.divisors.projectcuttlefish.uac.api,
+Import-Package: com.divisors.projectcuttlefish.httpserver.client,
+ com.divisors.projectcuttlefish.httpserver.ua,
  com.google.common.cache;version="18.0.0",
  javax.servlet.annotation;version="3.1.0",
  org.eclipse.core.runtime;version="3.5.0",
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework;version="1.3.0",
+ reactor.bus;version="2.1.0",
+ reactor.rx;version="2.1.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.divisors.projectcuttlefish.contentmanager.api
 Require-Bundle: com.divisors.projectcuttlefish.httpserver;bundle-version="[0.0.5,0.1.0)",
