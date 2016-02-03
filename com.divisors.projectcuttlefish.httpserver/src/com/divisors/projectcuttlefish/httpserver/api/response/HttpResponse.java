@@ -10,6 +10,7 @@ import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils.ByteBufferTokenizer;
+import com.divisors.projectcuttlefish.httpserver.util.Constants;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
 /**
@@ -27,7 +28,7 @@ public interface HttpResponse extends Mutable<ImmutableHttpResponse> {
 	 * TODO test
 	 */
 	public static HttpResponse parse(ByteBuffer data) throws ParseException {
-		ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(ByteUtils.HTTP_NEWLINE, data);
+		ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(Constants.HTTP_NEWLINE, data);
 		ByteBuffer token;
 		System.out.println(new String(ByteUtils.toArray(data.duplicate())));
 		System.out.println(FormatUtils.bytesToHex(data.duplicate(), true));

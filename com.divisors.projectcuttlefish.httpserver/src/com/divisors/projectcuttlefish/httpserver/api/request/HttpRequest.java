@@ -9,6 +9,7 @@ import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeader;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils;
 import com.divisors.projectcuttlefish.httpserver.util.ByteUtils.ByteBufferTokenizer;
+import com.divisors.projectcuttlefish.httpserver.util.Constants;
 import com.divisors.projectcuttlefish.httpserver.util.FormatUtils;
 
 /**
@@ -36,7 +37,7 @@ public interface HttpRequest extends Mutable<HttpRequest> {
 	 * @throws ParseException
 	 */
 	public static HttpRequest parse(ByteBuffer data) throws ParseException {
-		ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(ByteUtils.HTTP_NEWLINE, data);
+		ByteBufferTokenizer tokenizer = new ByteBufferTokenizer(Constants.HTTP_NEWLINE, data);
 		HttpRequestBuilder builder = new HttpRequestBuilder();
 		ByteBuffer token;
 		
