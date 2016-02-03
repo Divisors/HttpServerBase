@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,8 +65,9 @@ public class UserAgentDetector implements Function<String, UserAgent>, RunnableS
 		JSONArray browserInfo = browserMeta.getJSONArray("browsers");
 		this.browsers = new ArrayList<>(browserInfo.length());
 		for (int i=0; i < browserInfo.length(); i++) {
-			UABrowser browser = new UABrowser(browserInfo.getJSONObject(i));
-			System.out.println("Loaded browser: " + browser.getName());
+			JSONObject browserData = browserInfo.getJSONObject(i);
+			System.out.println("Loading browser: " + browserData.getString("name"));
+			UABrowser browser = new UABrowser(browserData);
 			browsers.add(browser);
 		}
 		return this;
@@ -84,15 +87,18 @@ public class UserAgentDetector implements Function<String, UserAgent>, RunnableS
 			}
 		}
 		ParsedUAToken[] tokens = parser.tokenize(s);
+		System.out.println(Arrays.toString(tokens));
 		UABrowser browser;
+		HashMap<String, String> properties = new HashMap<>();
 		for (UABrowser browserCandidate : browsers) {
 			if (browserCandidate.test(tokens)) {
 				browser = browserCandidate;
+				browser.parse(tokens, properties);
 				System.out.println("Browser: " + browser.getName());
 				break;
 			}
 		}
-		
+		System.out.println("Properties: " + new JSONObject(properties));
 		UAOperatingSystem os;
 		
 		return null;
