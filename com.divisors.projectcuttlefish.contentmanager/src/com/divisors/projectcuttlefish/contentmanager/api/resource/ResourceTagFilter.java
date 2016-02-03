@@ -1,4 +1,4 @@
-package com.divisors.projectcuttlefish.contentmanager.api;
+package com.divisors.projectcuttlefish.contentmanager.api.resource;
 
 import java.util.function.Predicate;
 
@@ -15,7 +15,7 @@ public interface ResourceTagFilter extends Predicate<ResourceTag> {
 		}
 		@Override
 		public boolean test(ResourceTag t) {
-			return t.getCompression() >= this.minCmp;
+			return false;
 		}
 	}
 }

@@ -6,7 +6,7 @@ Bundle-Version: 0.0.6.alpha
 Bundle-ClassPath: lib/json-20151123.jar,
  lib/javatuples-1.2.jar,
  .
-Bundle-Activator: com.divisors.projectcuttlefish.httpserver.Activator
+Bundle-Activator: com.divisors.projectcuttlefish.httpserver.HttpServerActivator
 Bundle-Vendor: DIVISORS
 Export-Package: com.divisors.projectcuttlefish.httpserver,
  com.divisors.projectcuttlefish.httpserver.api,

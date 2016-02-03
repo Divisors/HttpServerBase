@@ -36,6 +36,7 @@ public class HttpChannelImpl implements HttpChannel {
 	protected HashMap<ChannelOption<?>, Object> options;
 	protected final List<Registration<?, ?>>subscriptions = new LinkedList<>();
 	public HttpChannelImpl(TcpChannel source, HttpServerImpl server) {
+		server.channelMap.put(source.getConnectionID(), this);
 		server.bus.notify(Tuple.<String,Long>of("http.connect", source.getConnectionID()), Event.wrap(this));
 		this.source = source;
 		this.server = server;
@@ -44,7 +45,7 @@ public class HttpChannelImpl implements HttpChannel {
 			FormatUtils.bytesToHex(arr, true, -1);//TODO figure out why this makes it not crash...
 			HttpRequest request = HttpRequest.parse(buffer);
 			System.out.println("Dispatching request...");
-			server.bus.notify(Tuple.<String, Long>of("http.request", this.source.getConnectionID()), Event.wrap(request));
+			server.bus.notify(Tuple.<String, Long>of("http.request", this.getConnectionID()), Event.wrap(request));
 		});
 	}
 	@Override
@@ -55,7 +56,7 @@ public class HttpChannelImpl implements HttpChannel {
 
 	@Override
 	public Action onRead(Consumer<HttpRequest> handler) {
-		Registration<?, ?> registration = server.bus.on($t("http.request", this.source.getConnectionID()), event -> handler.accept((HttpRequest) event.getData()));
+		Registration<?, ?> registration = server.bus.on($t("http.request", this.getConnectionID()), event -> handler.accept((HttpRequest) event.getData()));
 		this.subscriptions.add(registration);
 		return new RegistrationCancelAction(registration);
 	}
@@ -67,10 +68,11 @@ public class HttpChannelImpl implements HttpChannel {
 
 	@Override
 	public void close() throws Exception {
+		this.server.channelMap.remove(getConnectionID());
 		if (!open.compareAndSet(false, true))
 			throw new IllegalStateException("Channel was closed/detatched");
 		this.source.close();
-		System.out.println("HTTP::Closing channel #" + this.source.getConnectionID());
+		System.out.println("HTTP::Closing channel #" + this.getConnectionID());
 	}
 
 	@Override

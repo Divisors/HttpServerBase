@@ -13,7 +13,7 @@ public class UATest {
 		UserAgentParser parser = new UserAgentParser();
 		parser.apply(uaString);
 		try {
-		UserAgentDetector detector = UserAgentDetector.getInstance();
+		UserAgentDetector detector = new UserAgentDetector();
 //		detector.registerPattern("iPhone Safari", "Mozilla/5.0 \\(iPhone; [UIN]; CPU iPhone OS ([0-9\\_]+) like Mac OS X; ([\\-a-zA-Z]+)\\)");
 		detector.apply(uaString);
 		} catch (Exception e) {

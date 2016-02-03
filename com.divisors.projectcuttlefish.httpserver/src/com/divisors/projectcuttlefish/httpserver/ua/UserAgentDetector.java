@@ -18,7 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.divisors.projectcuttlefish.httpserver.Activator;
+import com.divisors.projectcuttlefish.httpserver.HttpServerActivator;
 import com.divisors.projectcuttlefish.httpserver.api.RunnableService;
 import com.divisors.projectcuttlefish.httpserver.api.ServiceState;
 import com.divisors.projectcuttlefish.httpserver.ua.UserAgentParser.ParsedUAToken;
@@ -33,7 +33,7 @@ public class UserAgentDetector implements Function<String, UserAgent>, RunnableS
 	protected static String loadFromJar(String path) throws IOException {
 		System.out.println("Loading: '" + path + "'");
 		StringBuffer sb = new StringBuffer();
-		URL url = Activator.getInstance().getContext().getBundle().getEntry(path);
+		URL url = HttpServerActivator.getInstance().getContext().getBundle().getEntry(path);
 		if (url == null)
 			throw new FileNotFoundException(path);
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream()))) {
@@ -45,7 +45,7 @@ public class UserAgentDetector implements Function<String, UserAgent>, RunnableS
 		return sb.toString();
 	}
 	protected static String loadLocal(String path) {
-		IPath stateLocation = Platform.getStateLocation(Activator.getInstance().getContext().getBundle());
+		IPath stateLocation = Platform.getStateLocation(HttpServerActivator.getInstance().getContext().getBundle());
 		System.out.println(stateLocation);
 		return null;
 	}

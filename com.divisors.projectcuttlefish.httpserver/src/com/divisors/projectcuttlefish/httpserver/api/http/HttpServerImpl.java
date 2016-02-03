@@ -7,12 +7,15 @@ import java.net.SocketAddress;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.ServiceState;
+import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpChannel;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
@@ -20,6 +23,7 @@ import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+import reactor.fn.tuple.Tuple;
 
 /**
  * Implementation of {@link HttpServer}
@@ -27,6 +31,7 @@ import reactor.bus.EventBus;
  *
  */
 public class HttpServerImpl implements HttpServer {
+	protected final ConcurrentHashMap<Long, HttpChannel> channelMap = new ConcurrentHashMap<>();
 	protected final List<TcpServer> sources = new ArrayList<>();
 	/**
 	 * Executor that this server is run on. If {@link #listenOn(SocketAddress)} is called, the TcpServer
@@ -153,5 +158,13 @@ public class HttpServerImpl implements HttpServer {
 	public void destroy() {
 		// TODO Auto-generated method stub
 
+	}
+	@Override
+	public Action onRequest(BiConsumer<HttpChannel, HttpRequest> handler) {
+		return new RegistrationCancelAction(this.bus.on($t("http.request"), event -> {
+			HttpRequest request = (HttpRequest) event.getData();
+			HttpChannel channel= channelMap.get((Long)((Tuple)event.getKey()).get(1));
+			handler.accept(channel, request);
+		}));
 	}
 }
