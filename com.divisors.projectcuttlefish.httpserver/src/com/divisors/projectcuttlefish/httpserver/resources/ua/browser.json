@@ -56,12 +56,12 @@
 					product: "Mozilla/5.0"
 				},
 				{
-					token: 4,
-					productName: "Safari"
+					token: 3,
+					productName: "Mobile"
 				},
 				{
-					token: 2,
-					productName: "Mobile"
+					token: 4,
+					productName: "Safari"
 				}
 			],
 			parseRules: [
@@ -72,7 +72,7 @@
 				{
 					token: 0,
 					target: "details",
-					regex: "^(?<device>iPhone|iPad|iPod); [UIN]; CPU iPhone OS (?<osv>]\\d\\_?)+ like Mac OS X; (?<lang>[a-zA-Z0-9\\-]+)$",
+					regex: "^(?<device>iPhone|iPad|iPod);( [UIN];)? CPU (iPhone )?OS (?<osv>(\\d+\\_)+\\d+) like Mac OS X(; (?<lang>[a-zA-Z0-9\\-]+))?$",
 					groups: {
 						device: "device.name",
 						osv: {
@@ -96,6 +96,48 @@
 					key: "device.type",
 					value: "smartphone",
 					safe: true
+				}
+			]
+		},
+		{
+			name: "Googlebot",
+			mfr: "Google",
+			patternRules: [
+				{
+					token: 0,
+					detail: 2,
+					value: "+http://www.google.com/bot.html"
+				}
+			],
+			parseRules: [
+				{
+					token: 0,
+					target: details,
+					regex: "^compatible; Googlebot/(?<version>(\\d+\\.)*\\d+);",
+					groups: {
+						version: "browser.version"
+					}
+				}
+			]
+		},
+		{
+			name: "Firefox",
+			mfr: "Mozilla",
+			patternRules: [
+				{
+					token: 0,
+					product: "Mozilla/5.0"
+				},
+				{
+					token: 2,
+					productName: "Firefox"
+				}
+			],
+			parseRules: [
+				{
+					token: 2,
+					target: "version",
+					key: "browser.version"
 				}
 			]
 		},
