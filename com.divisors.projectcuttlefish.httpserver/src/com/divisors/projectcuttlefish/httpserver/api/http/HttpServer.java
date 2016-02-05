@@ -9,6 +9,8 @@ import com.divisors.projectcuttlefish.httpserver.api.Server;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
 
+import reactor.bus.EventBus;
+
 /**
  * Server for responding to HTTP requests. Usually upgrades one or more
  * {@link com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer TcpServer}'s.
@@ -39,4 +41,7 @@ public interface HttpServer extends Server<HttpRequest, HttpResponse, HttpChanne
 	HttpServer init() throws Exception;
 	
 	Action onRequest(BiConsumer<HttpChannel, HttpRequest> handler);
+	
+	HttpServer dispatchOn(EventBus bus) throws IllegalStateException;
+	EventBus getBus();
 }

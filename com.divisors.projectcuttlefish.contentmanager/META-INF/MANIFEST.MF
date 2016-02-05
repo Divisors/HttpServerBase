@@ -12,7 +12,8 @@ Require-Bundle: com.divisors.projectcuttlefish.httpserver;bundle-version="0.0.6"
  com.divisors.projectcuttlefish.uac;bundle-version="1.0.0",
  org.junit,
  io.projectreactor.reactor-core;bundle-version="2.1.0",
- org.reactivestreams.reactive-streams;bundle-version="1.0.0"
+ org.reactivestreams.reactive-streams;bundle-version="1.0.0",
+ org.eclipse.jgit;bundle-version="4.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.divisors.projectcuttlefish.httpserver.client,
  com.divisors.projectcuttlefish.httpserver.ua,
@@ -26,5 +27,3 @@ Bundle-ActivationPolicy: lazy
 Export-Package: com.divisors.projectcuttlefish.contentmanager.api
 Require-Bundle: com.divisors.projectcuttlefish.httpserver;bundle-version="[0.0.5,0.1.0)",
  org.junit,
- org.eclipse.egit;bundle-version="4.2.0",
- org.eclipse.egit.github.core;bundle-version="4.0.3"

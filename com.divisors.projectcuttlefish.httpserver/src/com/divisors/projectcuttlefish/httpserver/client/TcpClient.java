@@ -3,6 +3,7 @@ package com.divisors.projectcuttlefish.httpserver.client;
 import static com.divisors.projectcuttlefish.httpserver.api.tcp.SubsetSelector.$t;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
@@ -24,6 +25,7 @@ import java.util.function.Consumer;
 import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.Server;
 import com.divisors.projectcuttlefish.httpserver.api.ServiceState;
+import com.divisors.projectcuttlefish.httpserver.api.error.ServiceStateException;
 import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
 
 import reactor.bus.Event;
@@ -64,17 +66,15 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 		this.executor = executor;
 	}
 	@Override
-	public TcpClient init() throws Exception {
-		if (getState() != ServiceState.UNINITIALIZED)
-			throw new IllegalStateException("Expected: UNITNITIALIZED; State: "+getState().name());
+	public TcpClient init() throws IOException, ServiceStateException {
+		ServiceState.assertEquals(getState(), ServiceState.UNINITIALIZED);
 		selector = Selector.open();
 		state.set(ServiceState.INITIALIZED);
 		return this;
 	}
 	@Override
-	public TcpClient start() {
-		if (!state.compareAndSet(ServiceState.INITIALIZED, ServiceState.STARTING))
-			throw new IllegalStateException("Expected: INITIALIZED; State: "+state.get().name());
+	public TcpClient start() throws ServiceStateException {
+		ServiceState.assertAndSet(this.state, ServiceState.INITIALIZED, ServiceState.STARTING);
 		if (executor == null) {
 			run();
 		} else {
@@ -82,9 +82,8 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 		}
 		return this;
 	}
-	public TcpClient start(Consumer<? super TcpClient> initializer) throws IOException, IllegalStateException {
-		if (!state.compareAndSet(ServiceState.INITIALIZED, ServiceState.STARTING))
-			throw new IllegalStateException("Expected: INITIALIZED; State: "+state.get().name());
+	public TcpClient start(Consumer<? super TcpClient> initializer) throws IOException, ServiceStateException {
+		ServiceState.assertAndSet(this.state, ServiceState.INITIALIZED, ServiceState.STARTING);
 		initializer.accept(this);
 		if (executor == null) {
 			run();
@@ -96,6 +95,9 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 	public TcpClient dispatchOn(EventBus bus) {
 		this.bus = bus;
 		return this;
+	}
+	public EventBus getBus() {
+		return this.bus;
 	}
 	public TcpClient runOn(ExecutorService executor) {
 		final ServiceState cstate = getState();
@@ -240,8 +242,8 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 		
 		//create channel
 		long id = (Long)key.attachment();
-		upgradeSocket(socket, id);
 		TcpClientChannel channel = channelMap.get(id);
+		upgradeSocket(channel, socket, id);
 		System.out.println("\tConnected to " + channel.getRemoteAddress().toString());
 		System.out.println("\tID #"+id);
 		
@@ -254,9 +256,13 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 		socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, id);
 		System.out.println("\tDone.");
 	}
-	protected void upgradeSocket(SocketChannel socket, long id) throws IOException {
+	protected void upgradeSocket(TcpClientChannel channel, SocketChannel socket, long id) throws IOException {
 		//this method can be overridden by children of this class offering encryption & stuff
-		socket.finishConnect();
+		try {
+			socket.finishConnect();
+		} catch (ConnectException e) {
+			throw new ConnectException("Connection refused to " + channel.getRemoteAddress());
+		}
 	}
 	/**
 	 * Read buffer of data from socket

@@ -75,7 +75,7 @@ public class HttpClientChannel implements Channel<HttpResponse, HttpRequest> {
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() throws IOException {
 		for (Action action : shutdownActions)
 			if (action.isAvailable())
 				action.act();

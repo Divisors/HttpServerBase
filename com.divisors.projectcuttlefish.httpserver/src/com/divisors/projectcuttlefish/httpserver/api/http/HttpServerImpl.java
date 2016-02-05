@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.ServiceState;
+import com.divisors.projectcuttlefish.httpserver.api.error.ServiceStateException;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpChannel;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
@@ -67,10 +68,9 @@ public class HttpServerImpl implements HttpServer {
 	 * @throws Exception 
 	 * @throws IllegalStateException 
 	 */
-	public HttpServer listenOn(SocketAddress addr) throws IllegalStateException, IOException {
+	public HttpServer listenOn(SocketAddress addr) throws ServiceStateException, IOException {
 		System.out.println("HTTP::Listening on " + addr);
-		ServiceState state = this.state.get();
-		if (state != ServiceState.DESTROYED && state != ServiceState.STOPPING)
+		if (ServiceState.assertNone(getState(), ServiceState.UNINITIALIZED, ServiceState.UNKNOWN, ServiceState.DESTROYED))
 			new TcpServerImpl(addr)
 				.init()
 				.start((Consumer<TcpServer>)server->
@@ -106,29 +106,37 @@ public class HttpServerImpl implements HttpServer {
 		return false;
 	}
 	@Override
-	public HttpServerImpl init() throws Exception {
-		this.state.compareAndSet(ServiceState.UNINITIALIZED, ServiceState.INITIALIZED);
+	public HttpServerImpl init() throws ServiceStateException {
+		ServiceState.assertAndSet(this.state, ServiceState.UNINITIALIZED, ServiceState.INITIALIZED);
 		return this;
 	}
 	
 	@Override
-	public HttpServerImpl start() throws IOException, IllegalStateException {
+	public HttpServerImpl start() throws IOException, ServiceStateException {
 		return this.start((me)->{});
 	}
 	@Override
-	public HttpServerImpl start(Consumer<? super HttpServer> initializer) throws IOException, IllegalStateException {
-		if (!this.state.compareAndSet(ServiceState.INITIALIZED, ServiceState.STARTING))
-			throw new IllegalStateException("State was "+this.state.get().name()+"; expect: ServiceState#INITIALIZED");
+	public HttpServerImpl start(Consumer<? super HttpServer> initializer) throws IOException, ServiceStateException {
+		ServiceState.assertAndSet(this.state, ServiceState.INITIALIZED, ServiceState.STARTING);
 		initializer.accept(this);
 		return this;
 	}
-	public HttpServerImpl runOn(ExecutorService executor) {
-		this.executor = executor;//TODO check state
+	public HttpServerImpl runOn(ExecutorService executor) throws ServiceStateException {
+		ServiceState.assertAny(getState(), ServiceState.UNINITIALIZED, ServiceState.INITIALIZED, ServiceState.STARTING);
+		this.executor = executor;
 		return this;
 	}
+	/**
+	 * 
+	 */
+	@Override
 	public HttpServerImpl dispatchOn(EventBus bus) {
-		this.bus = bus;//TODO check state
+		ServiceState.assertAny(getState(), ServiceState.UNINITIALIZED, ServiceState.INITIALIZED, ServiceState.STARTING);
+		this.bus = bus;
 		return this;
+	}
+	public EventBus getBus() {
+		return this.bus;
 	}
 	@Override
 	public void run() {

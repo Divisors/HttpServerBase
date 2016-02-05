@@ -77,8 +77,7 @@ public class TcpServerImpl implements TcpServer {
 	}
 	@Override
 	public TcpServerImpl init() throws IllegalStateException, IOException {
-		if (getState() != ServiceState.UNINITIALIZED)
-			throw new IllegalStateException("Expected: UNITNITIALIZED; State: "+getState().name());
+		ServiceState.assertEquals(getState(), ServiceState.UNINITIALIZED);
 		selector = Selector.open();
 		server = ServerSocketChannel.open();
 		server.socket().bind(addr);
@@ -89,8 +88,7 @@ public class TcpServerImpl implements TcpServer {
 	}
 	@Override
 	public TcpServerImpl start() {
-		if (!state.compareAndSet(ServiceState.INITIALIZED, ServiceState.STARTING))
-			throw new IllegalStateException("Expected: INITIALIZED; State: "+state.get().name());
+		ServiceState.assertAndSet(state, ServiceState.INITIALIZED, ServiceState.STARTING);
 		if (executor == null) {
 			run();
 		} else {
@@ -117,11 +115,8 @@ public class TcpServerImpl implements TcpServer {
 	}
 	@Override
 	public TcpServerImpl runOn(ExecutorService executor) {
-		final ServiceState cstate = getState();
-		if (cstate == ServiceState.UNINITIALIZED || cstate == ServiceState.INITIALIZED || cstate == ServiceState.STARTING)
+		if (ServiceState.assertAny(getState(), ServiceState.UNINITIALIZED, ServiceState.INITIALIZED, ServiceState.STARTING))
 			this.executor = executor;
-		else
-			throw new IllegalStateException("Expected: INITIALIZED or STARTING; State: "+cstate.name());	
 		return this;
 	}
 	@Override
@@ -142,8 +137,7 @@ public class TcpServerImpl implements TcpServer {
 	
 	@Override
 	public void run() {
-		if (!state.compareAndSet(ServiceState.STARTING, ServiceState.RUNNING))
-			throw new IllegalStateException("I was already running! (Expect: STARTING; was " + state.get() + ").");
+		ServiceState.assertAndSet(state, ServiceState.STARTING, ServiceState.RUNNING);
 		try {
 			ServiceState cstate;//temporary state mirror for making life easy
 
@@ -183,8 +177,7 @@ public class TcpServerImpl implements TcpServer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (!(this.state.compareAndSet(ServiceState.RUNNING, ServiceState.INITIALIZED) || this.state.compareAndSet(ServiceState.STOPPING, ServiceState.INITIALIZED)))
-				throw new IllegalStateException("...I'm not even sure what caused this...");//TODO: set state to destroyed
+			ServiceState.assertAndSetAny(this.state, new ServiceState[] {ServiceState.RUNNING, ServiceState.STOPPING}, ServiceState.INITIALIZED);
 			this.state.notifyAll();
 		}
 	}

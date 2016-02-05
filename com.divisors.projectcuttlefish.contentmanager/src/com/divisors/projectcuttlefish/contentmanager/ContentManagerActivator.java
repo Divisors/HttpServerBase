@@ -13,6 +13,7 @@ import com.divisors.projectcuttlefish.contentmanager.api.ResourceCache;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceCacheImpl;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceHttpServlet;
 import com.divisors.projectcuttlefish.contentmanager.api.ViewManager;
+import com.divisors.projectcuttlefish.contentmanager.api.gh.GitRepositorySynchronizer;
 import com.divisors.projectcuttlefish.contentmanager.api.resource.FileResource;
 import com.divisors.projectcuttlefish.httpserver.HttpServerActivator;
 import com.divisors.projectcuttlefish.httpserver.api.Version;
@@ -54,6 +55,12 @@ public class ContentManagerActivator implements BundleActivator {
 		ResourceCache cache = new ResourceCacheImpl();
 		ResourceHttpServlet servlet = new ResourceHttpServlet(HttpServerActivator.getInstance().http, cache);
 		cache.put(new FileResource(new File("File location here"), new Version(0,0,0)));
+		{
+			File localRepo = new File(stateLoc.toFile(), "foo");
+			localRepo.mkdir();
+			GitRepositorySynchronizer git = new GitRepositorySynchronizer(localRepo, "git@github.com:Divisors/Project-Cuttlefish.git", "master");
+			git.update();
+		}
 		try {
 //			new GitAutoUpdateService().watch("Divisors", "Project-Cuttlefish");
 		} catch (Exception e) {
@@ -70,5 +77,4 @@ public class ContentManagerActivator implements BundleActivator {
 		ContentManagerActivator.instance = null;
 		viewManagerService.unregister();
 	}
-
 }

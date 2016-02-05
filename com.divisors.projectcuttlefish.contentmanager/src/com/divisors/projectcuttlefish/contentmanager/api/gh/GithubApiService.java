@@ -27,6 +27,9 @@ public class GithubApiService {
 	protected final Set<HttpClientChannel> ghChannels = new HashSet<>();
 	protected final BlockingQueue<HttpClientChannel> availGhChannels = new LinkedBlockingQueue<>();
 	protected final EventBus bus;
+	public GithubApiService(HttpClient client) {
+		this(client, client.getBus());
+	}
 	public GithubApiService(HttpClient client, EventBus bus) {
 		this.client = client;
 		this.bus = bus;
@@ -35,7 +38,7 @@ public class GithubApiService {
 		if (client.getState() == ServiceState.UNINITIALIZED)
 			client.init();
 	}
-	public Future<JSONObject> getRepositoriesByOwner(String user) {
+	public Future<JSONObject> getRepositoriesByOwner(String user) throws IOException {
 		query(new HttpRequestBuilder()
 				.setMethod("GET")
 				.setPath("https://api.github.com/users/" + user + "/repos")
@@ -59,8 +62,18 @@ public class GithubApiService {
 			return null;
 		}
 	}
-	protected void query(HttpRequest request) {
-		
+	protected void query(HttpRequest request) throws IOException {
+		HttpClientChannel channel = client.open(GITHUB);
+		channel.onConnect((c) -> channel.write(request));
+		channel.onRead((response)-> {
+			System.out.println(response);
+			try {
+				channel.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+		channel.connect();
 	}
 	protected void doQuery(Event<HttpRequest> request) {
 		try {

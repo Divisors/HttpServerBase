@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.Server;
 import com.divisors.projectcuttlefish.httpserver.api.ServiceState;
+import com.divisors.projectcuttlefish.httpserver.api.error.ServiceStateException;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
 import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
@@ -20,7 +21,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 /**
- * HTTP client, loosely based on XMLHttpRequest
+ * HTTP client
  * @author mailmindlin
  */
 public class HttpClient implements Server<HttpResponse, HttpRequest, HttpClientChannel>{
@@ -36,10 +37,10 @@ public class HttpClient implements Server<HttpResponse, HttpRequest, HttpClientC
 		this(tcp, null, null);
 	}
 	public HttpClient(ExecutorService executor) {
-		this(new TcpClient(executor), null, executor);
+		this(null, executor);
 	}
 	public HttpClient(EventBus bus) {
-		this(new TcpClient(bus), bus, null);
+		this(bus, null);
 	}
 	public HttpClient(EventBus bus, ExecutorService executor) {
 		this(new TcpClient(bus, executor), bus, executor);
@@ -54,16 +55,14 @@ public class HttpClient implements Server<HttpResponse, HttpRequest, HttpClientC
 		return this;
 	}
 	@Override
-	public HttpClient init() throws Exception {
-		if (!this.state.compareAndSet(ServiceState.UNINITIALIZED, ServiceState.INITIALIZED))
-			throw new IllegalStateException();//TODO add msg
+	public HttpClient init() throws ServiceStateException, IOException {
+		ServiceState.assertAndSet(this.state, ServiceState.UNINITIALIZED, ServiceState.INITIALIZED);
 		tcpClient.init();
 		return this;
 	}
 	@Override
-	public HttpClient start() throws Exception {
-		if (!this.state.compareAndSet(ServiceState.INITIALIZED, ServiceState.STARTING))
-			throw new IllegalStateException();//TODO add msg
+	public HttpClient start() throws ServiceStateException {
+		ServiceState.assertAndSet(this.state, ServiceState.INITIALIZED, ServiceState.STARTING);
 		tcpClient.start();
 		return this;
 	}
@@ -74,6 +73,9 @@ public class HttpClient implements Server<HttpResponse, HttpRequest, HttpClientC
 	@Override
 	public ServiceState getState() {
 		return this.state.get();
+	}
+	public EventBus getBus() {
+		return this.bus;
 	}
 	@Override
 	public void run() {
