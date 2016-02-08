@@ -16,7 +16,7 @@ public class UserAgentParser implements Function<String, UserAgent> {
 	/**
 	 * Online demo @ <a href="http://www.regexpal.com/?fam=93936">regexpal.com/?fam=93936</a>.
 	 */
-	public static final Pattern tokenizer = Pattern.compile("(([A-Za-z]+)(\\/?([a-zA-Z0-9\\.]+)?))( \\(((([A-Za-z0-9\\ \\_\\-\\,\\.]+); ?)*([A-Za-z0-9\\ \\_\\-\\,\\.]+))\\))?");
+	public static final Pattern tokenizer = Pattern.compile("(([A-Za-z]+)(\\/?([a-zA-Z0-9\\.]+)?))( \\(((([A-Za-z0-9\\ \\_\\-\\,\\.\\:]+); ?)*([A-Za-z0-9\\ \\_\\-\\,\\.\\:]+))\\))?");
 	@Override
 	public UserAgent apply(String ua) {
 		ParsedUAToken[] tokens = tokenize(ua);
@@ -59,6 +59,12 @@ public class UserAgentParser implements Function<String, UserAgent> {
 		while (m.find())
 			result.add(new ParsedUAToken(m.group(), m.group(2), m.group(4), m.group(6)));
 		return result.toArray(new ParsedUAToken[result.size()]);
+	}
+	public static enum ParsedUATokenField {
+		RAW,
+		NAME,
+		VERSION,
+		DETAILS;
 	}
 	public static class ParsedUAToken {
 		final String raw;
@@ -114,6 +120,21 @@ public class UserAgentParser implements Function<String, UserAgent> {
 				.append(Arrays.toString(details))
 				.append("}")
 				.toString();
+		}
+		
+		public String getField(ParsedUATokenField field) {
+			switch (field) {
+				case RAW:
+					return this.raw;
+				case NAME:
+					return getName();
+				case VERSION:
+					return getVersion();
+				case DETAILS:
+					return this.rawDetails;
+				default:
+					throw new UnsupportedOperationException("Unknown field: " + field);
+			}
 		}
 	}
 }
