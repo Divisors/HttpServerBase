@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -128,10 +129,10 @@ public class TcpChannelImpl implements TcpChannel {
 		
 		System.out.println("Queueing " + data.remaining() + " bytes for writing #" + this.getConnectionID());
 		this.writeQueue.add(data);
-		SelectionKey key = this.socket.keyFor(this.getServer().selector);
+		SelectionKey key = this.socket.keyFor(this.getSelector());
 		key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
 		// notify the selector of the interest
-		this.getServer().selector.wakeup();// this decreased latency by like
+		this.getSelector().wakeup();// this decreased latency by like
 											// >5000% (really), because writes
 											// were being blocked until the
 											// another socket triggered an event
@@ -176,7 +177,7 @@ public class TcpChannelImpl implements TcpChannel {
 			
 			//'tell' the selector that this can write more
 			if (!this.writeQueue.isEmpty()) {
-				SelectionKey key = socket.keyFor(getServer().selector);
+				SelectionKey key = socket.keyFor(getSelector());
 				key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
 			}
 			return written;
@@ -187,5 +188,8 @@ public class TcpChannelImpl implements TcpChannel {
 	public <E> Channel<ByteBuffer, ByteBuffer> setOption(ChannelOption<E> key, E value) {
 		// TODO Auto-generated method stub
 		return this;
+	}
+	protected Selector getSelector() {
+		return getServer().selector;
 	}
 }
