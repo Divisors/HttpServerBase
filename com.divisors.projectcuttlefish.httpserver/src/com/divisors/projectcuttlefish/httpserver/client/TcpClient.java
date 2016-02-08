@@ -250,7 +250,7 @@ public class TcpClient implements Server<ByteBuffer, ByteBuffer, TcpClientChanne
 		//trigger handlers
 		Event.Headers eventHeaders = new Event.Headers();
 		eventHeaders.setOrigin("TcpClient@"+channel.getRemoteAddress().toString());
-		bus.notify("tcp.accept",new Event<TcpClientChannel>(eventHeaders, channel));
+		bus.notify(Tuple.of("tcp.accept", channel.getConnectionID()),new Event<TcpClientChannel>(eventHeaders, channel));
 		
 		//queue for future I/O
 		socket.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, id);

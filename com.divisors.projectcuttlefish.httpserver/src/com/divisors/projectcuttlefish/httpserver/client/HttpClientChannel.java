@@ -53,8 +53,8 @@ public class HttpClientChannel implements Channel<HttpResponse, HttpRequest> {
 		return action;
 	}
 	@SuppressWarnings("unchecked")
-	public Action onConnect(Consumer<TcpClientChannel> handler) {
-		Registration<?,?> registration = client.bus.on($t("http.accept",getConnectionID()), event->handler.accept(((Event<TcpClientChannel>)event).getData()));
+	public Action onConnect(Consumer<HttpClientChannel> handler) {
+		Registration<?,?> registration = client.bus.on($t("http.accept",getConnectionID()), event->handler.accept(((Event<HttpClientChannel>)event).getData()));
 		registration.cancelAfterUse();// Connect should be called only once, so clean it up soon
 		Action action = new RegistrationCancelAction(registration);
 		this.shutdownActions.add(action);
