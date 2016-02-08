@@ -2,21 +2,28 @@ package com.divisors.projectcuttlefish.contentmanager;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.concurrent.Executors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.reactivestreams.Processor;
 
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceCache;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceCacheImpl;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceHttpServlet;
 import com.divisors.projectcuttlefish.contentmanager.api.ViewManager;
-import com.divisors.projectcuttlefish.contentmanager.api.gh.GitRepositorySynchronizer;
+import com.divisors.projectcuttlefish.contentmanager.api.gh.GithubApiService;
+import com.divisors.projectcuttlefish.contentmanager.api.gh.GithubUser;
 import com.divisors.projectcuttlefish.contentmanager.api.resource.FileResource;
 import com.divisors.projectcuttlefish.httpserver.HttpServerActivator;
 import com.divisors.projectcuttlefish.httpserver.api.Version;
+import com.divisors.projectcuttlefish.httpserver.client.HttpClient;
+
+import reactor.bus.EventBus;
+import reactor.core.processor.RingBufferProcessor;
 
 public class ContentManagerActivator implements BundleActivator {
 
@@ -56,10 +63,13 @@ public class ContentManagerActivator implements BundleActivator {
 		ResourceHttpServlet servlet = new ResourceHttpServlet(HttpServerActivator.getInstance().http, cache);
 		cache.put(new FileResource(new File("File location here"), new Version(0,0,0)));
 		{
-			File localRepo = new File(stateLoc.toFile(), "foo");
-			localRepo.mkdir();
-			GitRepositorySynchronizer git = new GitRepositorySynchronizer(localRepo, "git@github.com:Divisors/Project-Cuttlefish.git", "master");
-			git.update();
+			Processor processor = RingBufferProcessor.create("pc.server.1", 32);
+			HttpClient client = new HttpClient(EventBus.create(processor), Executors.newCachedThreadPool());
+			client.init();
+			client.start();
+			GithubApiService github = new GithubApiService(client);
+			GithubUser user = github.getUserByName("Divisors");
+			github.query(user);
 		}
 		try {
 //			new GitAutoUpdateService().watch("Divisors", "Project-Cuttlefish");
