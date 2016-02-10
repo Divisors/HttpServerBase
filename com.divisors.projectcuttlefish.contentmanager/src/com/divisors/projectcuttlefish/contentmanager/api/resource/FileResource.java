@@ -22,6 +22,10 @@ public class FileResource implements Resource {
 		this.path = p;
 		this.tag = new ResourceTag(p.getFileName().toString(), version);
 	}
+	public FileResource(Path p, String name, Version version) {
+		this.path = p;
+		this.tag = new ResourceTag(name, version);
+	}
 	@Override
 	public String getName() {
 		return getTag().name;
