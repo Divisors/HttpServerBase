@@ -11,7 +11,7 @@ public class ResourceCacheImpl implements ResourceCache {
 //	Cache<String, ByteBuffer> memcache = CacheBuilder.newBuilder().build();
 	@Override
 	public ResourceCacheImpl put(Resource resource) {
-		System.out.println("Loading resource " + resource.getName() + ':' + resource);
+		System.out.println("Loading resource '" + resource.getName() + "' as '" + resource.getName() + "'");
 		resourceByName.put(resource.getName(), resource);
 		return this;
 	}
