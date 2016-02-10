@@ -112,7 +112,7 @@
 			parseRules: [
 				{
 					token: 0,
-					target: details,
+					target: "details",
 					regex: "^compatible; Googlebot/(?<version>(\\d+\\.)*\\d+);",
 					groups: {
 						version: "browser.version"
