@@ -171,7 +171,8 @@ public class HttpServerImpl implements HttpServer {
 	public Action onRequest(BiConsumer<HttpChannel, HttpRequest> handler) {
 		return new RegistrationCancelAction(this.bus.on($t("http.request"), event -> {
 			HttpRequest request = (HttpRequest) event.getData();
-			HttpChannel channel= channelMap.get((Long)((Tuple)event.getKey()).get(1));
+			long channelID = (Long)((Tuple)event.getKey()).get(1);
+			HttpChannel channel= channelMap.get(channelID);
 			handler.accept(channel, request);
 		}));
 	}

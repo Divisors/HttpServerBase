@@ -79,10 +79,15 @@ public interface HttpResponse extends Mutable<ImmutableHttpResponse> {
 				.append(getHeaders().toString())
 				.append("\r\n");
 		byte[] bytes = headers.toString().getBytes();
-		ByteBuffer b = ByteBuffer.allocate(bytes.length + (int)getBody().remaining());//TODO: fix for big things
-		b.put(bytes);
-		getBody().drainTo(b::put);
-		b.flip();
-		return b;
+		HttpResponsePayload body = getBody();
+		if (body == null) {
+			return ByteBuffer.wrap(bytes);
+		} else {
+			ByteBuffer b = ByteBuffer.allocate(bytes.length + (int)getBody().remaining());//TODO: fix for big things
+			b.put(bytes);
+			getBody().drainTo(b::put);
+			b.flip();
+			return b;
+		}
 	}
 }
