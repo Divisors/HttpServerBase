@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import com.divisors.projectcuttlefish.contentmanager.api.resource.Resource;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpChannel;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeader;
+import com.divisors.projectcuttlefish.httpserver.api.http.HttpHeaders;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpServer;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
@@ -15,6 +17,7 @@ import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponsePayloa
 public class ResourceHttpServlet {
 	static HashMap<Integer, String> responseNames = new HashMap<>();
 	static {
+		responseNames.put(400, "Bad Request");
 		responseNames.put(404, "Not Found");
 		responseNames.put(500, "Server Error");
 	}
@@ -32,9 +35,12 @@ public class ResourceHttpServlet {
 		String path = request.getRequestLine().getPath();
 		if (path.startsWith("/"))
 			path = path.substring(1);
-		System.out.println("Searching for resource :'" + path + "'");
+		if (doCache(channel, request, path))
+			return;
+		System.out.println("Searching for resource: '" + path + "'");
 		Resource resource = cache.get(path);
 		if (resource == null) {
+			System.out.println("\tCould not find resource: " + path);
 			sendError(channel, request, 404);
 			return;
 		}
@@ -43,15 +49,45 @@ public class ResourceHttpServlet {
 		response.setBody(body);
 		response.setHeader("Content-Length", "" + body.remaining())
 			.setHeader("Content-Type", "text/html")
-			.setHeader("Etag", resource.getEtag());
+			.setHeader("Etag", '"' + resource.getEtag() + '"');
 		channel.write(response);
 	}
 	protected void sendError(HttpChannel channel, HttpRequest request, int code) {
-		HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(code, responseNames.getOrDefault(code, "Unknown")));
+		String name = responseNames.getOrDefault(code, "Unknown");
+		HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(code, name));
 		response.setHeader("Content-Type", "text/plain");
-		HttpResponsePayload body = HttpResponsePayload.wrap(ByteBuffer.wrap(("You got an error: " + code).getBytes()));
+		HttpResponsePayload body = HttpResponsePayload.wrap(ByteBuffer.wrap(("You got an error " + code + ": " + name).getBytes()));
 		response.setBody(body);
 		response.setHeader("Content-Length", Long.toString(body.remaining()));
 		channel.write(response);
+	}
+	protected boolean doCache(HttpChannel channel, HttpRequest request, String path) {
+		HttpHeaders headers = request.getHeaders();
+		//if there's no etag, there's nothing to do
+		if (!headers.containsKey("If-None-Match"))
+			return false;
+		
+		
+		HttpHeader ifNoneMatchHeader = headers.getHeader("If-None-Match");
+		if (ifNoneMatchHeader.getValue().size() > 1) {
+			sendError(channel, request, 400);
+			return true;
+		}
+		
+		String tag = ifNoneMatchHeader.first().trim();
+		tag = tag.substring(1, tag.length() - 1);//remove quotes around tag
+		
+		Resource resource = cache.get(path, tag);
+		
+		if (resource != null && resource.getEtag().equals(tag)) {
+			//send 304 NOT MODIFIED
+			HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(304, "Not Modified"));
+			response.addHeader("Content-Length", "0")
+				.addHeader("Etag",tag);
+			channel.write(response);
+			return true;
+		}
+		//the resource's etag has changed (probably because it was updated), so don't send a 304
+		return false;
 	}
 }

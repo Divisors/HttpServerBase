@@ -17,7 +17,6 @@ import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponseImpl;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponseLineImpl;
-import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponsePayload;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServer;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerFactory;
 import com.divisors.projectcuttlefish.httpserver.api.tcp.TcpServerImpl;
@@ -63,30 +62,30 @@ public class HttpServerActivator implements BundleActivator {
 			uaDetector.init();
 			http = new HttpServerImpl(EventBus.create(processor), Executors.newCachedThreadPool())
 				.init()
-				.start(server-> {
-				try {
-					((HttpServerImpl)server)
-						.listenOn(new InetSocketAddress(8085))
-						.onConnect((channel) -> {
-							channel.onRead((request) -> {
-								if (request.getHeaders().containsKey("User-Agent"))
-									uaDetector.apply(request.getHeader("User-Agent").first());
-								HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(request.getRequestLine().getHttpVersion(),200,"OK"))
-										.addHeader("Server","PC-0.0.6")
-										.addHeader("Content-Type","text/plain; charset=utf-8");
-								
-								StringBuilder responseText = new StringBuilder().append("Hello, World!");
-								HttpResponsePayload payload = HttpResponsePayload.wrap(ByteBuffer.wrap(responseText.toString().getBytes()));
-								response.addHeader("Content-Length",""+payload.remaining()).setBody(payload);
-								channel.write(response);
+				.start(server -> {
+					try {
+						((HttpServerImpl)server)
+							.listenOn(new InetSocketAddress(8085))
+							.onConnect((channel) -> {
+//								channel.onRead((request) -> {
+//									if (request.getHeaders().containsKey("User-Agent"))
+//										uaDetector.apply(request.getHeader("User-Agent").first());
+//									HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(request.getRequestLine().getHttpVersion(),200,"OK"))
+//											.addHeader("Server","PC-0.0.6")
+//											.addHeader("Content-Type","text/plain; charset=utf-8");
+//									
+//									StringBuilder responseText = new StringBuilder().append("Hello, World!");
+//									HttpResponsePayload payload = HttpResponsePayload.wrap(ByteBuffer.wrap(responseText.toString().getBytes()));
+//									response.addHeader("Content-Length",""+payload.remaining()).setBody(payload);
+//									channel.write(response);
+//								});
+								System.err.println("New channel: " + channel);
 							});
-							System.err.println("New channel: " + channel);
-						});
-				} catch (Exception e) {
-					e.printStackTrace();
-					System.exit(0);
-				}
-			});
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.exit(0);
+					}
+				});
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;
