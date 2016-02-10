@@ -25,7 +25,7 @@ import com.divisors.projectcuttlefish.httpserver.util.Constants;
 @FunctionalInterface
 public interface UserAgentParsingRule extends BiConsumer<ParsedUAToken[], Map<String, String>> {
 	@SuppressWarnings("unchecked")
-	public static UserAgentParsingRule compileJSON(JSONObject json) {
+	public static UserAgentParsingRule compileJSON(JSONObject json) throws ParseException {
 		if (json.has("regex")) {
 			int token = json.getInt("token");
 			ParsedUATokenField target = ParsedUATokenField.valueOf(json.getString("target").toUpperCase());
@@ -51,8 +51,18 @@ public interface UserAgentParsingRule extends BiConsumer<ParsedUAToken[], Map<St
 			return new UARegexParsingRule(token, pattern, target, groupNameMappings, Collections.EMPTY_MAP);
 		}else if (json.has("token")) {
 			int token = json.getInt("token");
-			String key = json.getString("key");
-			ParsedUATokenField field = ParsedUATokenField.valueOf(json.getString("target").toUpperCase());
+			String key = json.optString("key");
+			if (key == null)
+				throw new ParseException("Unable to find key in rule");
+			String fieldName = json.optString("target");
+			if (fieldName == null)
+				throw new ParseException("Unable to find target in rule");
+			ParsedUATokenField field;
+			try {
+				field = ParsedUATokenField.valueOf(fieldName.toUpperCase());
+			} catch (IllegalArgumentException e) {
+				throw new ParseException("Illegal field name: " + fieldName);
+			}
 			return new UASimpleParsingRule(token, key, field);
 		} else if (json.has("key") && json.has("value")) {
 			String key = json.getString("key");
