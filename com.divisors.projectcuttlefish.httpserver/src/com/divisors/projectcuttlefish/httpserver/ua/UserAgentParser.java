@@ -24,7 +24,7 @@ public class UserAgentParser implements Function<String, UserAgent> {
 		UASecurity security = UASecurity.UNKNOWN;
 		String language = null;
 		String platform = null;
-		UAOperatingSystem system = null;
+//		UAOperatingSystem system = null;
 		if (tokens.length >= 1) {
 			switch (tokens[0].details.length) {
 				case 4:

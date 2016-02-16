@@ -99,7 +99,7 @@ public class UserAgentDetector implements Function<String, UserAgent>, RunnableS
 			}
 		}
 		System.out.println("Properties: " + new JSONObject(properties));
-		UAOperatingSystem os;
+//		UAOperatingSystem os;
 		
 		return null;
 	}
