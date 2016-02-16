@@ -6,6 +6,11 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileTime;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
 import java.util.function.Consumer;
 
 import com.divisors.projectcuttlefish.httpserver.api.Version;
@@ -14,17 +19,26 @@ import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponsePayloa
 public class FileResource implements Resource {
 	protected final Path path;
 	protected final ResourceTag tag;
-	protected String etag;
+	protected String etagStrong, etagWeak;
+	protected FileTime lastModified;
 	public FileResource(File f, Version version) {
 		this(f.toPath(), version);
 	}
 	public FileResource(Path p, Version version) {
-		this.path = p;
-		this.tag = new ResourceTag(p.getFileName().toString(), version);
+		this(p, p.getFileName().toString(), version);
 	}
 	public FileResource(Path p, String name, Version version) {
 		this.path = p;
 		this.tag = new ResourceTag(name, version);
+		try {
+			this.lastModified = Files.getLastModifiedTime(this.path);
+			this.etagStrong = this.generateEtagStrong();
+		} catch (IOException e) {
+			System.err.println(p.toString() + " does not exist");
+			this.lastModified = null;
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		} 
 	}
 	@Override
 	public String getName() {
@@ -43,15 +57,67 @@ public class FileResource implements Resource {
 		return tag;
 	}
 	@Override
-	public String getEtag() {
-		if (etag == null)
-			etag = new StringBuilder(tag.name)
-					.append(':')
-					.append(tag.getVersion())
-					.append(':')
-					.append("")
-					.toString();
-		return etag;
+	public String getEtag(boolean strong) throws RuntimeException {
+		if (strong) {
+			if (this.etagStrong != null)
+				return this.etagStrong;
+			
+			try {
+				this.etagStrong = generateEtagStrong();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+				return null;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			
+			return this.etagStrong;
+		} else {
+			if (this.etagWeak != null)
+				return this.etagWeak;
+			try {
+				etagWeak = generateEtagWeak();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+				return null;
+			}
+			return etagWeak;
+		}
+	}
+	protected String generateEtagStrong() throws NoSuchAlgorithmException, IOException {
+		//calculate SHA-1 hash of the file, and return it in base64
+		//Note that this is not 
+		final MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
+		try (InputStream is = Files.newInputStream(this.path, StandardOpenOption.READ)) {
+			final byte[] buffer = new byte[1024];
+			for (int read = 0; (read = is.read(buffer)) != -1;) {
+				messageDigest.update(buffer, 0, read);
+			}
+		}
+
+		// Convert the byte to hex format
+		try (Formatter formatter = new Formatter()) {
+			for (final byte b : messageDigest.digest())
+				formatter.format("%02x", b);
+			return formatter.toString();
+		}
+	}
+	protected String generateEtagWeak() throws NoSuchAlgorithmException {
+		final MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
+		messageDigest.update(new StringBuilder(tag.name)
+			.append(':')
+			.append(tag.getVersion().getMajor())
+			.append(".")
+			.append(tag.getVersion().getMinor())
+			.toString()
+			.getBytes());
+		
+		// Convert the byte to hex format
+		try (Formatter formatter = new Formatter()) {
+			for (final byte b : messageDigest.digest())
+				formatter.format("%02x", b);
+			return formatter.toString();
+		}
 	}
 	@Override
 	public HttpResponsePayload toPayload() {

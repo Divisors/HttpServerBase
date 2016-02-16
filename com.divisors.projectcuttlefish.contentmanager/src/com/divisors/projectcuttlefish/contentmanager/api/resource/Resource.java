@@ -6,6 +6,6 @@ public interface Resource {
 	ResourceTag getTag();
 	String getName();
 	long estimateSize();
-	String getEtag();
+	String getEtag(boolean strong);
 	HttpResponsePayload toPayload();
 }

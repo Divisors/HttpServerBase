@@ -49,7 +49,7 @@ public class ResourceHttpServlet {
 		response.setBody(body);
 		response.setHeader("Content-Length", "" + body.remaining())
 			.setHeader("Content-Type", "text/html")
-			.setHeader("Etag", '"' + resource.getEtag() + '"');
+			.setHeader("Etag", '"' + resource.getEtag(true) + '"');
 		channel.write(response);
 	}
 	protected void sendError(HttpChannel channel, HttpRequest request, int code) {
@@ -75,11 +75,21 @@ public class ResourceHttpServlet {
 		}
 		
 		String tag = ifNoneMatchHeader.first().trim();
+		if (tag.length() <= 2) {
+			System.err.println("Invalid Etag: " + tag);
+			return false;
+		}
+		
+		boolean isStrong = !tag.substring(0, 2).equalsIgnoreCase("W/");
+		if (!isStrong)
+			tag = tag.substring(2);
+		
 		tag = tag.substring(1, tag.length() - 1);//remove quotes around tag
 		
-		Resource resource = cache.get(path, tag);
 		
-		if (resource != null && resource.getEtag().equals(tag)) {
+		Resource resource = cache.get(path, tag, isStrong);
+		
+		if (resource != null && resource.getEtag(isStrong).equals(tag)) {
 			//send 304 NOT MODIFIED
 			HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(304, "Not Modified"));
 			response.addHeader("Content-Length", "0")

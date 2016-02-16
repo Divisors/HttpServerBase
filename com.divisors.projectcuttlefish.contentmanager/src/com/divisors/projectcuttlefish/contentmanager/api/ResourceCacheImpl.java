@@ -7,7 +7,8 @@ import com.divisors.projectcuttlefish.contentmanager.api.resource.Resource;
 
 public class ResourceCacheImpl implements ResourceCache {
 	ConcurrentHashMap<String, Resource> resourceByName = new ConcurrentHashMap<>(),
-			resourceByEtag = new ConcurrentHashMap<>();
+			resourceByEtagStrong = new ConcurrentHashMap<>(),
+			resourceByEtagWeak = new ConcurrentHashMap<>();
 //	Cache<String, ByteBuffer> memcache = CacheBuilder.newBuilder().build();
 	@Override
 	public ResourceCacheImpl put(Resource resource) {
@@ -22,12 +23,13 @@ public class ResourceCacheImpl implements ResourceCache {
 	}
 
 	@Override
-	public Resource get(String name, String tag) {
+	public Resource get(String name, String tag, boolean strong) {
+		ConcurrentHashMap<String, Resource> resourceByEtag = (strong) ? this.resourceByEtagStrong : this.resourceByEtagWeak;
 		Resource r = resourceByEtag.get(tag);
 		if (r != null)
 			return r;
 		r = resourceByName.get(name);
-		resourceByEtag.put(r.getEtag(), r);
+		resourceByEtag.put(r.getEtag(strong), r);
 		return r;
 	}
 
