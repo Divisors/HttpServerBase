@@ -18,7 +18,8 @@
 			parseRules: [
 				{
 					token: 2,
-					version: "browser.version"
+					key: "browser.version",
+					target: "version"
 				}
 			]
 		},
@@ -43,7 +44,8 @@
 			parseRules: [
 				{
 					token: 2,
-					version: "browser.version"
+					key: "browser.version",
+					target: "version"
 				}
 			]
 		},
@@ -67,7 +69,8 @@
 			parseRules: [
 				{
 					token: 2,
-					version: "version"
+					key: "browser.version",
+					target: "version"
 				},
 				{
 					token: 0,
