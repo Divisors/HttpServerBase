@@ -83,7 +83,7 @@ public class ResourceHttpServlet {
 			//send 304 NOT MODIFIED
 			HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(304, "Not Modified"));
 			response.addHeader("Content-Length", "0")
-				.addHeader("Etag",tag);
+				.addHeader("Etag", '"' + tag + '"');
 			channel.write(response);
 			return true;
 		}
