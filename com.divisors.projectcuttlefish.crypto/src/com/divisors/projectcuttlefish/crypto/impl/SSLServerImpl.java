@@ -3,7 +3,6 @@ package com.divisors.projectcuttlefish.crypto.impl;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
-import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutorService;
 
@@ -44,6 +43,7 @@ public class SSLServerImpl extends TcpServerImpl implements SSLServer {
 	@Override
 	public SSLServerImpl init() throws IllegalStateException, IOException {
 		super.init();
+		System.setProperty("javax.net.debug", "all");
 		if (this.context == null) {
 			try {
 				this.context = SSLContext.getDefault();
