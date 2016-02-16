@@ -1,23 +1,18 @@
 package com.divisors.projectcuttlefish.contentmanager;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.Executors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.reactivestreams.Processor;
 
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceCache;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceCacheImpl;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceHttpServlet;
 import com.divisors.projectcuttlefish.contentmanager.api.ViewManager;
-import com.divisors.projectcuttlefish.contentmanager.api.gh.GithubApiService;
-import com.divisors.projectcuttlefish.contentmanager.api.gh.GithubUser;
 import com.divisors.projectcuttlefish.contentmanager.api.resource.DirectoryResourceLoader;
 import com.divisors.projectcuttlefish.contentmanager.api.resource.FileResource;
 import com.divisors.projectcuttlefish.httpserver.HttpServerActivator;

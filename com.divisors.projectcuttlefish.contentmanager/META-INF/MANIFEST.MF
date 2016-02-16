@@ -25,5 +25,8 @@ Import-Package: com.divisors.projectcuttlefish.httpserver.client,
  reactor.rx;version="2.1.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.divisors.projectcuttlefish.contentmanager.api
-Require-Bundle: com.divisors.projectcuttlefish.httpserver;bundle-version="[0.0.5,0.1.0)",
- org.junit,
+Require-Bundle: com.divisors.projectcuttlefish.httpserver;bundle-version="0.0.6",
+ org.reactivestreams.reactive-streams;bundle-version="1.0.0",
+ io.projectreactor.reactor-bus;bundle-version="2.1.0",
+ com.divisors.projectcuttlefish.uac;bundle-version="1.0.0",
+ io.projectreactor.reactor-core;bundle-version="2.1.0"
