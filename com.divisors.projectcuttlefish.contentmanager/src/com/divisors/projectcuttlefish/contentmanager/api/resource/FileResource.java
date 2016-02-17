@@ -109,6 +109,7 @@ public class FileResource implements Resource {
 			.append(tag.getVersion().getMajor())
 			.append(".")
 			.append(tag.getVersion().getMinor())
+			//Don't use the patch; these are assumed to be equivalent
 			.toString()
 			.getBytes());
 		
@@ -127,6 +128,10 @@ public class FileResource implements Resource {
 			throw new RuntimeException(e);
 		}
 	}
+	/**
+	 * Payload wrapping a FileResource
+	 * @author mailmindlin
+	 */
 	public class HttpFileResponsePayload implements HttpResponsePayload {
 		public static final int BUFFER_SIZE = 4096;
 		InputStream is;
