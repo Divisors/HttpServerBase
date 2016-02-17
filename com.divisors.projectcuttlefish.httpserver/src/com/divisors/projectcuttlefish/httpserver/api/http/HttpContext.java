@@ -33,4 +33,6 @@ public interface HttpContext {
 	 * @return value, or null if not set
 	 */
 	Object getProperty(String key);
+	
+	HttpProtocol getProtocol();
 }

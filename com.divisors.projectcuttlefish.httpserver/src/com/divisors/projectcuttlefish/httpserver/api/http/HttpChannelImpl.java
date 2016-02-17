@@ -35,15 +35,23 @@ public class HttpChannelImpl implements HttpChannel {
 	protected final AtomicBoolean open = new AtomicBoolean(true);
 	protected HashMap<ChannelOption<?>, Object> options;
 	protected final List<Registration<?, ?>>subscriptions = new LinkedList<>();
+	protected HttpContextImpl context;
 	public HttpChannelImpl(TcpChannel source, HttpServerImpl server) {
 		server.channelMap.put(source.getConnectionID(), this);
 		server.bus.notify(Tuple.<String,Long>of("http.connect", source.getConnectionID()), Event.wrap(this));
+		this.context = new HttpContextImpl(this);
 		this.source = source;
 		this.server = server;
 		source.onRead((buffer) -> {
 			byte[] arr = ByteUtils.toArray(buffer);
 			FormatUtils.bytesToHex(arr, true, -1);//TODO figure out why this makes it not crash...
 			HttpRequest request = HttpRequest.parse(buffer);
+			if (context.getProtocol() == HttpProtocol.UNKNOWN) {
+				String protocolName = request.getHttpVersion();
+				if (protocolName.equalsIgnoreCase("HTTP/1"))
+					context.protocol = HttpProtocol.HTTP_1;
+				//TODO finish
+			}
 			System.out.println("Dispatching request...");
 			server.bus.notify(Tuple.<String, Long>of("http.request", this.getConnectionID()), Event.wrap(request));
 		});
@@ -79,7 +87,7 @@ public class HttpChannelImpl implements HttpChannel {
 	public HttpServerImpl getHttpServer() {
 		return this.server;
 	}
-
+	
 	@Override
 	public Optional<TcpChannel> getTcp() {
 		return Optional.of(source);
@@ -87,8 +95,7 @@ public class HttpChannelImpl implements HttpChannel {
 
 	@Override
 	public HttpContext getContext() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.context;
 	}
 	@Override
 	public <E> HttpChannelImpl setOption(ChannelOption<E> key, E value) {
@@ -106,11 +113,12 @@ public class HttpChannelImpl implements HttpChannel {
 			return null;
 		return (E) this.options.get(key);
 	}
+	
 	@Override
 	public long getConnectionID() {
 		return this.source.getConnectionID();
 	}
-
+	
 	@Override
 	public String toString() {
 		return getClass().getName() + "#" + getConnectionID();
