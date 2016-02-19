@@ -4,16 +4,48 @@ Bundle-Name: Project Cuttlefish SSL Server
 Bundle-SymbolicName: com.divisors.projectcuttlefish.crypto
 Bundle-Version: 0.0.7.alpha
 Bundle-ClassPath: lib/acme4j-client-0.3.jar,
+ lib/jose4j-0.4.4.jar,
  lib/acme4j-utils-0.3.jar,
- .
+ .,
+ lib/bcpkix-jdk15on-1.48.jar,
+ lib/bcprov-jdk16-1.45.jar
 Bundle-Activator: com.divisors.projectcuttlefish.crypto.Activator
 Export-Package: com.divisors.projectcuttlefish.crypto,
  com.divisors.projectcuttlefish.crypto.api,
+ com.divisors.projectcuttlefish.crypto.api.jwt,
  com.divisors.projectcuttlefish.crypto.impl,
- com.divisors.projectcuttlefish.ssl.api
+ com.divisors.projectcuttlefish.ssl.api,
+ org.jose4j.base64url,
+ org.jose4j.base64url.internal.apache.commons.codec.binary,
+ org.jose4j.http,
+ org.jose4j.json,
+ org.jose4j.json.internal.json_simple,
+ org.jose4j.json.internal.json_simple.parser,
+ org.jose4j.jwa,
+ org.jose4j.jwe,
+ org.jose4j.jwe.kdf,
+ org.jose4j.jwk,
+ org.jose4j.jws,
+ org.jose4j.jwt,
+ org.jose4j.jwt.consumer,
+ org.jose4j.jwx,
+ org.jose4j.keys,
+ org.jose4j.keys.resolvers,
+ org.jose4j.lang,
+ org.jose4j.mac,
+ org.jose4j.zip,
+ org.shredzone.acme4j,
+ org.shredzone.acme4j.challenge,
+ org.shredzone.acme4j.connector,
+ org.shredzone.acme4j.exception,
+ org.shredzone.acme4j.impl,
+ org.shredzone.acme4j.provider,
+ org.shredzone.acme4j.provider.letsencrypt,
+ org.shredzone.acme4j.util
 Require-Bundle: io.projectreactor.reactor-core;bundle-version="2.1.0",
  org.reactivestreams.reactive-streams;bundle-version="1.0.0",
- io.projectreactor.reactor-bus;bundle-version="2.1.0"
+ io.projectreactor.reactor-bus;bundle-version="2.1.0",
+ org.junit
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.divisors.projectcuttlefish.httpserver.api.http,
  com.divisors.projectcuttlefish.httpserver.api.tcp,

@@ -10,5 +10,6 @@
 		</accessrules>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/acme4j-utils-0.3.jar"/>
+	<classpathentry kind="lib" path="lib/jose4j-0.4.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

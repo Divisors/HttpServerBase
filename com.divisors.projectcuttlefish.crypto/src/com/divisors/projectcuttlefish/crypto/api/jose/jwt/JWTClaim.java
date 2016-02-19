@@ -40,7 +40,7 @@ public interface JWTClaim {
 				}
 			};
 			
-			registeredClaims.put(name, claim);
+			claims.put(name, claim);
 			
 			return claim;
 		}
