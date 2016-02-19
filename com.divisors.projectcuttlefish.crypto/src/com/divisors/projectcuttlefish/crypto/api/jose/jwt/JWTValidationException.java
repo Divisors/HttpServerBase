@@ -1,4 +1,4 @@
-package com.divisors.projectcuttlefish.crypto.api.jwt;
+package com.divisors.projectcuttlefish.crypto.api.jose.jwt;
 
 /**
  * Thrown if a JWT's integrity cannot be validated

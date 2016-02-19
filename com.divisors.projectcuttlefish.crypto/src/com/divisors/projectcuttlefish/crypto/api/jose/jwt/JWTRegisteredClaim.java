@@ -1,4 +1,4 @@
-package com.divisors.projectcuttlefish.crypto.api.jwt;
+package com.divisors.projectcuttlefish.crypto.api.jose.jwt;
 
 /**
  * Enumeration of registered JWT claims
@@ -83,12 +83,20 @@ public enum JWTRegisteredClaim implements JWTClaim {
 	 * being replayed. The "jti" value is a case- sensitive string. Use of this
 	 * claim is OPTIONAL.
 	 */
-	JWT_ID("jti");
+	JWT_ID("jti"),
+	/**
+	 * @deprecated went away as of jwt draft - 12; it's only a header parameter name
+	 */
+	@Deprecated
+	TYPE("typ");
 	
 	protected final String name;
 	
 	JWTRegisteredClaim(String name) {
 		this.name = name;
+		
+		//register self
+		JWTClaims.claims.put(name, this);
 	}
 	
 	@Override

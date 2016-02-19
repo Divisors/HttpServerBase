@@ -1,4 +1,4 @@
-package com.divisors.projectcuttlefish.crypto.api.jwt;
+package com.divisors.projectcuttlefish.crypto.api.jose.jwt;
 
 /**
  * Type of JWTClaim

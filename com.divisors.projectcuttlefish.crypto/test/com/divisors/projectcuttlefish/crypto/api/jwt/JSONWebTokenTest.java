@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.divisors.projectcuttlefish.crypto.api.jose.jwt.JSONWebToken;
+
 public class JSONWebTokenTest {
 
 	@Test
