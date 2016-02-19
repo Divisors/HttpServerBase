@@ -14,5 +14,5 @@
  * From <a href="http://tools.ietf.org/html/rfc7519">RFC 7519</a>
  * @author mailmindlin
  */
-package com.divisors.projectcuttlefish.crypto.api.jwt;
+package com.divisors.projectcuttlefish.crypto.api.jose.jwt;
 
