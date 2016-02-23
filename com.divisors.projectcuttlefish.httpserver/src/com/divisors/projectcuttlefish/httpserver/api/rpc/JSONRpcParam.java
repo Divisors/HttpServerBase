@@ -6,8 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface JSONRpcExtern {
-	String value() default "";
-	JSONRpcAccessibility accessibility() default JSONRpcAccessibility.SECURED;
+@Target(ElementType.PARAMETER)
+public @interface JSONRpcParam {
+	String value();
+	String defaultValue() default "";
+	JSONParameterType type() default JSONParameterType.DETECT;
 }

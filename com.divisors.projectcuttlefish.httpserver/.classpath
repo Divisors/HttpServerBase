@@ -15,6 +15,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/json-20151123.jar" sourcepath="lib/json-20151123-sources.jar"/>
+	<classpathentry kind="lib" path="lib/javassist.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="output" path="bin"/>

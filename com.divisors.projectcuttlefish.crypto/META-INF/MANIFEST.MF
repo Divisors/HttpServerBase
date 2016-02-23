@@ -48,6 +48,7 @@ Require-Bundle: io.projectreactor.reactor-core;bundle-version="2.1.0",
  org.junit
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.divisors.projectcuttlefish.httpserver.api.http,
+ com.divisors.projectcuttlefish.httpserver.api.rpc,
  com.divisors.projectcuttlefish.httpserver.api.tcp,
  org.eclipse.core.runtime;version="3.5.0",
  org.json,
