@@ -124,9 +124,19 @@ public abstract class JSONRpcClient {
 		for (Entry<String, MethodInfo> methodData : classInfo.methods.entrySet()) {
 			MethodInfo methodInfo = methodData.getValue();
 			Method method = methodInfo.method;
+			
+			//Start with 'public returnType methodName('
 			StringBuilder methodText = new StringBuilder("public ")
-					.append(method.getName());
-			CtMethod overridingMethod = CtNewMethod.make(methodText.toString(), result, "__rpcClient", "doHttp");
+					.append(method.getName())
+					.append('(');
+			//build param string
+			for (Map.Entry<String, JSONParameterType> param : methodInfo.params.entrySet()) {
+				
+			}
+			
+			CtMethod generatedOverride = CtNewMethod.m(methodText.toString(), result, "__rpcClient", "doHttp");
+			generatedOverride.setModifiers(method.getModifiers());
+			result.addMethod(generatedOverride);
 		}
 		
 		return result.toClass();
