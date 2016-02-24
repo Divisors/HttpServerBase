@@ -9,7 +9,6 @@ import com.divisors.projectcuttlefish.httpserver.api.rpc.JSONRpcAccessibility;
 import com.divisors.projectcuttlefish.httpserver.api.rpc.JSONRpcExtern;
 import com.divisors.projectcuttlefish.httpserver.api.rpc.JSONRpcParam;
 import com.divisors.projectcuttlefish.httpserver.api.rpc.JSONRpcResult;
-import com.divisors.projectcuttlefish.httpserver.api.rpc.JSONRpcResultParser;
 
 /**
  * RPC API for Random.org
@@ -26,10 +25,9 @@ public abstract class RandomRpc implements JSONRemote {
 	 * @param replace whether to generate with replacement. default true
 	 * @return random integers
 	 */
-	@JSONRpcExtern(value = "generateIntegers", accessibility = JSONRpcAccessibility.PUBLIC)
+	@JSONRpcExtern(name = "generateIntegers", accessibility = JSONRpcAccessibility.PUBLIC, postparser="__generateIntegers")
 	public abstract Future<int[]> generateIntegers(@JSONRpcParam("apiKey") String apiKey, @JSONRpcParam("n") int num, @JSONRpcParam("min") long min, @JSONRpcParam("max") long max, @JSONRpcParam(value="base", defaultValue="10") int base, @JSONRpcParam(value="replace", defaultValue="true") boolean replace);
 	
-	@JSONRpcResultParser("generateIntegers")
 	protected int[] __generateIntegers(JSONRpcResult result, @JSONRpcParam("apiKey") String apiKey, @JSONRpcParam("n") int num, @JSONRpcParam("min") long min, @JSONRpcParam("max") long max, @JSONRpcParam(value="base") int base, @JSONRpcParam(value="replace") boolean replace) {
 		JSONArray results = result.getJSON().getJSONObject("result").getJSONObject("random").getJSONArray("data");
 		int[] parsed = new int[results.length()];

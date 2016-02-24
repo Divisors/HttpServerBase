@@ -2,30 +2,41 @@ package com.divisors.projectcuttlefish.httpserver.api.rpc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
 
+import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtConstructor;
+import javassist.CtField;
+import javassist.CtMethod;
+import javassist.CtNewConstructor;
+import javassist.CtNewMethod;
 import javassist.NotFoundException;
 
 public abstract class JSONRpcClient {
 	static final ClassPool pool = ClassPool.getDefault();
 	static final CtClass JSON_RPC_CLIENT_CLASS;
+	static final CtClass RPC_IMPL_CLASS;
 	static final CtClass GENERATED_IMPL_CLASS;
 	static final CtClass JSON_REMOTE_INTERFACE;
 	static final CtClass STRING_CLASS;
 	static {
-		JSON_RPC_CLIENT_CLASS = loadCt(JSONRpcClient.class.getCanonicalName());
-		GENERATED_IMPL_CLASS = loadCt(JSONRpcClient.class.getCanonicalName() + ".JSONRpcGeneratedImplementation");
-		JSON_REMOTE_INTERFACE = loadCt(JSONRemote.class.getCanonicalName());
-		STRING_CLASS = loadCt(S.class.getCanonicalName());
+		RPC_IMPL_CLASS = loadCt(JSONRpcClient.JSONRpcImplementation.class.getName());
+		JSON_RPC_CLIENT_CLASS = loadCt(JSONRpcClient.class.getName());
+		GENERATED_IMPL_CLASS = loadCt(JSONRpcClient.JSONRpcGeneratedImplementation.class.getName());
+		JSON_REMOTE_INTERFACE = loadCt(JSONRemote.class.getName());
+		STRING_CLASS = loadCt(String.class.getName());
 	}
 	
 	private static CtClass loadCt(String name) {
@@ -37,15 +48,15 @@ public abstract class JSONRpcClient {
 		}
 	}
 	
-	protected Map<Class<? extends JSONRemote>, Map<String, MethodInfo>> metadata = new ConcurrentHashMap<>();
-	protected Map<Class<? extends JSONRemote>, CtClass> proto = new ConcurrentHashMap<>();
+	protected Map<Class<? extends JSONRemote>, ClassInfo> metadata = new ConcurrentHashMap<>();
+	protected Map<Class<? extends JSONRemote>, Class<? extends JSONRemote>> proto = new ConcurrentHashMap<>();
 	
 	protected abstract Future<HttpResponse> doHttp(HttpRequest request);
 	
 	public <E extends JSONRemote> E get(String url, Class<E> clazz) {
 		//TODO finish
 		@SuppressWarnings("unchecked")
-		Class<E> prototype = pool.toClass(proto.get(clazz));
+		Class<E> prototype = (Class<E>) proto.get(clazz);
 		
 		E result;
 		
@@ -58,24 +69,73 @@ public abstract class JSONRpcClient {
 		return result;
 	}
 	
-	protected Map<String, MethodInfo> getMeta(Class<? extends JSONRemote> clazz) {
+	protected ClassInfo getMeta(Class<? extends JSONRemote> clazz) {
 		
 		return null;
 	}
 	
-	protected Class<? extends JSONRemote> generateProto(Class<? extends JSONRemote> clazz) {
-		Map<String, MethodInfo> meta = metadata.computeIfAbsent(clazz, this::getMeta);
+	@SuppressWarnings("unchecked")
+	protected Class<? extends JSONRemote> generateProto(Class<? extends JSONRemote> clazz) throws NotFoundException, CannotCompileException {
+		CtClass result;
+		String className = clazz.getName() + "__RPC";
 		if (clazz.isInterface()) {
-			CtClass impl = pool.makeClass(clazz.getCanonicalName() + "__RPC", GENERATED_IMPL_CLASS);
-			impl.addInterface(JSON_REMOTE_INTERFACE);
-			impl.addInterface(pool.get(clazz.getCanonicalName()));
+			result = pool.makeClass(className, GENERATED_IMPL_CLASS);
+			result.addInterface(JSON_REMOTE_INTERFACE);
+			result.addInterface(pool.get(clazz.getName()));
+			
+			//Create constructor to invoke 
+			CtConstructor constructor = CtNewConstructor.make(new CtClass[]{JSON_RPC_CLIENT_CLASS, STRING_CLASS}, new CtClass[]{}, result);
+			constructor.setModifiers(Modifier.PUBLIC);
+			result.addConstructor(constructor);
+		} else {
+			//is abstract class JSONRpcGeneratedImplementation(JSONRpcClient, String)
+			result = pool.makeClass(className, pool.get(clazz.getName()));
+			result.addInterface(RPC_IMPL_CLASS);
+			
+			CtField rpcClientField = new CtField(JSON_RPC_CLIENT_CLASS, "__rpcClient", result);
+			rpcClientField.setModifiers(Modifier.PRIVATE | Modifier.FINAL | Modifier.TRANSIENT);
+			result.addField(rpcClientField);
+			
+			CtField rpcUrlField = new CtField(STRING_CLASS, "__rpcUrl", result);
+			rpcUrlField.setModifiers(Modifier.PRIVATE | Modifier.FINAL);
+			result.addField(rpcUrlField);
+			
+			//Create constructor to invoke
+			CtConstructor constructor = CtNewConstructor.make(
+				"public " + className + '(' + getClass().getName() + " client, java.lang.String url) {"
+					+ "super();"
+					+ "this." + rpcClientField.getName() + " = client;"
+					+ "this." + rpcUrlField.getName() + " = url;"
+				+ "}", result);
+			result.addConstructor(constructor);
+			
+			//implement JSONRpcImplementation
+			CtMethod getClientMethod = CtNewMethod.getter("getClient", rpcClientField);
+			getClientMethod.setModifiers(Modifier.PUBLIC | Modifier.FINAL);
+			result.addMethod(getClientMethod);
+			
+			CtMethod getUrlMethod = CtNewMethod.getter("getRpcUrl", rpcUrlField);
+			getClientMethod.setModifiers(Modifier.PUBLIC | Modifier.FINAL);
+			result.addMethod(getUrlMethod);
 		}
+		
+		//now generate methods
+		ClassInfo classInfo = metadata.computeIfAbsent(clazz, this::getMeta);
+		for (Entry<String, MethodInfo> methodData : classInfo.methods.entrySet()) {
+			MethodInfo methodInfo = methodData.getValue();
+			Method method = methodInfo.method;
+			StringBuilder methodText = new StringBuilder("public ")
+					.append(method.getName());
+			CtMethod overridingMethod = CtNewMethod.make(methodText.toString(), result, "__rpcClient", "doHttp");
+		}
+		
+		return result.toClass();
 	}
 	
 	public Future<JSONRpcResult> invoke(JSONRemote object, String methodName, Map<String, Object> params) throws IllegalArgumentException, IllegalAccessException, NoSuchMethodException{
-		Map<String, MethodInfo> prototype = meta.computeIfAbsent(object.getClass(), this::getMeta);
+		ClassInfo classInfo = metadata.computeIfAbsent(object.getClass(), this::getMeta);
 		
-		MethodInfo method = prototype.get(methodName);
+		MethodInfo method = classInfo.methods.get(methodName);
 		
 		if (method == null)
 			throw new NoSuchMethodException("Unknown method " + object.getClass() + '#' + methodName);
@@ -102,11 +162,18 @@ public abstract class JSONRpcClient {
 		return null;
 	}
 	
+	protected class ClassInfo {
+		Class<? extends JSONRemote> clazz;
+		Map<String, MethodInfo> methods;
+	}
+	
 	protected class MethodInfo {
 		final Method method;
 		final String name;
 		final Map<String, JSONParameterType> params;
 		final JSONRpcAccessibility accessibility;
+		Function<Object[], JSONRpcRequest> preparser;
+		Function<JSONRpcResult, Object> postparser;
 		MethodInfo(Method method, String name, Map<String, JSONParameterType> params, JSONRpcAccessibility accessibility) {
 			this.method = method;
 			this.name = name;
@@ -114,9 +181,27 @@ public abstract class JSONRpcClient {
 			this.accessibility = accessibility;
 		}
 	}
-	protected abstract class JSONRpcGeneratedImplementation implements JSONRemote {
+	protected interface JSONRpcImplementation extends JSONRemote {
+		JSONRpcClient getClient();
+		String getRpcUrl();
+	}
+	protected abstract class JSONRpcGeneratedImplementation implements JSONRpcImplementation {
+		protected final JSONRpcClient __rpcClient;
+		protected final String __rpcUrl;
 		public JSONRpcGeneratedImplementation(JSONRpcClient client, String url) {
-			
+			this.__rpcClient = client;
+			this.__rpcUrl = url;
 		}
+		
+		@Override
+		public JSONRpcClient getClient() {
+			return __rpcClient;
+		}
+		
+		@Override
+		public String getRpcUrl() {
+			return __rpcUrl;
+		}
+		
 	}
 }
