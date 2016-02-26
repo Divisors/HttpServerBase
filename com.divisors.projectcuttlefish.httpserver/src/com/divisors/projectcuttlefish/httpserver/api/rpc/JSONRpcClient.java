@@ -1,18 +1,25 @@
 package com.divisors.projectcuttlefish.httpserver.api.rpc;
 
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import org.json.JSONObject;
 
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
+import com.sun.org.apache.bcel.internal.classfile.Field;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -48,6 +55,13 @@ public abstract class JSONRpcClient {
 		}
 	}
 	
+	private static CtClass getCt(String className) throws NotFoundException {
+		return pool.get(className);
+	}
+	private static CtClass getCt(Class<?> clazz) throws NotFoundException {
+		return pool.get(clazz.getName());
+	}
+	
 	protected Map<Class<? extends JSONRemote>, ClassInfo> metadata = new ConcurrentHashMap<>();
 	protected Map<Class<? extends JSONRemote>, Class<? extends JSONRemote>> proto = new ConcurrentHashMap<>();
 	
@@ -77,9 +91,11 @@ public abstract class JSONRpcClient {
 	@SuppressWarnings("unchecked")
 	protected Class<? extends JSONRemote> generateProto(Class<? extends JSONRemote> clazz) throws NotFoundException, CannotCompileException {
 		CtClass result;
-		String className = clazz.getName() + "__RPC";
+		CtClass clazzCt = getCt(clazz);
+		String outClassName = clazz.getName() + "__RPC";
+		
 		if (clazz.isInterface()) {
-			result = pool.makeClass(className, GENERATED_IMPL_CLASS);
+			result = pool.makeClass(outClassName, GENERATED_IMPL_CLASS);
 			result.addInterface(JSON_REMOTE_INTERFACE);
 			result.addInterface(pool.get(clazz.getName()));
 			
@@ -89,7 +105,7 @@ public abstract class JSONRpcClient {
 			result.addConstructor(constructor);
 		} else {
 			//is abstract class JSONRpcGeneratedImplementation(JSONRpcClient, String)
-			result = pool.makeClass(className, pool.get(clazz.getName()));
+			result = pool.makeClass(outClassName, pool.get(clazz.getName()));
 			result.addInterface(RPC_IMPL_CLASS);
 			
 			CtField rpcClientField = new CtField(JSON_RPC_CLIENT_CLASS, "__rpcClient", result);
@@ -101,15 +117,9 @@ public abstract class JSONRpcClient {
 			result.addField(rpcUrlField);
 			
 			//Create constructor to invoke
-			CtConstructor constructor = CtNewConstructor.make(
-				"public " + className + '(' + getClass().getName() + " client, java.lang.String url) {"
-					+ "super();"
-					+ "this." + rpcClientField.getName() + " = client;"
-					+ "this." + rpcUrlField.getName() + " = url;"
-				+ "}", result);
-			result.addConstructor(constructor);
+			result.addConstructor(CtNewConstructor.make(new CtClass[]{JSON_RPC_CLIENT_CLASS, STRING_CLASS}, new CtClass[]{}, "super();$0.__rpcClient = $1;$0.__rpcUrl=$2", result));
 			
-			//implement JSONRpcImplementation
+			//implement JSONRpcImplementation (generate getters)
 			CtMethod getClientMethod = CtNewMethod.getter("getClient", rpcClientField);
 			getClientMethod.setModifiers(Modifier.PUBLIC | Modifier.FINAL);
 			result.addMethod(getClientMethod);
@@ -120,30 +130,60 @@ public abstract class JSONRpcClient {
 		}
 		
 		//now generate methods
-		ClassInfo classInfo = metadata.computeIfAbsent(clazz, this::getMeta);
+		ClassInfo<?> classInfo = metadata.computeIfAbsent(clazz, this::getMeta);
 		for (Entry<String, MethodInfo> methodData : classInfo.methods.entrySet()) {
 			MethodInfo methodInfo = methodData.getValue();
 			Method method = methodInfo.method;
 			
-			//Start with 'public returnType methodName('
-			StringBuilder methodText = new StringBuilder("public ")
-					.append(method.getName())
-					.append('(');
-			//build param string
-			for (Map.Entry<String, JSONParameterType> param : methodInfo.params.entrySet()) {
+			CtClass returnType = getCt(method.getReturnType());
+			
+			//build param array
+			CtClass[] params = new CtClass[methodInfo.params.size()];
+			int i = 0;
+			for (ParamInfo param : methodInfo.params.values())
+				params[i++] = getCt((Class<?>) param.type.getType());
+			
+			StringBuilder methodBody = new StringBuilder("{\n");
+			String preparserSignature = methodInfo.annotation.preparser();
+			String postparserSignature = methodInfo.annotation.postparser();
+			if (preparserSignature != null && !preparserSignature.isEmpty()) {
+				String preparserName = preparserSignature;
+				String[] preparserArgs;
+				CtClass ownerClass = clazzCt;
+				
+				int idxToken;
+				if ((idxToken = preparserName.indexOf("#")) > 0) {
+					ownerClass = getCt(preparserName.substring(0, idxToken));
+					preparserName = preparserName.substring(idxToken);
+				}
+				
+				if ((idxToken = preparserName.indexOf('(')) > 0) {
+					String preparserArgsText = preparserName.substring(idxToken, '(');
+					preparserName = preparserName.substring(0, idxToken);
+				}
+				//get preparser
+				
+				for (Method declared : clazz.getDeclaredMethods())
+					if (declared.getName().equals(preparserName))
+				methodBody.append("org.json.JSONObject params = $0");
+				
+			} else {
+				//try to build JSONObject from params
 				
 			}
 			
-			CtMethod generatedOverride = CtNewMethod.m(methodText.toString(), result, "__rpcClient", "doHttp");
-			generatedOverride.setModifiers(method.getModifiers());
+			CtMethod generatedOverride = CtNewMethod.make(method.getModifiers(), returnType, method.getName(), params, new CtClass[]{}, methodBody.toString(), result);
 			result.addMethod(generatedOverride);
 		}
 		
 		return result.toClass();
 	}
 	
+	public Future<JSONRpcResult> invokeRemote(String url, String methodName, JSONObject params) {
+		return null;//TODO fin
+	}
 	public Future<JSONRpcResult> invoke(JSONRemote object, String methodName, Map<String, Object> params) throws IllegalArgumentException, IllegalAccessException, NoSuchMethodException{
-		ClassInfo classInfo = metadata.computeIfAbsent(object.getClass(), this::getMeta);
+		ClassInfo<?> classInfo = metadata.computeIfAbsent(object.getClass(), this::getMeta);
 		
 		MethodInfo method = classInfo.methods.get(methodName);
 		
@@ -155,41 +195,83 @@ public abstract class JSONRpcClient {
 		
 		//test if I can invoke it
 		Set<String> paramNames = params.keySet();
-		if (!paramNames.equals(method.params.keySet())) {
-			if (!method.params.keySet().containsAll(paramNames)) {
+		//TODO finish
+		/*if (!paramNames.equals(method.params)) {
+			if (!method.params.containsAll(paramNames)) {
 				paramNames = new HashSet<>(paramNames);//copy set
-				paramNames.removeAll(method.params.keySet());
+				paramNames.removeAll(method.params);
 				throw new IllegalArgumentException("Unknown parameters: " + paramNames);
 			}
 			
-			if (!paramNames.containsAll(method.params.keySet())) {
-				Set<String> missingParams = new HashSet<>(method.params.keySet());//copy set
+			if (!paramNames.containsAll(method.params)) {
+				Set<String> missingParams = new HashSet<>(method.params);//copy set
 				missingParams.removeAll(paramNames);
 				throw new IllegalArgumentException("Missing parameters: " + missingParams);
 			}
-		}
+		}*/
 		
 		return null;
 	}
 	
-	protected class ClassInfo {
-		Class<? extends JSONRemote> clazz;
+	protected class ClassInfo<E extends JSONRemote> {
+		/**
+		 * Class that this is wrapping
+		 */
+		Class<E> clazz;
+		/**
+		 * Generated class reference
+		 */
+		Class<? extends E> impl;
+		/**
+		 * Methods that were annotated
+		 */
 		Map<String, MethodInfo> methods;
+		/**
+		 * Function wrapping generated constructor
+		 */
+		BiFunction<? extends JSONRpcClient, String, E> construct;
 	}
 	
+	/**
+	 * Information about wrapped method
+	 * @author mailmindlin
+	 */
 	protected class MethodInfo {
+		/**
+		 * Method that this is wrapping
+		 */
 		final Method method;
+		/**
+		 * Extern annotation on this method
+		 */
+		final JSONRpcExtern annotation;
+		/**
+		 * External name for this method
+		 */
 		final String name;
-		final Map<String, JSONParameterType> params;
+		/**
+		 * Parameters
+		 */
+		final Map<String, ParamInfo> params;
+		/**
+		 * JSONRpc accessibility (i.e., can it be only accessed by trusted clients)
+		 */
 		final JSONRpcAccessibility accessibility;
-		Function<Object[], JSONRpcRequest> preparser;
-		Function<JSONRpcResult, Object> postparser;
-		MethodInfo(Method method, String name, Map<String, JSONParameterType> params, JSONRpcAccessibility accessibility) {
+		MethodInfo(Method method, String name, Map<String, ParamInfo> params, JSONRpcExtern annotation) {
 			this.method = method;
 			this.name = name;
 			this.params = params;
-			this.accessibility = accessibility;
+			this.annotation = annotation;
+			this.accessibility = annotation.accessibility();
 		}
+	}
+	
+	protected class ParamInfo {
+		AnnotatedType type;
+		JSONRpcParam annotation;
+		JSONParameterType jsonType;
+		String name;
+		String defaultValue;
 	}
 	protected interface JSONRpcImplementation extends JSONRemote {
 		JSONRpcClient getClient();
