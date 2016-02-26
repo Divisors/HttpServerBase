@@ -88,6 +88,120 @@ public abstract class JSONRpcClient {
 		return null;
 	}
 	
+	protected Class<?> unbox(Class<?> primitive) {
+		if (primitive ==boolean.class)
+			return Boolean.class;
+		if (primitive == byte.class)
+			return Byte.class;
+		if (primitive == char.class)
+			return Character.class;
+		if (primitive == short.class)
+			return Short.class;
+		if (primitive == int.class)
+			return Integer.class;
+		if (primitive == long.class)
+			return Long.class;
+		if (primitive == float.class)
+			return Float.class;
+		if (primitive == double.class)
+			return Double.class;
+		return primitive;
+	}
+	public static Class<?> getArrayClass(Class<?> componentType) throws ClassNotFoundException {
+	    ClassLoader classLoader = componentType.getClassLoader();
+	    String name;
+	    if(componentType.isArray()){
+	        // just add a leading "["
+	        name = "["+componentType.getName();
+	    }else if(componentType == boolean.class){
+	        name = "[Z";
+	    }else if(componentType == byte.class){
+	        name = "[B";
+	    }else if(componentType == char.class){
+	        name = "[C";
+	    }else if(componentType == double.class){
+	        name = "[D";
+	    }else if(componentType == float.class){
+	        name = "[F";
+	    }else if(componentType == int.class){
+	        name = "[I";
+	    }else if(componentType == long.class){
+	        name = "[J";
+	    }else if(componentType == short.class){
+	        name = "[S";
+	    }else{
+	        // must be an object non-array class
+	        name = "[L"+componentType.getName()+";";
+	    }
+	    return classLoader != null ? classLoader.loadClass(name) : Class.forName(name);
+	}
+	/**
+	 * Convert an
+	 * @param primitiveArray
+	 * @return
+	 */
+	protected Class<?> unboxArray(Class<?> primitiveArray) {
+		if (!primitiveArray.isArray())
+			return primitiveArray;
+		Class<?> primitive = primitiveArray.getComponentType();
+		if (primitive.isArray())
+			try {
+				return getArrayClass(unboxArray(primitive));
+			} catch (ClassNotFoundException e1) {
+				e1.printStackTrace();
+			}
+		if (!primitive.isPrimitive())
+			return primitiveArray;
+		try {
+			return getArrayClass(unbox(primitive));
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			return primitiveArray;
+		}
+	}
+	
+	protected Set<Method> getMethodBySignature(Class<?> clazz, String methodName, String[] args, Set<String> allowedExceptions) {
+		Set<Method> candidates = new HashSet<>();
+		
+		for (Method declared : clazz.getDeclaredMethods())
+			if (declared.getName().equals(methodName))
+				candidates.add(declared);
+		
+		for (Method method : clazz.getMethods())
+			if (method.getName().equals(methodName))
+				candidates.add(method);
+		
+		if (args != null) {
+			candidates.removeIf((method)->(method.getParameterCount() > args.length));
+			for (Method candidate : candidates) {
+				int i = 0;
+				for (Class<?> param : candidate.getParameterTypes()) {
+					String arg = args[i++];
+					
+					if (param.getSimpleName().equals(arg) || param.getName().equals(arg))
+						continue;
+					
+					if (param.isPrimitive()) {
+						//try unboxing
+						Class<?> unboxed = unbox(param);
+						if (unboxed.getSimpleName().equals(arg) || unboxed.getName().equals(arg))
+							continue;
+					}
+				}
+			}
+		}
+		
+		for (Method candidate : candidates) {
+			for (Class<?> exception : candidate.getExceptionTypes()) {
+				if ((!allowedExceptions.contains(exception)) && !(exception.isInstance(RuntimeException.class))) {
+					candidates.remove(candidate);
+					break;
+				}
+			}
+		}
+		
+		return candidates;
+	}
 	@SuppressWarnings("unchecked")
 	protected Class<? extends JSONRemote> generateProto(Class<? extends JSONRemote> clazz) throws NotFoundException, CannotCompileException {
 		CtClass result;
@@ -149,6 +263,7 @@ public abstract class JSONRpcClient {
 			if (preparserSignature != null && !preparserSignature.isEmpty()) {
 				String preparserName = preparserSignature;
 				String[] preparserArgs;
+				String[] preparserExceptions;
 				CtClass ownerClass = clazzCt;
 				
 				int idxToken;
@@ -157,12 +272,24 @@ public abstract class JSONRpcClient {
 					preparserName = preparserName.substring(idxToken);
 				}
 				
+				if ((idxToken = preparserName.indexOf("throws")) > 0) {
+					String exceptionsText = preparserName.substring(idxToken + 6).trim();
+					preparserExceptions = exceptionsText.split(",");
+					
+					preparserName.substring(0, idxToken);
+				}
+				
 				if ((idxToken = preparserName.indexOf('(')) > 0) {
 					String preparserArgsText = preparserName.substring(idxToken, '(');
 					preparserName = preparserName.substring(0, idxToken);
+					
+					if ((idxToken = preparserArgsText.indexOf(")")) > 0)
+						preparserArgsText = preparserArgsText.substring(0, idxToken);
+					
+					preparserArgs = preparserArgsText.split(",");//TODO fix for generics
 				}
-				//get preparser
 				
+				//get preparser
 				for (Method declared : clazz.getDeclaredMethods())
 					if (declared.getName().equals(preparserName))
 				methodBody.append("org.json.JSONObject params = $0");
