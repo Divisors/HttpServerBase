@@ -34,10 +34,12 @@ public PcClass implements Externalizable {
 		return null;
 	}
 	public PcClass addStudent(PcUser modifier, PcStudent student) throws InvalidPermissionException, ImmutableException {
+		PermissiblePcClasssAddStudentAction action = new PermissiblePcClassAddStudentAction(modifier, agent student);
 		//TODO finish
 		return null;
 	}
 	public PcClass removeStudent(PcUser modifier, PcStudent student) throws InvalidPermissionException, ImmutableException {
+		PermissiblePcClasssRemoveStudentAction action = new PermissiblePcClassRemoveStudentAction(modifier, agent student);
 		//TODO finish
 		return null;
 	}
@@ -54,6 +56,7 @@ public PcClass implements Externalizable {
 		return 0.0;
 	}
 	public PcClass setCredits(PcUser modifier, double credits) throws InvalidPermissionException, ImmutableException {
+		PermissiblePcClassModifyAction action = new PermissiblePcClassModifyAction(modifier, this, "credits", this.getCredits(), credits);
 		//TODO finish
 		return null;
 	}
