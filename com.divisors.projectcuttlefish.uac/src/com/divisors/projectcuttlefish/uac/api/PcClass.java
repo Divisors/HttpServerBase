@@ -57,5 +57,34 @@ public PcClass implements Externalizable {
 		//TODO finish
 		return null;
 	}
-	
+	public static PermissiblePcClassCreateAction extends PermissibleAction {
+		public PermissiblePcClassCreateAction(PcUser agent, PcClass created) {
+			super(PermissibleAction.PermissibleActionType.CREATE, agent, created);
+		}
+	}
+	public static PermissiblePcClassAddStudentAction extends PermissibleAction {
+		protected final PcStudent student;
+		public PermissiblePcClassAddStudentAction(PcUser agent, PcClass target, PcStudent added) {
+			super(PermissibleAction.PermissibleActionType.ADD, agent, target);
+			this.student = added;
+		}
+		public PcStudent getStudent() {
+			return student;
+		}
+	}
+	public static PermissiblePcClassRemoveStudentAction extends PermissibleAction {
+		public PermissiblePcClassRemoveStudentAction(PcUser agent, PcClass target) {
+			super(PermissibleAction.PermissibleActionType.REMOVE, agent, target);
+		}
+	}
+	public static PermissiblePcClassModifyAction extends PermissibleAction {
+		protected final String field;
+		protected final Object oldValue, newValue;
+		public PermissiblePcClassModifyAction(PcUser agent, PcClass target, String field, Object oldValue, Object newValue) {
+			super(PermissibleAction.PermissibleActionType.MODIFY, agent, target);
+			this.field = field;
+			this.oldValue = oldValue;
+			this.newValue = newValue;
+		}
+	}
 }
