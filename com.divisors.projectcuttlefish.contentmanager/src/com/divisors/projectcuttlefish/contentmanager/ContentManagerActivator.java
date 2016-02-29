@@ -17,10 +17,6 @@ import com.divisors.projectcuttlefish.contentmanager.api.resource.DirectoryResou
 import com.divisors.projectcuttlefish.contentmanager.api.resource.FileResource;
 import com.divisors.projectcuttlefish.httpserver.HttpServerActivator;
 import com.divisors.projectcuttlefish.httpserver.api.Version;
-import com.divisors.projectcuttlefish.httpserver.client.HttpClient;
-
-import reactor.bus.EventBus;
-import reactor.core.processor.RingBufferProcessor;
 
 public class ContentManagerActivator implements BundleActivator {
 
