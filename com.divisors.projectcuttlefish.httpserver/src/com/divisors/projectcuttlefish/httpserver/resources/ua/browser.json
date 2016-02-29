@@ -79,8 +79,9 @@
 					groups: {
 						device: "device.name",
 						osv: {
-							replaceChar: [
+							transform: [
 								{
+									action: "replace"
 									from: "_",
 									to: "."
 								}

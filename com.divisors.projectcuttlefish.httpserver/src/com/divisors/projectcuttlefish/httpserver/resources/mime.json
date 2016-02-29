@@ -1,0 +1,177 @@
+{
+	"application": {
+		"calendar+json": {
+		},
+		"calendar+xml": {
+		},
+		"ecmascript": {
+			fx: "es"
+		},
+		"java-archive": {
+			fx: "jar"
+		},
+		"java-serialized-object": {
+			fx: "ser"
+		},
+		"java-vm": {
+			fx: "class"
+		},
+		"javascript": {
+			fx: "js"
+		},
+		"json": {
+			fx: "json"
+		},
+		"jsonml+json": {
+			fx: "jsonml"
+		},
+		"msword": {
+			fx: ["doc","dot"]
+		},
+		"vnd": {
+			extensions: {
+				"google-apps": {
+					extensions: {
+						"audio": {
+						},
+						"document": {
+						},
+						"drawing": {
+						},
+						"file": {
+						},
+						"folder": {
+						},
+						"form": {
+						},
+						"map": {
+						},
+						"photo": {
+						},
+						"presentation": {
+						},
+						"script": {
+						},
+						"sites": {
+						},
+						"spreadsheet": {
+						},
+						"unknown": {
+						},
+						"video": {
+						}
+					}
+				},
+				"ms-excel": {
+					fx: ["xls", "xlm", "xla", "xlc", "xlt", "xlw", "xlam", "xlsb", "xlsm", "xltm"],
+				},
+				"ms-powerpoint": {
+					fx: ["ppt", "pps", "pot"]
+				}
+			}
+		},
+		"xhtml+xml": {
+			fx: ["xhtml","xht"]
+		},
+		"xml": {
+			fx: ["xml","xsl"]
+		},
+		"xml-dtd": {
+			fx: "dtd"
+		},
+		"xslt+xml": {
+			fx: "xslt"
+		},
+		"zip": {
+			fx: "zip"
+		}
+	},
+	"audio": {
+		"mpeg": {
+			fx: ["mpga","mp2","mp2a","mp3","m2a","m3a"]
+		},
+		"ogg": {
+			fx: ["oga","ogg","spx"]
+		},
+		"webm": {
+			fx: "weba"
+		},
+		"x-wav": {
+			fx: "wav"
+		}
+	},
+	"chemical": {
+		"x-cdx": {
+			fx: "cdx"
+		},
+		"x-cif": {
+			fx: "cif"
+		},
+		"x-xyz": {
+			fx: "xyz"
+		}
+	},
+	"example": {
+	},
+	"image": {
+		"bmp": {
+			fx: "bmp"
+		},
+		"gif": {
+			fx: "gif"
+		},
+		"jpeg": {
+			fx: ["jpeg","jpg", "jpe"]
+		},
+		"png": {
+			fx: "png"
+		},
+		"tiff": {
+			fx: ["tiff","tif"]
+		}
+	},
+	"message": {
+	},
+	"model": {
+	},
+	"multipart": {
+	},
+	"text": {
+		"cache-manifest": {
+			fx: "appcache"
+		},
+		"css": {
+			fx: "css"
+		},
+		"csv": {
+			fx: "csv"
+		},
+		"html": {
+			fx: ["html","htm"]
+		},
+		"javascript": {
+			superseded: "application/javascript",
+			fx: "js"
+		},
+		"plain": {
+			fx: ["txt","text","conf","def","list","log","in"]
+		},
+		"richtext": {
+			fx: "rtx"
+		},
+		"x-java-source": {
+			fx: "java"
+		}
+	},
+	"video": {
+		"mp4": {
+			fx: ["mp4","mp4v","mpg4"]
+		},
+		"mpeg": {
+			fx: ["mpeg","mpg","mpe","m1v","m2v"]
+		},
+		"ogg": {
+			fx: "ogv"
+		}
+	}
+}
