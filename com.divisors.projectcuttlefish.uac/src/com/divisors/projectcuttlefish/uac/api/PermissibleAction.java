@@ -1,11 +1,18 @@
 package com.divisors.projectcuttlefish.uac.api;
 
-public abstract class PermissableAction implements Externalizable, JSONifiable {
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+import org.json.JSONObject;
+
+public abstract class PermissibleAction implements Externalizable, JSONifiable {
 	protected final PcUser agent;
 	protected final PcEntity target;
-	protected final PermissableActionType type;
+	protected final PermissibleActionType type;
 	
-	protected PermissableAction(PermissableActionType type, PcUser agent, PcEntity target) {
+	protected PermissibleAction(PermissibleActionType type, PcUser agent, PcEntity target) {
 		this.type = type;
 		this.agent = agent;
 		this.target = target;
@@ -14,14 +21,35 @@ public abstract class PermissableAction implements Externalizable, JSONifiable {
 	public PcEntity getTarget() {
 		return this.target;
 	}
-	public PermissableActionType getType() {
+	public PermissibleActionType getType() {
 		return this.type;
 	}
 	public PcUser getAgent() {
 		return this.agent;
 	}
 	
-	public enum PermissableActionType {
+	@Override
+	public void readExternal(ObjectInput arg0) throws IOException, ClassNotFoundException {
+		readJSON((JSONObject)arg0.readObject());
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput arg0) throws IOException {
+		arg0.writeObject(toJSON());
+	}
+
+	@Override
+	public void writeJSON(JSONObject json) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void readJSON(JSONObject json) {
+		// TODO Auto-generated method stub
+		
+	}
+	public enum PermissibleActionType {
 		/**
 		 * Action when some object is created. For example, a new class is created.
 		 */
@@ -62,7 +90,12 @@ public abstract class PermissableAction implements Externalizable, JSONifiable {
 	 * A series of actions carried out in series. Basically a transaction, so if any of the sub-events fails, no
 	 * change is made to anything.
 	 */
-	public static class PermissableActionSeries extends PermissableAction {
+	public static class PermissableActionSeries extends PermissibleAction {
+
+		protected PermissableActionSeries(PermissibleActionType type, PcUser agent, PcEntity target) {
+			super(type, agent, target);
+			// TODO Auto-generated constructor stub
+		}
 		
 	}
 }
