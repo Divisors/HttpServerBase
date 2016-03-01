@@ -31,7 +31,7 @@ import org.shredzone.acme4j.util.KeyPairUtils;
 public class AcmePrivateKey {
 	public static final int KEY_SIZE = 2048;
 
-	protected final File USER_KEY_FILE = new File("s\user1.key");
+	protected final File USER_KEY_FILE = new File("user1.key");
 	protected final File DOMAIN_KEY_FILE = new File("domain1.key");
 	protected final File DOMAIN_CERT_FILE = new File("domain1.crt");
 	protected final File DOMAIN_CSR_FILE = new File("domain1.crt");
