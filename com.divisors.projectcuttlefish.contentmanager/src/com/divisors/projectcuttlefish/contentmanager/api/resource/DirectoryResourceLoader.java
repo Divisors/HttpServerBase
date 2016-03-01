@@ -39,6 +39,12 @@ public class DirectoryResourceLoader {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		//force generation of Etags
+		for (FileResource file : result) {
+			file.getEtag(true);
+			file.getEtag(false);
+		}
 		return result;
 	}
 }

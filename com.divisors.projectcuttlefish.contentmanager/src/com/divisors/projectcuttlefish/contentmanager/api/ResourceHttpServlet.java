@@ -92,8 +92,18 @@ public class ResourceHttpServlet {
 		if (resource != null && resource.getEtag(isStrong).equals(tag)) {
 			//send 304 NOT MODIFIED
 			HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(304, "Not Modified"));
-			response.addHeader("Content-Length", "0")
-				.addHeader("Etag", '"' + tag + '"');
+			response.addHeader("Content-Length", "0");
+			
+			StringBuilder tagOut = new StringBuilder((isStrong?0:2) + 2 + tag.length());
+			if (isStrong) {
+				tagOut.append('"');
+			} else {
+				tagOut.append("W/\"");
+			}
+			tagOut.append(tag);
+			tagOut.append('"');
+			
+			response.addHeader("Etag", tagOut.toString());
 			channel.write(response);
 			return true;
 		}

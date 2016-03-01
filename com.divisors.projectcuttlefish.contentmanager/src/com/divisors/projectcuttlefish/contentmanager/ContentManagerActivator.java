@@ -53,6 +53,7 @@ public class ContentManagerActivator implements BundleActivator {
 		}
 		System.out.println("Home dir: " + stateLoc);
 		ResourceCache cache = new ResourceCacheImpl();
+		@SuppressWarnings("unused")
 		ResourceHttpServlet servlet = new ResourceHttpServlet(HttpServerActivator.getInstance().http, cache);
 //		{
 //			Processor processor = RingBufferProcessor.create("pc.server.1", 32);

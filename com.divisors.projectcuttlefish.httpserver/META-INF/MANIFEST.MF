@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.divisors.projectcuttlefish.httpserver;singleton:=true
 Bundle-Version: 0.0.6.alpha
 Bundle-ClassPath: lib/json-20151123.jar,
  lib/javatuples-1.2.jar,
+ lib/javassist.jar,
  .
 Bundle-Activator: com.divisors.projectcuttlefish.httpserver.HttpServerActivator
 Bundle-Vendor: DIVISORS
@@ -15,6 +16,7 @@ Export-Package: com.divisors.projectcuttlefish.httpserver,
  com.divisors.projectcuttlefish.httpserver.api.http,
  com.divisors.projectcuttlefish.httpserver.api.request,
  com.divisors.projectcuttlefish.httpserver.api.response,
+ com.divisors.projectcuttlefish.httpserver.api.rpc,
  com.divisors.projectcuttlefish.httpserver.api.tcp,
  com.divisors.projectcuttlefish.httpserver.api.websocket,
  com.divisors.projectcuttlefish.httpserver.client,

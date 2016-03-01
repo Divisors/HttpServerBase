@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.json.JSONObject;
 

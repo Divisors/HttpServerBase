@@ -4,5 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.divisors.projectcuttlefish.httpserver"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/io.projectreactor.reactor-stream"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
