@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Netty
+Bundle-SymbolicName: io.netty
+Bundle-Version: 5.0.0.Alpha2
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
