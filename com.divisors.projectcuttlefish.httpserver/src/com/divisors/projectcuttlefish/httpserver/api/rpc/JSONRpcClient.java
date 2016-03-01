@@ -1,5 +1,6 @@
 package com.divisors.projectcuttlefish.httpserver.api.rpc;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -275,10 +276,26 @@ public abstract class JSONRpcClient {
 			System.out.println("Pulling metadata from '" + method + "'");
 			JSONRpcExtern methodAnnotation = method.getAnnotation(JSONRpcExtern.class);
 			
-			Map<String, ParamInfo> parameters = new HashMap<>();
-			for (AnnotatedType param : method.getAnnotatedParameterTypes()) {
-				System.out.println("Building info for " + param.getType() + Arrays.toString(param.getDeclaredAnnotations()));
-				JSONRpcParam info = param.getDeclaredAnnotation(JSONRpcParam.class);
+			Map<String, ParamInfo> parameterMap = new HashMap<>();
+			Annotation[][] allAnnotations = method.getParameterAnnotations();
+			Class<?>[] parameters = method.getParameterTypes();
+			for (int i=0, numParams = method.getParameterCount(); i<numParams; i++) {
+				Class<?> param = parameters[i];
+				Annotation[] annotations = allAnnotations[i];
+				System.out.println("Building info for " + param + Arrays.toString(annotations));
+				JSONRpcParam info = null;
+				for (Annotation annotation : annotations) {
+					if (annotation instanceof JSONRpcParam) {
+						info = (JSONRpcParam) annotation;
+						break;
+					}
+				}
+				if (info == null) {
+					methods.remove(methods);
+					System.err.println("Missing @JSONRpcParam on parameter #" + (i+1) + " of " + method);
+					return;
+				}
+				
 				System.out.println(info);
 				ParamInfo parameter = new ParamInfo();
 				parameter.annotation = info;
@@ -286,9 +303,9 @@ public abstract class JSONRpcClient {
 				parameter.jsonType = info.type();
 				parameter.name = info.value();
 				parameter.type = param;
-				parameters.put(info.value(), parameter);
+				parameterMap.put(info.value(), parameter);
 			}
-			result.methods.put(methodAnnotation.name(), new MethodInfo(method, methodAnnotation.name(), parameters, methodAnnotation));
+			result.methods.put(methodAnnotation.name(), new MethodInfo(method, methodAnnotation.name(), parameterMap, methodAnnotation));
 		});
 		return result;
 	}
@@ -409,7 +426,7 @@ public abstract class JSONRpcClient {
 			CtClass[] params = new CtClass[methodInfo.params.size()];
 			int i = 0;
 			for (ParamInfo param : methodInfo.params.values())
-				params[i++] = getCt((Class<?>) param.type.getType());
+				params[i++] = getCt(param.type);
 			
 			StringBuilder methodBody = new StringBuilder("{\n");
 			String preparserSignature = methodInfo.annotation.preparser();
@@ -553,7 +570,7 @@ public abstract class JSONRpcClient {
 	}
 	
 	protected class ParamInfo {
-		AnnotatedType type;
+		Class<?> type;
 		JSONRpcParam annotation;
 		JSONParameterType jsonType;
 		String name;
