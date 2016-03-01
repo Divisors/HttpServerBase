@@ -32,6 +32,18 @@ import reactor.fn.tuple.Tuple;
  *
  */
 public class HttpServerImpl implements HttpServer {
+	
+	public static class HttpServerFactoryImpl implements HttpServerFactory {
+		@Override
+		public HttpServer createServer(SocketAddress addr) throws IOException {
+			return new HttpServerImpl().listenOn(addr);
+		}
+	}
+	
+	public static HttpServerFactory getFactory() {
+		return new HttpServerFactoryImpl();
+	}
+	
 	protected final ConcurrentHashMap<Long, HttpChannel> channelMap = new ConcurrentHashMap<>();
 	protected final List<TcpServer> sources = new ArrayList<>();
 	/**
