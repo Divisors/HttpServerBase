@@ -1,6 +1,14 @@
 package com.divisors.projectcuttlefish.uac.api;
 
-public PcClass implements Externalizable {
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.time.Instant;
+import java.time.Period;
+import java.util.Set;
+
+public class PcClass implements PcEntity, Externalizable {
 	public int getID() {
 		//TODO finish
 		return -1;
@@ -33,13 +41,13 @@ public PcClass implements Externalizable {
 		//TODO finish
 		return null;
 	}
-	public PcClass addStudent(PcUser modifier, PcStudent student) throws InvalidPermissionException, ImmutableException {
-		PermissiblePcClasssAddStudentAction action = new PermissiblePcClassAddStudentAction(modifier, agent student);
+	public PcClass addStudent(PcUser agent, PcStudent student) throws InvalidPermissionException, ImmutableException {
+		PermissiblePcClassAddStudentAction action = new PermissiblePcClassAddStudentAction(agent, this, student);
 		//TODO finish
 		return null;
 	}
-	public PcClass removeStudent(PcUser modifier, PcStudent student) throws InvalidPermissionException, ImmutableException {
-		PermissiblePcClasssRemoveStudentAction action = new PermissiblePcClassRemoveStudentAction(modifier, agent student);
+	public PcClass removeStudent(PcUser agent, PcStudent student) throws InvalidPermissionException, ImmutableException {
+		PermissiblePcClassRemoveStudentAction action = new PermissiblePcClassRemoveStudentAction(agent, this, student);
 		//TODO finish
 		return null;
 	}
@@ -60,12 +68,12 @@ public PcClass implements Externalizable {
 		//TODO finish
 		return null;
 	}
-	public static PermissiblePcClassCreateAction extends PermissibleAction {
+	public class PermissiblePcClassCreateAction extends PermissibleAction {
 		public PermissiblePcClassCreateAction(PcUser agent, PcClass created) {
 			super(PermissibleAction.PermissibleActionType.CREATE, agent, created);
 		}
 	}
-	public static PermissiblePcClassAddStudentAction extends PermissibleAction {
+	public class PermissiblePcClassAddStudentAction extends PermissibleAction {
 		protected final PcStudent student;
 		public PermissiblePcClassAddStudentAction(PcUser agent, PcClass target, PcStudent added) {
 			super(PermissibleAction.PermissibleActionType.ADD, agent, target);
@@ -75,12 +83,14 @@ public PcClass implements Externalizable {
 			return student;
 		}
 	}
-	public static PermissiblePcClassRemoveStudentAction extends PermissibleAction {
-		public PermissiblePcClassRemoveStudentAction(PcUser agent, PcClass target) {
+	public static class PermissiblePcClassRemoveStudentAction extends PermissibleAction {
+		protected final PcStudent student;
+		public PermissiblePcClassRemoveStudentAction(PcUser agent, PcClass target, PcStudent removed) {
 			super(PermissibleAction.PermissibleActionType.REMOVE, agent, target);
+			this.student = removed;
 		}
 	}
-	public static PermissiblePcClassModifyAction extends PermissibleAction {
+	public static class PermissiblePcClassModifyAction extends PermissibleAction {
 		protected final String field;
 		protected final Object oldValue, newValue;
 		public PermissiblePcClassModifyAction(PcUser agent, PcClass target, String field, Object oldValue, Object newValue) {
@@ -89,5 +99,25 @@ public PcClass implements Externalizable {
 			this.oldValue = oldValue;
 			this.newValue = newValue;
 		}
+		@Override
+		public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+			// TODO Auto-generated method stub
+			
+		}
+		@Override
+		public void writeExternal(ObjectOutput out) throws IOException {
+			// TODO Auto-generated method stub
+			
+		}
+	}
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 }
