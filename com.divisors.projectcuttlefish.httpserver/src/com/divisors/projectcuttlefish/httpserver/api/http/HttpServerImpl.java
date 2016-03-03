@@ -31,17 +31,11 @@ import reactor.fn.tuple.Tuple;
  * @author mailmindlin
  *
  */
+@Deprecated
 public class HttpServerImpl implements HttpServer {
 	
-	public static class HttpServerFactoryImpl implements HttpServerFactory {
-		@Override
-		public HttpServer createServer(SocketAddress addr) throws IOException {
-			return new HttpServerImpl().listenOn(addr);
-		}
-	}
-	
 	public static HttpServerFactory getFactory() {
-		return new HttpServerFactoryImpl();
+		return (addr)->(new HttpServerImpl().listenOn(addr));
 	}
 	
 	protected final ConcurrentHashMap<Long, HttpChannel> channelMap = new ConcurrentHashMap<>();
