@@ -68,3 +68,4 @@ Export-Package: io.netty.bootstrap,
  io.netty.util.internal,
  io.netty.util.internal.chmv8,
  io.netty.util.internal.logging
+Require-Bundle: com.twitter.hpack;bundle-version="1.0.0"
