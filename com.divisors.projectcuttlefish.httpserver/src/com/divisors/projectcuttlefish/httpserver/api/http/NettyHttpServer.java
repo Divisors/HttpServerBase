@@ -1,28 +1,37 @@
 package com.divisors.projectcuttlefish.httpserver.api.http;
 
+import static com.divisors.projectcuttlefish.httpserver.api.tcp.SubsetSelector.$t;
+
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.divisors.projectcuttlefish.httpserver.api.Action;
 import com.divisors.projectcuttlefish.httpserver.api.ServiceState;
+import com.divisors.projectcuttlefish.httpserver.api.http2.HelloWorldHttp2Handler;
 import com.divisors.projectcuttlefish.httpserver.api.http2.Http2ServerInitializer;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
+import com.divisors.projectcuttlefish.httpserver.util.RegistrationCancelAction;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpServerUpgradeHandler;
+import io.netty.handler.codec.http2.Http2ServerUpgradeCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 public class NettyHttpServer implements HttpServer {
@@ -32,7 +41,7 @@ public class NettyHttpServer implements HttpServer {
 	protected final AtomicReference<ServiceState> state = new AtomicReference<>(ServiceState.UNINITIALIZED);
 	EventLoopGroup bossGroup;
 	EventLoopGroup workerGroup;
-
+	protected EventBus bus;
 	@Override
 	public NettyHttpServer init() throws Exception {
 		bootstrap = new ServerBootstrap();
@@ -43,7 +52,7 @@ public class NettyHttpServer implements HttpServer {
 		this.bootstrap.group(bossGroup, workerGroup)
 			.channel(NioServerSocketChannel.class)
 			.handler(new LoggingHandler(LogLevel.INFO))
-			.childHandler(new NettyProtocolChooserHandler());
+			.childHandler(new Http2ServerInitializer(null));
 		return this;
 	}
 
@@ -58,11 +67,9 @@ public class NettyHttpServer implements HttpServer {
 		try {
 			channel = bootstrap.bind(port).sync().channel();
 
-	        System.err.println("Open your HTTP/2-enabled web browser and navigate to localhost:" + port + '/');
-
-	        channel.closeFuture().sync();
+			System.err.println("Open your HTTP/2-enabled web browser and navigate to localhost:" + port + '/');
+			run();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return this;
@@ -70,26 +77,23 @@ public class NettyHttpServer implements HttpServer {
 
 	@Override
 	public Action onConnect(Consumer<HttpChannel> handler) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RegistrationCancelAction(this.bus.on($t("http.connect"), event -> handler.accept(((Event<HttpChannel>)event).getData())));
 	}
 
 	@Override
 	public Action onRequest(BiConsumer<HttpChannel, HttpRequest> handler) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RegistrationCancelAction(this.bus.on($t("http.request"), event -> handler.accept(((Event<HttpRequest>)event).getData())));
 	}
 
 	@Override
-	public HttpServer dispatchOn(EventBus bus) throws IllegalStateException {
-		// TODO Auto-generated method stub
-		return null;
+	public NettyHttpServer dispatchOn(EventBus bus) throws IllegalStateException {
+		this.bus = bus;
+		return this;
 	}
 
 	@Override
 	public EventBus getBus() {
-		// TODO Auto-generated method stub
-		return null;
+		return bus;
 	}
 
 	@Override
@@ -104,14 +108,20 @@ public class NettyHttpServer implements HttpServer {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-
+		state.compareAndSet(ServiceState.STARTING, ServiceState.RUNNING);
+		try {
+			channel.closeFuture().sync();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+			state.compareAndSet(ServiceState.RUNNING, ServiceState.INITIALIZED);
+		}
 	}
 
 	@Override
 	public boolean shutdown() {
 		bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
+		workerGroup.shutdownGracefully();
 		return true;
 	}
 
@@ -131,5 +141,36 @@ public class NettyHttpServer implements HttpServer {
 	public void destroy() throws RuntimeException {
 		// TODO Auto-generated method stub
 
+	}
+
+	protected class NettyHttpServerInitializer extends ChannelInitializer<SocketChannel> {
+
+		/**
+		 * Configure the pipeline for a cleartext upgrade from HTTP to HTTP/2.
+		 */
+		@Override
+		public void initChannel(SocketChannel ch) {
+			HttpServerCodec sourceCodec = new HttpServerCodec();
+			HttpServerUpgradeHandler.UpgradeCodec upgradeCodec = new Http2ServerUpgradeCodec(
+					new HelloWorldHttp2Handler());
+			HttpServerUpgradeHandler upgradeHandler = new HttpServerUpgradeHandler(sourceCodec,
+					Collections.singletonList(upgradeCodec), 65536);
+
+			ch.pipeline().addLast(sourceCodec);
+			ch.pipeline().addLast(upgradeHandler);
+			ch.pipeline().addLast(new UserEventLogger());
+		}
+
+	}
+
+	/**
+	 * Class that logs any User Events triggered on this channel.
+	 */
+	protected static class UserEventLogger extends ChannelHandlerAdapter {
+		@Override
+		public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+			System.out.println("User Event Triggered: " + evt);
+			ctx.fireUserEventTriggered(evt);
+		}
 	}
 }

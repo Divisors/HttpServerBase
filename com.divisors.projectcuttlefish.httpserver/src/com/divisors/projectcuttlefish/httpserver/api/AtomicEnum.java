@@ -4,19 +4,16 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.Serializable;
-import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 import sun.misc.Unsafe;
 
 public class AtomicEnum<E extends Enum<E>> implements Externalizable {
 	private static final Unsafe unsafe = Unsafe.getUnsafe();
 	private static final long valueOffset;
-	private static final Method enumGetValues;
 	static {
 		try {
 			valueOffset = unsafe.objectFieldOffset(AtomicEnum.class.getDeclaredField("value"));
-			enumGetValues = Enum.class.getMethod("values");
 		} catch (Exception ex) {
 			throw new Error(ex);
 		}
@@ -27,6 +24,7 @@ public class AtomicEnum<E extends Enum<E>> implements Externalizable {
 	private Class<E> enumType;
 
 	public AtomicEnum() {
+		this.enumType = null;
 		value = null;
 	}
 	public AtomicEnum(E initialValue) {
@@ -45,13 +43,34 @@ public class AtomicEnum<E extends Enum<E>> implements Externalizable {
 	public final boolean compareAndSet(E expect, E update) {
 		return unsafe.compareAndSwapObject(this, valueOffset, expect, update);
 	}
+	@SuppressWarnings("unchecked")
 	@Override
-	public void readExternal(ObjectInput arg0) throws IOException, ClassNotFoundException {
-		
+	public void readExternal(ObjectInput input) throws IOException, ClassNotFoundException {
+		int idx = input.readInt();
+		if (idx > -2) {
+			this.enumType = (Class<E>) input.readObject();
+			if (idx >= 0) {
+				try {
+					this.value = ((E[])(enumType.getMethod("values").invoke(null)))[idx];
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+						| NoSuchMethodException | SecurityException e) {
+					throw new IOException(e);
+				}
+			}
+		}
 	}
 	@Override
-	public void writeExternal(ObjectOutput arg0) throws IOException {
-		// TODO Auto-generated method stub
-		
+	public void writeExternal(ObjectOutput out) throws IOException {
+		if (value == null) {
+			if (enumType == null) {
+				out.writeInt(-2);
+			} else {
+				out.writeInt(-1);
+				out.writeObject(enumType);
+			}
+		} else {
+			out.writeInt(value.ordinal());
+			out.writeObject(enumType);
+		}
 	}
 }

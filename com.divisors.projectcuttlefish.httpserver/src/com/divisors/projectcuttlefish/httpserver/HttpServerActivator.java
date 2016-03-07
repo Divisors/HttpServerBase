@@ -13,6 +13,7 @@ import org.reactivestreams.Processor;
 import com.divisors.projectcuttlefish.httpserver.api.StandardChannelOptions;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpServer;
 import com.divisors.projectcuttlefish.httpserver.api.http.HttpServerImpl;
+import com.divisors.projectcuttlefish.httpserver.api.http.NettyHttpServer;
 import com.divisors.projectcuttlefish.httpserver.api.request.HttpRequest;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponse;
 import com.divisors.projectcuttlefish.httpserver.api.response.HttpResponseImpl;
@@ -60,6 +61,8 @@ public class HttpServerActivator implements BundleActivator {
 			processor = RingBufferProcessor.create("pc.server.1", 32);
 			uaDetector = new UserAgentDetector();
 			uaDetector.init();
+			http = new NettyHttpServer().dispatchOn(EventBus.create(processor)).init().start();
+			/*
 			http = new HttpServerImpl(EventBus.create(processor), Executors.newCachedThreadPool())
 				.init()
 				.start(server -> {
@@ -85,7 +88,7 @@ public class HttpServerActivator implements BundleActivator {
 						e.printStackTrace();
 						System.exit(0);
 					}
-				});
+				});*/
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;
