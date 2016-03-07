@@ -81,7 +81,7 @@
 						osv: {
 							transform: [
 								{
-									action: "replace"
+									action: "replace",
 									from: "_",
 									to: "."
 								}
