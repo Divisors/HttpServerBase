@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -31,7 +32,6 @@ import reactor.fn.tuple.Tuple;
  * @author mailmindlin
  *
  */
-@Deprecated
 public class HttpServerImpl implements HttpServer {
 	
 	public static HttpServerFactory getFactory() {
@@ -40,6 +40,7 @@ public class HttpServerImpl implements HttpServer {
 	
 	protected final ConcurrentHashMap<Long, HttpChannel> channelMap = new ConcurrentHashMap<>();
 	protected final List<TcpServer> sources = new ArrayList<>();
+	protected final List<Action> shutdown = new LinkedList<>();
 	/**
 	 * Executor that this server is run on. If {@link #listenOn(SocketAddress)} is called, the TcpServer
 	 * created will also run on this executor.
@@ -76,14 +77,19 @@ public class HttpServerImpl implements HttpServer {
 	 */
 	public HttpServer listenOn(SocketAddress addr) throws ServiceStateException, IOException {
 		System.out.println("HTTP::Listening on " + addr);
-		if (ServiceState.assertNone(getState(), ServiceState.UNINITIALIZED, ServiceState.UNKNOWN, ServiceState.DESTROYED))
-			new TcpServerImpl(addr)
+		if (ServiceState.assertNone(getState(), ServiceState.UNINITIALIZED, ServiceState.UNKNOWN, ServiceState.DESTROYED)) {
+			TcpServerImpl tcp = new TcpServerImpl(addr)
 				.init()
 				.start((Consumer<TcpServer>)server->
 					server
 						.dispatchOn(this.bus)
 						.runOn(this.executor)
 						.onConnect(this::upgradeTcpChannel));
+			this.shutdown.add(()->{
+				tcp.shutdown();
+				sources.remove(tcp);
+			});
+		}
 		return this;
 	}
 	/**

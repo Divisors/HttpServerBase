@@ -54,7 +54,7 @@ public class HttpServerActivator implements BundleActivator {
 	 */
 	@Override
 	public void start(BundleContext context) throws Exception {
-		INSTANCE = this;
+		HttpServerActivator.INSTANCE = this;
 		this.ctx = context;
 		try {
 			System.out.println("Initializing: ProjectCuttlefish|HttpServer");

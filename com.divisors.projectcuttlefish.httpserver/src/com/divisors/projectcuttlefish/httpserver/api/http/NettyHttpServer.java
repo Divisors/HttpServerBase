@@ -171,6 +171,7 @@ public class NettyHttpServer implements HttpServer {
 		 */
 		@Override
 		public void initChannel(SocketChannel ch) {
+			System.out.println("Initializing channel");
 			if (sslCtx == null) {
 				HttpServerCodec sourceCodec = new HttpServerCodec();
 				HttpServerUpgradeHandler.UpgradeCodec upgradeCodec = new Http2ServerUpgradeCodec(
