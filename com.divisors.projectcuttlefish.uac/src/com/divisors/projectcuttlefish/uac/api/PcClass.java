@@ -1,6 +1,5 @@
 package com.divisors.projectcuttlefish.uac.api;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -8,33 +7,28 @@ import java.time.Instant;
 import java.time.Period;
 import java.util.Set;
 
-public class PcClass implements PcEntity, Externalizable {
-	public int getID() {
-		//TODO finish
-		return -1;
-	}
-	public String getName() {
-		//TODO finish
-		return null;
-	}
-	public PcTeacher getTeacher() {
-		//TODO finish
-		return null;
-	}
-	public Set<PcStudent> getStudents() {
-		//TODO finish
-		return null;
-	}
+public abstract class PcClass implements PcEntity {
+	public abstract int getID();
+	public abstract String getName();
+	public abstract PcTeacher getTeacher();
+	public abstract Set<PcStudent> getStudents();
+	/**
+	 * Returns assigmnents due between dates
+	 * @param start
+	 * @param length
+	 * @return
+	 */
 	public Set<PcAssignment> getAssignmentsBetween(Instant start, Period length) {
-		//TODO finish
-		return null;
+		Set<PcAssignment> result = getAssignments();
+		Instant end = start.plus(length);
+		result.removeIf((assignment)->{
+			Instant due = assignment.getDue();
+			return !(due.isAfter(start) && due.isBefore(end));
+		});
+		return result;
 	}
-	public Set<PcAssignment> getAssignments() {
-		//TODO finish
-		return null;
-	}
+	public abstract Set<PcAssignment> getAssignments();
 	public boolean isImmutable() {
-		//TODO finish
 		return true;
 	}
 	public PcClass setTeacher(PcUser modifier, PcTeacher teacher) throws InvalidPermissionException, ImmutableException {
