@@ -12,6 +12,7 @@ Import-Package: com.divisors.projectcuttlefish.httpserver.client,
  com.divisors.projectcuttlefish.httpserver.ua,
  javax.servlet.annotation;version="3.1.0",
  org.eclipse.core.runtime;version="3.5.0",
+ org.eclipse.osgi.framework.console;version="1.1.0",
  org.osgi.framework;version="1.3.0",
  reactor.bus;version="2.1.0",
  reactor.rx;version="2.1.0"

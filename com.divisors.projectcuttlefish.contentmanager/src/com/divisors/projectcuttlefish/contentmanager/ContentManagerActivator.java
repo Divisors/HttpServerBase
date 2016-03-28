@@ -2,9 +2,11 @@ package com.divisors.projectcuttlefish.contentmanager;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Hashtable;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -13,6 +15,7 @@ import com.divisors.projectcuttlefish.contentmanager.api.ResourceCache;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceCacheImpl;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceHttpServlet;
 import com.divisors.projectcuttlefish.contentmanager.api.ViewManager;
+import com.divisors.projectcuttlefish.contentmanager.api.plugins.PluginManagerCLI;
 import com.divisors.projectcuttlefish.contentmanager.api.resource.DirectoryResourceLoader;
 import com.divisors.projectcuttlefish.contentmanager.api.resource.FileResource;
 import com.divisors.projectcuttlefish.httpserver.HttpServerActivator;
@@ -35,6 +38,7 @@ public class ContentManagerActivator implements BundleActivator {
 	}
 	
 	protected ServiceRegistration<?> viewManagerService;
+	protected ServiceRegistration<?> pluginCLIService;
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -43,6 +47,10 @@ public class ContentManagerActivator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		instance = this;
 		this.context = context;
+		{
+			Hashtable<String, ?> properties = new Hashtable<String, Object>();
+			pluginCLIService = context.registerService(CommandProvider.class.getName(), new PluginManagerCLI(), properties);
+		}
 		System.out.println("Initializing: ProjectCuttlefish|View Manager");
 		ViewManager viewManager = ViewManager.getInstance();
 		viewManagerService = context.registerService(ViewManager.class.getName(), viewManager, null);
@@ -80,6 +88,7 @@ public class ContentManagerActivator implements BundleActivator {
 	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
 		ContentManagerActivator.instance = null;
+		pluginCLIService.unregister();
 		viewManagerService.unregister();
 	}
 }
