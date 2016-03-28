@@ -14,7 +14,7 @@ public class PluginManagerCLI implements CommandProvider {
 		return "jsp <cmd>";
 	}
 	
-	public void plugin(CommandInterpreter ci) throws Exception {
+	public void _jsp(CommandInterpreter ci) throws Exception {
 		BundleContext context = ContentManagerActivator.getInstance().getContext();
 		String vendor = context.getProperty(Constants.FRAMEWORK_VENDOR);
 		String version = context.getProperty(Constants.FRAMEWORK_VERSION);
