@@ -38,5 +38,4 @@ Import-Package: javax.servlet.annotation;version="3.1.0",
 Require-Bundle: io.reactivex.rxjava,
  io.projectreactor.reactor-core,
  org.junit,
- io.projectreactor.reactor-bus,
- io.netty;bundle-version="5.0.0"
+ io.projectreactor.reactor-bus

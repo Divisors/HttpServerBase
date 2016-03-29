@@ -61,12 +61,12 @@ public class HttpServerActivator implements BundleActivator {
 			processor = RingBufferProcessor.create("pc.server.1", 32);
 			uaDetector = new UserAgentDetector();
 			uaDetector.init();
-			http = new NettyHttpServer()
+			/*http = new NettyHttpServer()
 					.dispatchOn(EventBus.create(processor))
 					.runOn(Executors.newCachedThreadPool())
 					.init()
-					.start();
-			/*
+					.start();*/
+			
 			http = new HttpServerImpl(EventBus.create(processor), Executors.newCachedThreadPool())
 				.init()
 				.start(server -> {
@@ -92,7 +92,7 @@ public class HttpServerActivator implements BundleActivator {
 						e.printStackTrace();
 						System.exit(0);
 					}
-				});*/
+				});
 		}catch (Exception e) {
 			e.printStackTrace();
 			throw e;
