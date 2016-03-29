@@ -12,6 +12,10 @@ public class PluginManager {
 	public static final PluginManager INSTANCE = new PluginManager();
 	
 	protected ConcurrentHashMap<String, Plugin> plugins = new ConcurrentHashMap<>();
+	public void loadPlugin(Path json) {
+		Path home = json.getParent();
+		
+	}
 	public void loadJS(Path p) {
 	}
 
