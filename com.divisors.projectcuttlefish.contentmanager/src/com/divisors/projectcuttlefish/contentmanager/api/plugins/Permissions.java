@@ -12,6 +12,7 @@ import com.divisors.projectcuttlefish.httpserver.api.NeedsTesting;
  * Class for permissions. Permission names are in the form of <code>foo.bar.baz</code>.
  * @author mailmindlin
  */
+@NeedsTesting(important=true)
 public class Permissions {
 	/**
 	 * Root node

@@ -19,6 +19,7 @@ import org.json.JSONString;
  * @see {@link semver.org}
  * @author mailmindlin
  */
+@NeedsTesting(since="caee2cb822fc17119ffc9ff7219d0890a42c548b")
 public class Version implements Comparable<Version>, Externalizable, Formattable, JSONString {
 	/**
 	 * Tests whether a given string is a valid integer
@@ -53,6 +54,7 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 	 *            second string to compare
 	 * @return their comparison, which will be 1, 0, or -1 only
 	 */
+	@NeedsTesting
 	public static final int compareStrings(String a, String b) {
 		if (a.equals(b))
 			return 0;
@@ -189,11 +191,12 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 		validate();
 	}
 	
+	@NeedsTesting
 	protected void validate() {
 		if (major < 0 || minor < 0 || patch < 0)
 			//TODO customize error messages for each variable?
 			throw new IllegalArgumentException("Major, minor, and patch numbers must be positive");
-		if (prerelease != null && !prerelease.isEmpty()) {
+		if (isPrerelease()) {
 			String[] identifiers = prerelease.split("\\.");
 			int i = 0;
 			for (String identifier : identifiers) {
@@ -208,7 +211,7 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 				i++;
 			}
 		}
-		if (meta != null && !meta.isEmpty()) {
+		if (hasMetadata()) {
 			String[] identifiers = meta.split("\\.");
 			int i = 0;
 			for (String identifier : identifiers) {
@@ -289,6 +292,7 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 	 *            other version to compare to
 	 */
 	@Override
+	@NeedsTesting
 	public int compareTo(Version other) {
 		// Precedence MUST be calculated by separating the version into major, minor, patch, pre-release, and build identifiers in that order
 		// Major, minor, and patch versions are always compared numerically.
@@ -321,6 +325,7 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 	 * Converts the version to a string, in the format of <code>major.minor.patch[-prerelease][+metadata]</code>.
 	 */
 	@Override
+	@NeedsTesting
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getMajor());
@@ -340,6 +345,7 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 	}
 	
 	@Override
+	@NeedsTesting
 	public boolean equals(final Object other) {
 		if (other == this)
 			return true;
@@ -367,6 +373,7 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 	}
 	
 	@Override
+	@NeedsTesting
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeInt(0xDEADBAAD);// for sanity check
 		out.writeInt(this.major);
@@ -391,6 +398,7 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 	}
 	
 	@Override
+	@NeedsTesting
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		// perform sanity check
 		if (in.readInt() != 0xDEADBAAD)
@@ -419,6 +427,7 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 	 * Essentially {@link #toString()} surrounded with quotes, for storing as JSON.
 	 */
 	@Override
+	@NeedsTesting
 	public String toJSONString() {
 		return '"' + this.toString() + "'";
 	}
