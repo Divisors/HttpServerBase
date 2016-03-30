@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.filechooser.FileSystemView;
 
@@ -15,6 +16,10 @@ import org.osgi.framework.BundleContext;
 
 import com.divisors.projectcuttlefish.contentmanager.ContentManagerActivator;
 
+/**
+ * 
+ * @author mailmindlin
+ */
 public class PluginManagerCLI implements CommandProvider {
 	protected Path cd = (new File(System.getProperty("user.dir"))).toPath();
 	@Override
@@ -63,12 +68,55 @@ public class PluginManagerCLI implements CommandProvider {
 					}
 					Path path = cd;
 					path = path.resolve(arguments.get(1)).normalize();
-					Path pluginJs = path.resolve("plugin.js").normalize();
-					System.out.println("\tSearching " + path);
-					if (!Files.exists(pluginJs)) {
-						System.err.println("\tUnable to locate plugin.js at " + pluginJs);
+					Path pluginManifest = path.resolve("plugin.json").normalize();
+					System.out.println("\tSearching " + pluginManifest);
+					if (!Files.exists(pluginManifest)) {
+						System.err.format("\tUnable to locate plugin manifest at %s%n",pluginManifest);
 						break;
 					}
+					try {
+						PluginManager.INSTANCE.loadPlugin(pluginManifest);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					break;
+				}
+				case "status":
+				case "list": {
+					Map<Long, Plugin> plugins = PluginManager.INSTANCE.getPlugins();
+					if (plugins.isEmpty()) {
+						System.err.println("0 plugins active");
+						break;
+					}
+					plugins.values().parallelStream()
+						.sorted((a,b)->(a.getId() > b.getId() ? 1 : a.getId() < b.getId() ? -1 : 0))
+						.map((plugin) -> (" " + plugin.getId() + "\t" + plugin.getName()))
+						.forEachOrdered(System.out::println);
+					break;
+				}
+				case "activate": {
+					if (arguments.size() < 2) {
+						System.err.println("\tUsage: jsp load <plugin ID>");
+						break;
+					}
+					Long id;
+					try {
+						id = Long.parseLong(arguments.get(1));
+					} catch (NumberFormatException e) {
+						System.err.format("Invalid plugin ID '%s'%n", arguments.get(1));
+						break;
+					}
+					Plugin plugin = PluginManager.INSTANCE.getPluginByID(id);
+					if (plugin == null) {
+						System.err.format("There is no plugin with the id #%d%n", id);
+						break;
+					}
+					System.out.format("Activating plugin #%d (%s)%n", id, plugin.getName());
+					
+					break;
+				}
+				default: {
+					System.err.println("Usage: jsp <pwd | cd | ls | load | list>");
 					break;
 				}
 			}
