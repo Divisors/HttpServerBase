@@ -84,26 +84,26 @@ public class PluginManager {
 		long id = (Long) ((Tuple)ev.getKey()).get(1);
 		
 		Plugin plugin = this.getPluginByID(id);
-		System.out.println(plugin.getId() + "(" + plugin.getName() + ")");
+		System.out.println(new StringBuilder().append(plugin.getId()).append('(').append(plugin.getName()).append(')'));
 		for (String script : plugin.scripts) {
 			Path scriptPath;
 			try {
 				scriptPath = plugin.getHome().resolve(script).normalize();
 			} catch (InvalidPathException e) {
-				System.err.println("Invalid script path " + script + " (Plugin #" + plugin.getId() + ")");
+				System.err.println(new StringBuilder(40).append("Invalid script path ").append(script).append(" (Plugin #").append(plugin.getId()).append(')'));
 				e.printStackTrace();
 				continue;
 			}
 			System.out.println("Loading script @ " + scriptPath);
 			if (!checkPluginFileAccess(plugin, scriptPath)) {
-				System.err.println("Invalid permissions to load script from " + scriptPath + " (Plugin #" + plugin.getId() + ")");
+				System.err.println(new StringBuilder(70).append("Invalid permissions to load script from ").append(scriptPath).append(" (Plugin #").append(plugin.getId()).append(')'));
 				System.err.println("If you need to load this script, you can request the permission 'file.script.loadSpecial'");
 				continue;//should it die?
 			}
 			try (BufferedReader br = Files.newBufferedReader(scriptPath)) {
 				plugin.getEngine().eval(br);
 			} catch (FileNotFoundException e) {
-				System.err.println("Unable to find script @ " + scriptPath + " (Pluugin #" + plugin.getId() + ")");
+				System.err.println(new StringBuilder(45).append("Unable to find script @ ").append(scriptPath).append(" (Plugin #").append(plugin.getId()).append(')'));
 				e.printStackTrace();
 				continue;
 			} catch (IOException e) {

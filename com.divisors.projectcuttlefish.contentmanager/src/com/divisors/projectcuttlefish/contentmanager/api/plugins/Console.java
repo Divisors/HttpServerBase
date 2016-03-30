@@ -1,5 +1,12 @@
 package com.divisors.projectcuttlefish.contentmanager.api.plugins;
 
+import com.divisors.projectcuttlefish.httpserver.api.NeedsTesting;
+
+/**
+ * 
+ * @author mailmindlin
+ */
+@NeedsTesting
 public class Console {
 	protected static final Console INSTANCE = new Console();
 	String prefix = "";
