@@ -1,8 +1,17 @@
 package com.divisors.projectcuttlefish.httpserver.api;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.nio.charset.StandardCharsets;
+import java.util.Formattable;
+import java.util.Formatter;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.json.JSONString;
 
 /**
  * Simple implementation of semantic versioning.
@@ -10,8 +19,7 @@ import java.util.regex.Pattern;
  * @see {@link semver.org}
  * @author mailmindlin
  */
-public class Version implements Comparable<Version> {
-	public static final int compareStr(String a, String b) {
+public class Version implements Comparable<Version>, Externalizable, Formattable, JSONString {
 	/**
 	 * Tests whether a given string is a valid integer
 	 */
@@ -27,7 +35,7 @@ public class Version implements Comparable<Version> {
 			.compile("^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(\\.\\d+)*(-(?<prerel>[0-9A-Za-z\\-\\.]+))?(\\+(?<meta>[0-9A-Za-z\\-\\.]+))?$");
 	
 	/**
-	 * Compares strings in the method described by <a href="http://semver.org/#spec-item-11">semver.org ï¿½ 11</a>.
+	 * Compares strings in the method described by <a href="http://semver.org/#spec-item-11">semver.org § 11</a>.
 	 * <p>
 	 * This method compares dot-separated identifiers from left to right in the strings as follows:
 	 * <ol>
@@ -103,6 +111,14 @@ public class Version implements Comparable<Version> {
 	 * 'cached' hash value
 	 */
 	protected int hash;
+	
+	/**
+	 * Stub for deserializing. Don't actually use this.
+	 */
+	protected Version() {
+	
+	}
+	
 	/**
 	 * Parses version string s
 	 * 
@@ -265,7 +281,7 @@ public class Version implements Comparable<Version> {
 	}
 	
 	/**
-	 * Compares this version to another version with the method described in <a href="http://semver.org/#spec-item-11">semver.org ï¿½ 11</a>.
+	 * Compares this version to another version with the method described in <a href="http://semver.org/#spec-item-11">semver.org § 11</a>.
 	 * Amplitudes may not be correct when comparing versions, but signs are. A return value of 0 means that {@link #equals(Object)
 	 * this.equals(other)} will return true.
 	 * 
@@ -353,5 +369,67 @@ public class Version implements Comparable<Version> {
 		}
 		return h;
 	}
+	
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeInt(0xDEADBAAD);// for sanity check
+		out.writeInt(this.major);
+		out.writeInt(this.minor);
+		out.writeInt(this.patch);
+		
+		if (isPrerelease()) {
+			byte[] data = this.getPrerelease().getBytes(StandardCharsets.UTF_8);
+			out.writeInt(data.length);
+			out.write(data);
+		} else {
+			out.writeInt(0);
+		}
+		
+		if (hasMetadata()) {
+			byte[] data = this.getMeta().getBytes(StandardCharsets.UTF_8);
+			out.writeInt(data.length);
+			out.write(data);
+		} else {
+			out.writeInt(0);
+		}
+	}
+	
+	@Override
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+		// perform sanity check
+		if (in.readInt() != 0xDEADBAAD)
+			throw new IOException("Sanity check when deserializing failed");
+			
+		this.major = in.readInt();
+		this.minor = in.readInt();
+		this.patch = in.readInt();
+		
+		int len;
+		if ((len = in.readInt()) > 0) {
+			byte[] buf = new byte[len];
+			in.read(buf);
+			this.prerelease = new String(buf, StandardCharsets.UTF_8);
+		}
+		if ((len = in.readInt()) > 0) {
+			byte[] buf = new byte[len];
+			in.read(buf);
+			this.meta = new String(buf, StandardCharsets.UTF_8);
+		}
+		
+		validate();
+	}
+
+	/**
+	 * Essentially {@link #toString()} surrounded with quotes, for storing as JSON.
+	 */
+	@Override
+	public String toJSONString() {
+		return '"' + this.toString() + "'";
+	}
+
+	@Override
+	public void formatTo(Formatter formatter, int flags, int width, int precision) {
+		// TODO Auto-generated method stub
+		
 	}
 }
