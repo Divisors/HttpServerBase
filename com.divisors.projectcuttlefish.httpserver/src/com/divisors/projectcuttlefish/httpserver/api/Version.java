@@ -5,7 +5,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Simple way to use semantic versioning
+ * Simple implementation of semantic versioning.
+ * 
  * @see {@link semver.org}
  * @author mailmindlin
  */
@@ -42,8 +43,11 @@ public class Version implements Comparable<Version> {
 	 *            first string to compare
 	 * @param b
 	 *            second string to compare
-	 * @return their comparison
+	 * @return their comparison, which will be 1, 0, or -1 only
 	 */
+	public static final int compareStrings(String a, String b) {
+		if (a.equals(b))
+			return 0;
 		final String[] aPreTokens = a.split("\\.");
 		final String[] bPreTokens = b.split("\\.");
 		final int len = Math.min(aPreTokens.length, bPreTokens.length);
@@ -59,18 +63,19 @@ public class Version implements Comparable<Version> {
 				int aNumber = Integer.parseInt(aPreToken);
 				int bNumber = Integer.parseInt(bPreToken);
 				if (aNumber != bNumber)
-					return aNumber - bNumber;
+					return aNumber > bNumber ? 1 : -1;
 			} else if (aIsNumber) {
-				return 1;
-			} else if (bIsNumber) {
 				//"Numeric identifiers always have lower precedence than non-numeric identifiers"
 				return -1;
+			} else if (bIsNumber) {
+				return 1;
 			} else {
 				//"identifiers with letters or hyphens are compared lexically in ASCII sort order"
+				return aPreToken.compareTo(bPreToken) > 0 ? 1 : -1;
 			}
 		}
 		if (aPreTokens.length != bPreTokens.length)
-			return aPreTokens.length - bPreTokens.length;
+			return aPreTokens.length > bPreTokens.length ? 1 : -1;
 		return 0;//they are equal
 	}
 	
@@ -112,9 +117,10 @@ public class Version implements Comparable<Version> {
 		this.minor = Integer.parseInt(m.group("minor"));
 		this.patch = Integer.parseInt(m.group("patch"));
 		String prerel = m.group("prerel");
-		this.prerelease = (prerel != null) ? prerel : "";
+		this.prerelease = (prerel != null && prerel.isEmpty()) ? null : prerel;
 		String meta = m.group("meta");
-		this.meta = (meta != null) ? meta : "";
+		this.meta = (meta != null && meta.isEmpty()) ? null : meta;
+		validate();
 	}
 	
 	/**
@@ -162,8 +168,42 @@ public class Version implements Comparable<Version> {
 		this.major = major;
 		this.minor = minor;
 		this.patch = patch;
-		this.prerelease = (prerelease != null) ? prerelease : "";
-		this.meta = (meta != null) ? meta : "";
+		this.prerelease = (prerelease != null && prerelease.isEmpty()) ? null : prerelease;
+		this.meta = (meta != null && meta.isEmpty()) ? null : meta;
+		validate();
+	}
+	
+	protected void validate() {
+		if (major < 0 || minor < 0 || patch < 0)
+			//TODO customize error messages for each variable?
+			throw new IllegalArgumentException("Major, minor, and patch numbers must be positive");
+		if (prerelease != null && !prerelease.isEmpty()) {
+			String[] identifiers = prerelease.split("\\.");
+			int i = 0;
+			for (String identifier : identifiers) {
+				if (identifier.isEmpty()) {
+					throw new IllegalArgumentException(String.format("Invalid prerelease identifier \"%s\" (#%d): identifiers MUST NOT be empty", identifier, i));
+				}else if (isInteger.test(identifier)) {
+					if (identifier.startsWith("0"))
+						throw new IllegalArgumentException(String.format("Invalid prerelease identifier \"%s\" (#%d): numeric identifiers must not include leading zeroes", identifier, i));
+				} else if(!asciiAlphaNumericTest.test(identifier)) {
+					throw new IllegalArgumentException(String.format("Invalid prerelease identifier \"%s\" (#%d): identifiers MUST comprise only [0-9A-Za-z-]", identifier, i));
+				}
+				i++;
+			}
+		}
+		if (meta != null && !meta.isEmpty()) {
+			String[] identifiers = meta.split("\\.");
+			int i = 0;
+			for (String identifier : identifiers) {
+				if (identifier.isEmpty()) {
+					throw new IllegalArgumentException(String.format("Invalid metadata identifier \"%s\" (#%d): identifiers MUST NOT be empty", identifier, i));
+				} else if(!asciiAlphaNumericTest.test(identifier)) {
+					throw new IllegalArgumentException(String.format("Invalid metadata identifier \"%s\" (#%d): identifiers MUST comprise only [0-9A-Za-z-]", identifier, i));
+				}
+				i++;
+			}
+		}
 	}
 	
 	/**
@@ -189,13 +229,31 @@ public class Version implements Comparable<Version> {
 	public int getPatch() {
 		return patch;
 	}
+
+	/**
+	 * Determines if this version is a prerelease. A version is a prerelease
+	 * if the prerelease string is not null or empty.
+	 * @return whether this is a prerelease version
+	 */
+	public boolean isPrerelease() {
+		return !this.getPrerelease().isEmpty();
+	}
 	
 	/**
 	 * Get prerelease string
 	 * @return prerelease string, or empty string if not set
 	 */
 	public String getPrerelease() {
-		return this.prerelease;
+		return this.prerelease == null ? "" : this.prerelease;
+	}
+	
+	/**
+	 * Determines if this version has metadata. A version has metadata
+	 * if its metadata string is not null or empty.
+	 * @return whether this has any metadata
+	 */
+	public boolean hasMetadata() {
+		return !this.getMeta().isEmpty();
 	}
 	
 	/**
@@ -203,7 +261,7 @@ public class Version implements Comparable<Version> {
 	 * @return metadata string, or empty string if not set
 	 */
 	public String getMeta() {
-		return this.meta;
+		return this.meta == null ? "" : this.meta;
 	}
 	
 	/**
@@ -224,29 +282,23 @@ public class Version implements Comparable<Version> {
 			return this.getMinor() - other.getMinor();
 		if (this.getPatch() != other.getPatch())
 			return this.getPatch() - other.getPatch();
-		/*
-		 * Pre-release and build version precedence MUST be determined by comparing each
-		 * dot separated identifier as follows: identifiers consisting of only digits are
-		 * compared numerically and identifiers with letters or dashes are compared
-		 * lexically in ASCII sort order. Numeric identifiers always have lower
-		 * precedence than non-numeric identifiers.
-		 */
-		String myPreRel = getPrerelease();
-		String otherPreRel = other.getPrerelease();
-		if (!myPreRel.equals(otherPreRel)) {
-			//prereleases "have a lower precedence than the associated normal version"
-			if (myPreRel.isEmpty())
-				return -1;
-			if (otherPreRel.isEmpty())
-				return 1;
-			int cmp = compareStr(myPreRel, otherPreRel);
-			if (cmp != 0)
-				return cmp;
+		
+		boolean iAmPrerelease = this.isPrerelease();
+		boolean otherIsPrerelease = other.isPrerelease();
+		if (iAmPrerelease ^ otherIsPrerelease) {
+			//either I am a prerelease version, or the other one is.
+			//"Pre-release versions have a lower precedence than the associated normal version"
+			return iAmPrerelease ? -1 : 1;
+		} else if (iAmPrerelease && otherIsPrerelease) {
+			int comparison = compareStrings(this.getPrerelease(), other.getPrerelease());
+			if (comparison != 0)
+				return comparison;
 		}
+		
 		String myMeta = getMeta();
 		String otherMeta = other.getMeta();
 		if (!myMeta.equals(otherMeta)) {
-			int cmp = compareStr(myMeta, otherMeta);
+			int cmp = compareStrings(myMeta, otherMeta);
 			if (cmp != 0)
 				return cmp;
 		}
@@ -264,15 +316,13 @@ public class Version implements Comparable<Version> {
 		sb.append(getMinor());
 		sb.append(".");
 		sb.append(getPatch());
-		String prerel = getPrerelease();
-		if (!(prerel == null || prerel.isEmpty())) {
+		if (isPrerelease()) {
 			sb.append("-");
-			sb.append(prerel);
+			sb.append(getPrerelease());
 		}
-		String meta = getMeta();
-		if (!(meta == null || meta.isEmpty())) {
+		if (hasMetadata()) {
 			sb.append("+");
-			sb.append(meta);
+			sb.append(getMeta());
 		}
 		return sb.toString();
 	}
@@ -283,18 +333,25 @@ public class Version implements Comparable<Version> {
 			return true;
 		if (other instanceof Version) {
 			Version otherVersion = (Version) other;
-			return otherVersion.getMajor() == this.major
-				&& otherVersion.getMinor() == this.minor
-				&& otherVersion.getPatch() == this.patch
-				&& (otherVersion.getMeta() == this.meta || (this.meta != null && this.meta.equals(otherVersion.getMeta())))
-				&& (this.prerelease == otherVersion.getPrerelease() || (this.prerelease != null && this.prerelease.equals(otherVersion.getPrerelease())));
+			return otherVersion.getMajor() == this.getMajor()
+					&& otherVersion.getMinor() == this.getMinor()
+					&& otherVersion.getPatch() == this.getPatch()
+					&& this.getMeta().equals(otherVersion.getMeta())
+					&& this.getPrerelease().equals(otherVersion.getPrerelease());
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		//TODO fix for efficiency and/or collision
-		return (getMajor() << 8) ^ (getMinor() << 4) ^ (getPatch()) ^ (meta == null ? 0 : meta.hashCode()) ^ (prerelease == null ? 0 : prerelease.hashCode());
+		// TODO fix for efficiency and/or collision
+		int h = this.hash;
+		if (h == 0) {
+			h = (getMajor() << 16) ^ (getMinor() << 8) ^ (getPatch()) + (meta == null ? 0 : meta.hashCode())
+					^ (prerelease == null ? 0 : prerelease.hashCode());
+			this.hash = h;
+		}
+		return h;
+	}
 	}
 }
