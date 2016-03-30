@@ -310,14 +310,10 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 			if (comparison != 0)
 				return comparison;
 		}
-		
-		String myMeta = getMeta();
-		String otherMeta = other.getMeta();
-		if (!myMeta.equals(otherMeta)) {
-			int cmp = compareStrings(myMeta, otherMeta);
-			if (cmp != 0)
-				return cmp;
-		}
+		/*
+		 * Build metadata SHOULD be ignored when determining version precedence.
+		 * Thus two versions that differ only in the build metadata, have the same precedence.
+		 */
 		return 0;
 	}
 	
@@ -352,8 +348,8 @@ public class Version implements Comparable<Version>, Externalizable, Formattable
 			return otherVersion.getMajor() == this.getMajor()
 					&& otherVersion.getMinor() == this.getMinor()
 					&& otherVersion.getPatch() == this.getPatch()
-					&& this.getMeta().equals(otherVersion.getMeta())
-					&& this.getPrerelease().equals(otherVersion.getPrerelease());
+					&& this.getPrerelease().equals(otherVersion.getPrerelease())
+					&& this.getMeta().equals(otherVersion.getMeta());
 		}
 		return false;
 	}
