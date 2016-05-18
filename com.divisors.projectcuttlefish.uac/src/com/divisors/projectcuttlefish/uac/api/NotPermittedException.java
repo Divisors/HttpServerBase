@@ -3,7 +3,7 @@ package com.divisors.projectcuttlefish.uac.api;
 public class NotPermittedException extends RuntimeException {
 	private static final long serialVersionUID = -5092517600291707813L;
 	
-	protected final User user;
+	protected final PcAgent agent;
 	protected final String permission;
 	
 	public NotPermittedException() {
@@ -18,9 +18,9 @@ public class NotPermittedException extends RuntimeException {
 		this.permission = null;
 	}
 	
-	public NotPermittedException(User user, String permission) {
+	public NotPermittedException(PcAgent agent, String permission) {
 		super(user.toString() + " requires permission '" + permission + '\'');
-		this.user = user;
+		this.agent = agent;
 		this.permission = permission;
 	}
 }

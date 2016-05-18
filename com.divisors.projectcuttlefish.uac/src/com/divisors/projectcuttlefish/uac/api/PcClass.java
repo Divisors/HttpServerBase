@@ -1,10 +1,6 @@
 package com.divisors.projectcuttlefish.uac.api;
 
-public PcClass implements Externalizable {
-	public int getID() {
-		//TODO finish
-		return -1;
-	}
+public PcClass implements PcEntity {
 	public String getName() {
 		//TODO finish
 		return null;
