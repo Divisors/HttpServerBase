@@ -1,3 +1,6 @@
 [submodule "com.divisors.projectcuttlefish.quizlet"]
 	path = com.divisors.projectcuttlefish.quizlet
 	url = git@github.com:Divisors/com.divisors.projectcuttlefish.quizlet.git
+[submodule "javassist"]
+	path = javassist
+	url = https://github.com/Divisors/javassist.git
