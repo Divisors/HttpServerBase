@@ -23,15 +23,15 @@ public class DirectoryResourceLoader {
 		System.out.println("Loading from " + p.toString());
 	}
 
-	public List<FileResource> load() {
-		List<FileResource> result = new LinkedList<>();
+	public List<StaticFileResource> load() {
+		List<StaticFileResource> result = new LinkedList<>();
 		try {
 			Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					if (!attrs.isDirectory()) {
 						String name = dir.relativize(file).toString().replace(File.separator, "/");
-						result.add(new FileResource(file, name, mapper.apply(file)));
+						result.add(new StaticFileResource(file, name, mapper.apply(file)));
 					}
 					return FileVisitResult.CONTINUE;
 				}
@@ -41,7 +41,7 @@ public class DirectoryResourceLoader {
 		}
 		
 		//force generation of Etags
-		for (FileResource file : result) {
+		for (StaticFileResource file : result) {
 			file.getEtag(true);
 			file.getEtag(false);
 		}

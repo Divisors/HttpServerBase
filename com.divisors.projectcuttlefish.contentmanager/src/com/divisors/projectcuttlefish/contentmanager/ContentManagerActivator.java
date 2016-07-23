@@ -14,7 +14,7 @@ import com.divisors.projectcuttlefish.contentmanager.api.ResourceCacheImpl;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceHttpServlet;
 import com.divisors.projectcuttlefish.contentmanager.api.ViewManager;
 import com.divisors.projectcuttlefish.contentmanager.api.resource.DirectoryResourceLoader;
-import com.divisors.projectcuttlefish.contentmanager.api.resource.FileResource;
+import com.divisors.projectcuttlefish.contentmanager.api.resource.StaticFileResource;
 import com.divisors.projectcuttlefish.httpserver.HttpServerActivator;
 import com.divisors.projectcuttlefish.httpserver.api.Version;
 import com.divisors.projectcuttlefish.httpserver.client.HttpClient;
@@ -68,7 +68,7 @@ public class ContentManagerActivator implements BundleActivator {
 //			GithubUser user = github.getUserByName("Divisors");
 //			github.query(user);
 //		}
-		for (FileResource file : (new DirectoryResourceLoader(Paths.get("Source Directory"), (x)->(new Version(0,0,0)))).load())
+		for (StaticFileResource file : (new DirectoryResourceLoader(Paths.get("Source Directory"), (x)->(new Version(0,0,0)))).load())
 			cache.put(file);
 		try {
 //			new GitAutoUpdateService().watch("Divisors", "Project-Cuttlefish");
