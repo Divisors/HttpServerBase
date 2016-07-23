@@ -1,4 +1,9 @@
 package com.divisors.projectcuttlefish.uac.api.agent;
+
+import java.util.UUID;
+
+import com.divisors.projectcuttlefish.uac.api.humans.HumanName;
+
 public class PcUser extends PcAgent {
 	public static PcUser forName(String name) {
 		
@@ -29,5 +34,10 @@ public class PcUser extends PcAgent {
 	@Override
 	public boolean isAnonymous() {
 		return false;
+	}
+	@Override
+	public UUID getEntityId() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
