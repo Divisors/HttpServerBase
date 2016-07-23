@@ -1,5 +1,6 @@
 package com.divisors.projectcuttlefish.httpserver.api;
 
+import java.io.Serializable;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,7 +11,8 @@ import java.util.regex.Pattern;
  * @see {@link semver.org} (Spec 2.0.0)
  * @author mailmindlin
  */
-public class Version implements Comparable<Version> {
+public class Version implements Comparable<Version>, Serializable {
+	private static final long serialVersionUID = -1836671900581922660L;
 	/**
 	 * Predicate whether a given string is an integer.
 	 * TODO make more efficient (I think that speed can be improved over Pattern performance)
