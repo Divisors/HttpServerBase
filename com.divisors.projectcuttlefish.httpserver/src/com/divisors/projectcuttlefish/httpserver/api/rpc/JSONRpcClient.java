@@ -40,7 +40,7 @@ public abstract class JSONRpcClient {
 		RPC_IMPL_CLASS = loadCt(JSONRpcClient.JSONRpcImplementation.class.getName());
 		JSON_RPC_CLIENT_CLASS = loadCt(JSONRpcClient.class.getName());
 		GENERATED_IMPL_CLASS = loadCt(JSONRpcClient.JSONRpcGeneratedImplementation.class.getName());
-		JSON_REMOTE_INTERFACE = loadCt(JSONRemote.class.getName());
+		JSON_REMOTE_INTERFACE = loadCt(RpcRemote.class.getName());
 		STRING_CLASS = loadCt(String.class.getName());
 	}
 	
@@ -242,12 +242,12 @@ public abstract class JSONRpcClient {
 		}
 	}
 	
-	protected Map<Class<? extends JSONRemote>, ClassInfo<?>> metadata = new ConcurrentHashMap<>();
-	protected Map<Class<? extends JSONRemote>, Class<? extends JSONRemote>> proto = new ConcurrentHashMap<>();
+	protected Map<Class<? extends RpcRemote>, ClassInfo<?>> metadata = new ConcurrentHashMap<>();
+	protected Map<Class<? extends RpcRemote>, Class<? extends RpcRemote>> proto = new ConcurrentHashMap<>();
 	
 	protected abstract Future<HttpResponse> doHttp(HttpRequest request);
 	
-	public <E extends JSONRemote> E get(String url, Class<E> clazz) {
+	public <E extends RpcRemote> E get(String url, Class<E> clazz) {
 		//TODO finish
 		@SuppressWarnings("unchecked")
 		Class<E> prototype = (Class<E>) proto.get(clazz);
@@ -263,17 +263,17 @@ public abstract class JSONRpcClient {
 		return result;
 	}
 	
-	protected <E extends JSONRemote> ClassInfo<E> getMeta(Class<E> clazz) {
+	protected <E extends RpcRemote> ClassInfo<E> getMeta(Class<E> clazz) {
 		ClassInfo<E> result = new ClassInfo<>();
 		result.clazz = clazz;
 		
 		result.methods = new HashMap<>();
 		Set<Method> methods = new HashSet<>(Arrays.asList(clazz.getDeclaredMethods()));
 		methods.addAll(Arrays.asList(clazz.getMethods()));
-		methods.removeIf(method->(!method.isAnnotationPresent(JSONRpcExtern.class)));
+		methods.removeIf(method->(!method.isAnnotationPresent(RpcExtern.class)));
 		methods.forEach(method->{
 			System.out.println("Pulling metadata from '" + method + "'");
-			JSONRpcExtern methodAnnotation = method.getAnnotation(JSONRpcExtern.class);
+			RpcExtern methodAnnotation = method.getAnnotation(RpcExtern.class);
 			
 			Map<String, ParamInfo> parameters = new HashMap<>();
 			for (AnnotatedType param : method.getAnnotatedParameterTypes()) {
@@ -288,7 +288,7 @@ public abstract class JSONRpcClient {
 				parameter.type = param;
 				parameters.put(info.value(), parameter);
 			}
-			result.methods.put(methodAnnotation.name(), new MethodInfo(method, methodAnnotation.name(), parameters, methodAnnotation));
+			result.methods.put(methodAnnotation.value(), new MethodInfo(method, methodAnnotation.value(), parameters, methodAnnotation));
 		});
 		return result;
 	}
@@ -354,7 +354,7 @@ public abstract class JSONRpcClient {
 		return candidates;
 	}
 	@SuppressWarnings("unchecked")
-	public Class<? extends JSONRemote> generateProto(Class<? extends JSONRemote> clazz) throws NotFoundException, CannotCompileException {
+	public Class<? extends RpcRemote> generateProto(Class<? extends RpcRemote> clazz) throws NotFoundException, CannotCompileException {
 		CtClass result;
 		CtClass clazzCt = getCt(clazz);
 		String outClassName = clazz.getName() + "__RPC";
@@ -412,7 +412,7 @@ public abstract class JSONRpcClient {
 				params[i++] = getCt((Class<?>) param.type.getType());
 			
 			StringBuilder methodBody = new StringBuilder("{\n");
-			String preparserSignature = methodInfo.annotation.preparser();
+			/*String preparserSignature = methodInfo.annotation.preparser();
 			String postparserSignature = methodInfo.annotation.postparser();
 			if (preparserSignature != null && !preparserSignature.isEmpty()) {
 				String preparserName = preparserSignature;
@@ -456,7 +456,7 @@ public abstract class JSONRpcClient {
 			} else {
 				//try to build JSONObject from params
 				
-			}
+			}*/
 			
 			CtMethod generatedOverride = CtNewMethod.make(method.getModifiers(), returnType, method.getName(), params, new CtClass[]{}, methodBody.toString(), result);
 			result.addMethod(generatedOverride);
@@ -468,7 +468,7 @@ public abstract class JSONRpcClient {
 	public Future<JSONRpcResult> invokeRemote(String url, String methodName, JSONObject params) {
 		return null;//TODO fin
 	}
-	public Future<JSONRpcResult> invoke(JSONRemote object, String methodName, Map<String, Object> params) throws IllegalArgumentException, IllegalAccessException, NoSuchMethodException{
+	public Future<JSONRpcResult> invoke(RpcRemote object, String methodName, Map<String, Object> params) throws IllegalArgumentException, IllegalAccessException, NoSuchMethodException{
 		ClassInfo<?> classInfo = metadata.computeIfAbsent(object.getClass(), this::getMeta);
 		
 		MethodInfo method = classInfo.methods.get(methodName);
@@ -499,7 +499,7 @@ public abstract class JSONRpcClient {
 		return null;
 	}
 	
-	protected class ClassInfo<E extends JSONRemote> {
+	protected class ClassInfo<E extends RpcRemote> {
 		/**
 		 * Class that this is wrapping
 		 */
@@ -530,7 +530,7 @@ public abstract class JSONRpcClient {
 		/**
 		 * Extern annotation on this method
 		 */
-		final JSONRpcExtern annotation;
+		final RpcExtern annotation;
 		/**
 		 * External name for this method
 		 */
@@ -543,7 +543,7 @@ public abstract class JSONRpcClient {
 		 * JSONRpc accessibility (i.e., can it be only accessed by trusted clients)
 		 */
 		final JSONRpcAccessibility accessibility;
-		MethodInfo(Method method, String name, Map<String, ParamInfo> params, JSONRpcExtern annotation) {
+		MethodInfo(Method method, String name, Map<String, ParamInfo> params, RpcExtern annotation) {
 			this.method = method;
 			this.name = name;
 			this.params = params;
@@ -559,7 +559,7 @@ public abstract class JSONRpcClient {
 		String name;
 		String defaultValue;
 	}
-	protected interface JSONRpcImplementation extends JSONRemote {
+	protected interface JSONRpcImplementation extends RpcRemote {
 		JSONRpcClient getClient();
 		String getRpcUrl();
 	}

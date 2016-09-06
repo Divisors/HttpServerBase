@@ -12,15 +12,10 @@ import org.osgi.framework.ServiceRegistration;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceCache;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceCacheImpl;
 import com.divisors.projectcuttlefish.contentmanager.api.ResourceHttpServlet;
-import com.divisors.projectcuttlefish.contentmanager.api.ViewManager;
 import com.divisors.projectcuttlefish.contentmanager.api.resource.DirectoryResourceLoader;
 import com.divisors.projectcuttlefish.contentmanager.api.resource.StaticFileResource;
 import com.divisors.projectcuttlefish.httpserver.HttpServerActivator;
 import com.divisors.projectcuttlefish.httpserver.api.Version;
-import com.divisors.projectcuttlefish.httpserver.client.HttpClient;
-
-import reactor.bus.EventBus;
-import reactor.core.processor.RingBufferProcessor;
 
 public class ContentManagerActivator implements BundleActivator {
 
@@ -48,8 +43,6 @@ public class ContentManagerActivator implements BundleActivator {
 		instance = this;
 		this.context = context;
 		System.out.println("Initializing: ProjectCuttlefish|View Manager");
-		ViewManager viewManager = ViewManager.getInstance();
-		viewManagerService = context.registerService(ViewManager.class.getName(), viewManager, null);
 		{
 			IPath path = Platform.getStateLocation(context.getBundle());
 			if (path != null)

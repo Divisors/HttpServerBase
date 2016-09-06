@@ -23,12 +23,15 @@ public class StaticFileResource implements Resource {
 	protected final ResourceTag tag;
 	protected String etagStrong, etagWeak;
 	protected FileTime lastModified;
+
 	public StaticFileResource(File f, Version version) {
 		this(f.toPath(), version);
 	}
+
 	public StaticFileResource(Path p, Version version) {
 		this(p, p.getFileName().toString(), version);
 	}
+
 	public StaticFileResource(Path p, String name, Version version) {
 		this.path = p;
 		this.tag = new ResourceTag(name, version);
@@ -40,8 +43,9 @@ public class StaticFileResource implements Resource {
 			this.lastModified = null;
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
-		} 
+		}
 	}
+
 	@Override
 	public long estimateSize() {
 		try {
@@ -50,16 +54,18 @@ public class StaticFileResource implements Resource {
 			throw new RuntimeException(e);
 		}
 	}
+
 	@Override
 	public ResourceTag getTag() {
 		return tag;
 	}
+
 	@Override
 	public String getEtag(boolean strong) throws RuntimeException {
 		if (strong) {
 			if (this.etagStrong != null)
 				return this.etagStrong;
-			
+
 			try {
 				this.etagStrong = generateEtagStrong();
 			} catch (NoSuchAlgorithmException e) {
@@ -68,7 +74,7 @@ public class StaticFileResource implements Resource {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			
+
 			return this.etagStrong;
 		} else {
 			if (this.etagWeak != null)
@@ -82,9 +88,10 @@ public class StaticFileResource implements Resource {
 			return etagWeak;
 		}
 	}
+
 	protected String generateEtagStrong() throws NoSuchAlgorithmException, IOException {
-		//calculate SHA-1 hash of the file, and return it in base64
-		//Note that this is not 
+		// calculate SHA-1 hash of the file, and return it in base64
+		// Note that this is not
 		final MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
 		try (InputStream is = Files.newInputStream(this.path, StandardOpenOption.READ)) {
 			final byte[] buffer = new byte[1024];
@@ -100,17 +107,14 @@ public class StaticFileResource implements Resource {
 			return formatter.toString();
 		}
 	}
+
 	protected String generateEtagWeak() throws NoSuchAlgorithmException {
 		final MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
-		messageDigest.update(new StringBuilder(tag.name)
-			.append(':')
-			.append(tag.getVersion().getMajor())
-			.append(".")
-			.append(tag.getVersion().getMinor())
-			//Don't use the patch; these are assumed to be equivalent
-			.toString()
-			.getBytes());
-		
+		messageDigest.update(new StringBuilder(tag.name).append(':').append(tag.getVersion().getMajor()).append(".")
+				.append(tag.getVersion().getMinor())
+				// Don't use the patch; these are assumed to be equivalent
+				.toString().getBytes());
+
 		// Convert the byte to hex format
 		try (Formatter formatter = new Formatter()) {
 			for (final byte b : messageDigest.digest())
@@ -118,6 +122,7 @@ public class StaticFileResource implements Resource {
 			return formatter.toString();
 		}
 	}
+
 	@Override
 	public HttpResponsePayload getPayload(HttpRequest request, HttpContext context) {
 		try {
@@ -126,17 +131,21 @@ public class StaticFileResource implements Resource {
 			throw new RuntimeException(e);
 		}
 	}
+
 	/**
 	 * Payload wrapping a FileResource
+	 * 
 	 * @author mailmindlin
 	 */
 	public class HttpFileResponsePayload implements HttpResponsePayload {
 		public static final int BUFFER_SIZE = 4096;
 		InputStream is;
 		volatile boolean open = true;
+
 		public HttpFileResponsePayload() throws IOException {
 			is = Files.newInputStream(path);
 		}
+
 		@Override
 		public long remaining() {
 			if (is == null)
@@ -180,6 +189,6 @@ public class StaticFileResource implements Resource {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 }

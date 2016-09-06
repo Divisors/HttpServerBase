@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.divisors.projectcuttlefish.contentmanager.api.resource.Resource;
+import com.divisors.projectcuttlefish.contentmanager.api.resource.ResourceTag;
 
 public class ResourceCacheImpl implements ResourceCache {
 	ConcurrentHashMap<String, Resource> resourceByName = new ConcurrentHashMap<>(),
@@ -12,8 +13,9 @@ public class ResourceCacheImpl implements ResourceCache {
 //	Cache<String, ByteBuffer> memcache = CacheBuilder.newBuilder().build();
 	@Override
 	public ResourceCacheImpl put(Resource resource) {
-		System.out.println("Loading resource '" + resource.getName() + "' as '" + resource.getName() + "'");
-		resourceByName.put(resource.getName(), resource);
+		ResourceTag tag = resource.getTag();
+		System.out.println("Loading resource '" + tag.getName() + "' as '" + tag.getName() + "'");
+		resourceByName.put(tag.getName(), resource);
 		return this;
 	}
 

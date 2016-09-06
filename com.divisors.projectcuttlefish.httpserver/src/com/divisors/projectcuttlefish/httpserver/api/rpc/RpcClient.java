@@ -1,10 +1,16 @@
 package com.divisors.projectcuttlefish.httpserver.api.rpc;
 
+import java.util.concurrent.ConcurrentHashMap;
+
+import javassist.ClassPool;
+import javassist.CtClass;
+
 public class RpcClient {
 	//TODO replace with cache
 	protected final ConcurrentHashMap<Class<? extends RpcRemote>, CtClass> bindings = new ConcurrentHashMap<>();
 	protected CtClass bind(Class<? extends RpcRemote> javaClass) {
 		CtClass result;
+		ClassPool pool = ClassPool.getDefault();
 		CtClass clazz = pool.get(javaClass);
 		String outClassName = javaClass.getName() + "__RPC";
 		

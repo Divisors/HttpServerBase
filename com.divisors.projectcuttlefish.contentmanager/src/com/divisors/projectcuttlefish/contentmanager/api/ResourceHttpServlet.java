@@ -45,7 +45,7 @@ public class ResourceHttpServlet {
 			return;
 		}
 		HttpResponse response = new HttpResponseImpl(new HttpResponseLineImpl(200, "OK"));
-		HttpResponsePayload body = resource.toPayload();
+		HttpResponsePayload body = resource.getPayload(request, channel.getContext());
 		response.setBody(body);
 		response.setHeader("Content-Length", "" + body.remaining())
 			.setHeader("Content-Type", "text/html")

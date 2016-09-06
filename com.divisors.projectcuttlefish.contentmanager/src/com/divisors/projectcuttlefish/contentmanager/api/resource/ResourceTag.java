@@ -9,6 +9,9 @@ public class ResourceTag {
 		this.name = name;
 		this.version = version;
 	}
+	public String getName() {
+		return name;
+	}
 	public Version getVersion() {
 		return version;
 	}
